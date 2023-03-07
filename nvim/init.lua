@@ -58,7 +58,10 @@ require('packer').startup(function(use)
   use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable 'make' == 1 }
 
   use { 'github/copilot.vim' }
-  use {'nvim-telescope/telescope-ui-select.nvim' }
+  use { 'mhartington/oceanic-next' }
+  use { 'tanvirtin/monokai.nvim' }
+  use { 'xiyaowong/nvim-transparent' }
+  use { 'nvim-telescope/telescope-ui-select.nvim' }
   use {
     "nvim-neorg/neorg",
     config = function()
@@ -217,7 +220,7 @@ require('telescope').setup {
       },
     },
   },
-   extensions = {
+  extensions = {
     ["ui-select"] = {
       require("telescope.themes").get_dropdown {
         -- even more opts

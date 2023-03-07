@@ -54,3 +54,8 @@
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 (package! ob-async)
+(package! ement)
+
+;; let's unpin for org-roam ui :)
+(unpin! org-roam)
+(package! org-roam-ui)
