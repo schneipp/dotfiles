@@ -7,3 +7,5 @@ require("telescope").load_extension('workspaces')
 vim.keymap.set('n', '<leader>fw', ":Telescope workspaces\n")
 vim.opt.guicursor = ""
 
+require("devcontainer").setup{}
+
