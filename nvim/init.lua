@@ -266,6 +266,8 @@ vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>fd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>fs', require('telescope.builtin').lsp_document_symbols, { desc = '[F]ind [S]ymbols' })
+vim.keymap.set('n', '<leader>ps', require('telescope.builtin').live_grep)
+vim.keymap.set('n', '<leader>bb', require('telescope.builtin').buffers)
 -- vim.keymap.set('n', '<leader>fa', require('telescope.builtin').lsp_code_actions, { desc = '[F]ind [C]ode Action' })
 
 -- [[ Configure Treesitter ]]
@@ -461,24 +463,24 @@ cmp.setup {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
+--    ['<Tab>'] = cmp.mapping(function(fallback)
+--      if cmp.visible() then
+--        cmp.select_next_item()
+--      elseif luasnip.expand_or_jumpable() then
+--        luasnip.expand_or_jump()
+--      else
+--        fallback()
+--      end
+--    end, { 'i', 's' }), 
+--    ['<S-Tab>'] = cmp.mapping(function(fallback)
+--      if cmp.visible() then
+--        cmp.select_prev_item()
+--      elseif luasnip.jumpable(-1) then
+--        luasnip.jump(-1)
+--      else
+--        fallback()
+--      end
+--    end, { 'i', 's' }),
   },
   sources = {
     { name = 'nvim_lsp' },
@@ -504,3 +506,6 @@ vim.keymap.set({'n'},'N','Nzzzv')
 vim.keymap.set({'n'},'J','mzJ`z')
 -- Insane remapping of save to hammer
 vim.keymap.set({'n'},'<leader><leader>',':w<CR>')
+--nnoremap <leader>ps :lua require('telescope.builtin').grep_string( { search = vim.fn.input("Grep for > ") } )<cr>
+--nnoremap <leader>ff :lua require'telescope.builtin'.find_files{ hidden = true }<cr>
+-- vim.keymap.set('n', '<leader>ps', require('telescope.builtin').live_grep())
