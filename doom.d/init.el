@@ -198,7 +198,7 @@
        ;;literate
        (default +bindings +smartparens))
 
-(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
-(require 'eaf)
-(require 'eaf-browser)
-(require 'eaf-music-player)
+;;(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+;;(require 'eaf)
+;;(require 'eaf-browser)
+;;(require 'eaf-music-player)
