@@ -9,6 +9,7 @@ require('packer').startup(function(use)
   -- Package manager
   use 'wbthomason/packer.nvim'
   use 'andweeb/presence.nvim' 
+  use {"ggandor/leap.nvim", config = function() require("leap").set_default_keymaps() end}
   use { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
     requires = {
