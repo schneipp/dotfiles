@@ -105,10 +105,11 @@ window:
 font:
   normal:
     #family: monospace
-    family: Source Code Pro
+    #family: Source Code Pro
     # family: CodeNewRoman Nerd Font
     # family: RobotoMono Nerd Font
     # family: Hack
+    family: JetBrains Mono NF
     #family: JetBrains Mono
     # family: UbuntuMono Nerd Font
     # family: Monofur Nerd Font
@@ -120,7 +121,7 @@ font:
     # family: CodeNewRoman Nerd Font
     # family: RobotoMono Nerd Font
     # family: Hack
-    family: JetBrains Mono
+    family: JetBrains Mono NF
     # family: UbuntuMono Nerd Font
     # family: Monofur Nerd Font
     # family: TerminessTTF Nerd Font
@@ -132,7 +133,7 @@ font:
   bold_italic:
     family: monospace
     style: Bold Italic
-  size: 13.0
+  size: 13.5
 
   # Offset is the extra space around each character. `offset.y` can be thought
   # of as modifying the line spacing, and `offset.x` as modifying the letter

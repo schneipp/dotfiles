@@ -1,4 +1,8 @@
 return function(use)
+--  use ({
+--    "Bryley/neoai.nvim",
+--    require = { "MunifTanjim/nui.nvim" },
+--  })
   use({
     "folke/which-key.nvim",
       config = function()

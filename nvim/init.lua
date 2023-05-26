@@ -61,6 +61,8 @@ require('packer').startup(function(use)
   use { 'tanvirtin/monokai.nvim' }
   use { 'xiyaowong/nvim-transparent' }
   use { 'nvim-telescope/telescope-ui-select.nvim' }
+  use { "MunifTanjim/nui.nvim" }
+  use { "Bryley/neoai.nvim" }
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
   local has_plugins, plugins = pcall(require, 'custom.plugins')
   if has_plugins then
@@ -121,8 +123,9 @@ vim.wo.signcolumn = 'yes'
 
 -- Set colorscheme
 vim.o.termguicolors = true
--- vim.cmd [[colorscheme monokai_soda]]
-vim.cmd [[colorscheme catppuccin-mocha]]
+vim.cmd [[colorscheme monokai_soda]]
+-- vim.cmd [[colorscheme catppuccin-mocha]]
+-- vim.cmd [[colorscheme catppuccin-mocha]]
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
@@ -254,7 +257,7 @@ vim.keymap.set('n', '<leader>bb', require('telescope.builtin').buffers)
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'typescript', 'help' },
+  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'typescript' },
 
   highlight = { enable = true },
   indent = { enable = true },
@@ -337,18 +340,6 @@ local on_attach = function(_, bufnr)
   end
 
 
-local rt = require("rust-tools")
-
-rt.setup({
-  server = {
-    on_attach = function(_, bufnr)
-      -- Hover actions
-      -- vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
-      -- Code action groups
-      -- vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
-    end,
-  }
-})
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
   nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
 
@@ -457,7 +448,74 @@ cmp.setup {
   },
 }
 
+require('neoai').setup{
+    -- Below are the default options, feel free to override what you would like changed
+    ui = {
+        output_popup_text = "NeoAI",
+        input_popup_text = "Prompt",
+        width = 30,      -- As percentage eg. 30%
+        output_popup_height = 80, -- As percentage eg. 80%
+        submit = "<Enter>", -- Key binding to submit the prompt
+    },
+    models = {
+        {
+            name = "openai",
+            model = "gpt-3.5-turbo",
+            params = nil
+        },
+    },
+    register_output = {
+        ["g"] = function(output)
+            return output
+        end,
+        ["c"] = require("neoai.utils").extract_code_snippets,
+    },
+    inject = {
+        cutoff_width = 75,
+    },
+    prompts = {
+        context_prompt = function(context)
+            return "Hey, I'd like to provide some context for future "
+                .. "messages. Here is the code/text that I want to refer "
+                .. "to in our upcoming conversations:\n\n"
+                .. context
+        end,
+    },
+    mappings = {
+        ["select_up"] = "<C-k>",
+        ["select_down"] = "<C-j>",
+    },
+    open_api_key_env = "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",
+    open_api_key = "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",
+    shortcuts = {
+        {
+            name = "textify",
+            key = "<leader>as",
+            desc = "fix text with AI",
+            use_context = true,
+            prompt = [[
+                Please rewrite the text to make it more readable, clear,
+                concise, and fix any grammatical, punctuation, or spelling
+                errors
+            ]],
+            modes = { "v" },
+            strip_function = nil,
+        },
+        {
+            name = "gitcommit",
+            key = "<leader>ag",
+            desc = "generate git commit message",
+            use_context = false,
+            prompt = function ()
+                return [[
+                    Using the following git diff generate a consise and
+                    clear git commit message, with a short title summary
+                    that is 75 characters or less:
+                ]] .. vim.fn.system("git diff --cached")
+            end,
+            modes = { "n" },
+            strip_function = nil,
+        },
+    },
+}
 -- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
-vim.cmd [[set clipboard=unnamedplus]]
-
