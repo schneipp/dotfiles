@@ -11,7 +11,7 @@ an executable
 -- general
 lvim.log.level = "warn"
 lvim.format_on_save.enabled = false
-lvim.colorscheme = "monokai_ristretto"
+lvim.colorscheme = "gruvbox"
 -- to disable icons and use a minimalist setup, uncomment the following
 lvim.use_icons = true
 
@@ -121,6 +121,7 @@ lvim.plugins = {
   },
   { 'mhartington/oceanic-next' },
   { 'tanvirtin/monokai.nvim' },
+  { "ellisonleao/gruvbox.nvim", priority = 1000 },
   {
     'simrat39/rust-tools.nvim',
     ft = "rust",
@@ -228,6 +229,8 @@ vim.keymap.set('n', '<C-j>', require('harpoon.ui').nav_next, { desc = 'Harpoon N
 vim.keymap.set('n', '<C-k>', require('harpoon.ui').nav_prev, { desc = 'Harpoon Prev' })
 vim.keymap.set('n', '<leader>h', require('harpoon.ui').toggle_quick_menu, { desc = 'Harpoon Navigation' })
 vim.keymap.set('n', '<leader>ha', require('harpoon.mark').add_file, { desc = 'Harpoon Add File' })
+
+vim.keymap.set('n', '<leader>nrn', ':Telescope neorg find_norg_files<CR>', { desc = 'Harpoon Add File' })
 
 table.insert(lvim.builtin.cmp.sources, 1, { name = "copilot" })
 -- table.insert(lvim.builtin.cmp.sources, 2, { name = "rust-analyzer" })
