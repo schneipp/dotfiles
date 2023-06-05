@@ -11,7 +11,8 @@ an executable
 -- general
 lvim.log.level = "warn"
 lvim.format_on_save.enabled = false
-lvim.colorscheme = "gruvbox"
+-- lvim.colorscheme = "OceanicNext"
+lvim.colorscheme = "monokai_ristretto"
 -- to disable icons and use a minimalist setup, uncomment the following
 lvim.use_icons = true
 
@@ -63,6 +64,7 @@ lvim.plugins = {
   { "dempfi/ayu" },
   { "ThePrimeagen/harpoon" },
   { "sonph/onehalf" },
+  { "mg979/vim-visual-multi" },
   {
     "zbirenbaum/copilot.lua",
     cmd = "Copilot",
@@ -209,28 +211,38 @@ require("workspaces").setup({
 
 
 -- now for some customizations
-vim.keymap.set({ 'v' }, '<C-j>', ':m \'>+1<CR>gv=gv')
-vim.keymap.set({ 'v' }, '<C-k>', ':m \'<-2<CR>gv=gv')
+lvim.keys.visual_mode["<C-j>"] =  ':m \'>+1<CR>gv=gv'
+lvim.keys.visual_mode[ '<C-k>'] =  ':m \'<-2<CR>gv=gv'
 -- keep selection in visual mode when indenting
-vim.keymap.set({ 'v' }, '<', '<gv')
-vim.keymap.set({ 'v' }, '>', '>gv')
-vim.keymap.set({ 'n' }, 'Y', '0"*yg$')
+lvim.keys.visual_mode[ '<'] =  '<gv'
+lvim.keys.visual_mode[ '>'] =  '>gv'
+lvim.keys.normal_mode[ 'Y'] = '0"*yg$'
+-- center after page up and down
+lvim.keys.normal_mode[ '<C-u>'] = '<C-u>zz'
+lvim.keys.normal_mode[ '<C-d>'] = '<C-d>zz'
 -- n jump to next match, and center the screen
 -- forward and opposite dircection
-vim.keymap.set({ 'n' }, 'n', 'nzzzv')
-vim.keymap.set({ 'n' }, 'N', 'Nzzzv')
+lvim.keys.normal_mode[ 'n'] = 'nzzzv'
+lvim.keys.normal_mode[ 'N'] = 'Nzzzv'
+lvim.keys.normal_mode[ '<CR>'] = 'ciw'
+lvim.keys.normal_mode[ '<S-CR>'] = 'ciw'
+-- quick escape by pressing jk at the same time
+-- lvim.keys.insert_mode[ 'jk'] = '<ESC>'
 -- J Join lines, but keep cursor on same line
-vim.keymap.set({ 'n' }, 'J', 'mzJ`z')
+lvim.keys.normal_mode[ 'J'] = 'mzJ`z'
 -- Insane remapping of save to hammer
-vim.keymap.set({ 'n' }, '<leader><leader>', ':w<CR>')
+lvim.keys.normal_mode[ '<leader><leader>'] = ':w<CR>'
+lvim.keys.insert_mode['<C-i>'] = '<'
+lvim.keys.insert_mode['<C-o>'] = '>'
+lvim.keys.normal_mode['<leader>j'] =  require('harpoon.ui').nav_next
+lvim.keys.normal_mode['<leader>k'] =  require('harpoon.ui').nav_prev
+lvim.keys.normal_mode['<C-j>'] =  require('harpoon.ui').nav_next
+lvim.keys.normal_mode['<C-k>'] =  require('harpoon.ui').nav_prev
+lvim.keys.normal_mode['<leader>hh'] =  require('harpoon.ui').toggle_quick_menu
+lvim.keys.normal_mode['<leader>ha'] =  require('harpoon.mark').add_file
+lvim.keys.normal_mode['<leader>nrn'] =  ':Neorg workspace notes<CR>:Telescope neorg find_norg_files<CR>'
+
 lvim.builtin.cmp.formatting.source_names["copilot"] = "(Copilot)"
-
-vim.keymap.set('n', '<C-j>', require('harpoon.ui').nav_next, { desc = 'Harpoon Next' })
-vim.keymap.set('n', '<C-k>', require('harpoon.ui').nav_prev, { desc = 'Harpoon Prev' })
-vim.keymap.set('n', '<leader>h', require('harpoon.ui').toggle_quick_menu, { desc = 'Harpoon Navigation' })
-vim.keymap.set('n', '<leader>ha', require('harpoon.mark').add_file, { desc = 'Harpoon Add File' })
-
-vim.keymap.set('n', '<leader>nrn', ':Telescope neorg find_norg_files<CR>', { desc = 'Harpoon Add File' })
 
 table.insert(lvim.builtin.cmp.sources, 1, { name = "copilot" })
 -- table.insert(lvim.builtin.cmp.sources, 2, { name = "rust-analyzer" })
