@@ -21,7 +21,7 @@ function LazygitToggle()
   lazygit:toggle()
 end
 
-vim.api.nvim_set_keymap("n", "<C-g>", "<cmd>lua LazygitToggle()<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap("n", "<leader>gg", "<cmd>lua LazygitToggle()<CR>", {noremap = true, silent = true})
 -- vim.api.nvim_set_keymap("n", "<C-e>", "<cmd>lua _ranger_toggle()<CR>", {noremap = true, silent = true})
 
 -- vim.wo.colorcolumn = '120'

@@ -63,8 +63,47 @@ lvim.plugins = {
   { "YorickPeterse/Autumn.vim" },
   { "dempfi/ayu" },
   { "ThePrimeagen/harpoon" },
-  { "sonph/onehalf" },
-  { "mg979/vim-visual-multi" },
+  {
+    "romgrk/nvim-treesitter-context",
+    config = function()
+      require("treesitter-context").setup {
+        enable = true,   -- Enable this plugin (Can be enabled/disabled later via commands)
+        throttle = true, -- Throttles plugin updates (may improve performance)
+        max_lines = 0,   -- How many lines the window should span. Values <= 0 mean no limit.
+        patterns = {
+                         -- Match patterns for TS nodes. These get wrapped to match at word boundaries.
+          -- For all filetypes
+          -- Note that setting an entry here replaces all other patterns for this entry.
+          -- By setting the 'default' entry below, you can control which nodes you want to
+          -- appear in the context window.
+          default = {
+            'class',
+            'function',
+            'method',
+          },
+        },
+      }
+    end
+  }, { "sonph/onehalf" },
+  {
+    "tpope/vim-fugitive",
+    cmd = {
+      "G",
+      "Git",
+      "Gdiffsplit",
+      "Gread",
+      "Gwrite",
+      "Ggrep",
+      "GMove",
+      "GDelete",
+      "GBrowse",
+      "GRemove",
+      "GRename",
+      "Glgrep",
+      "Gedit"
+    },
+    ft = { "fugitive" }
+  }, { "mg979/vim-visual-multi" },
   {
     "zbirenbaum/copilot.lua",
     cmd = "Copilot",
@@ -142,14 +181,34 @@ lvim.plugins = {
     end
   },
   {
+    "phaazon/hop.nvim",
+    event = "BufRead",
+    config = function()
+      require("hop").setup()
+      vim.api.nvim_set_keymap("n", "s", ":HopChar2<cr>", { silent = true })
+      vim.api.nvim_set_keymap("n", "S", ":HopWord<cr>", { silent = true })
+    end,
+  },
+  {
+    "pwntester/octo.nvim",
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope.nvim',
+      'nvim-tree/nvim-web-devicons',
+    },
+    config = function()
+      require("octo").setup()
+    end,
+  },
+  {
     "nvim-neorg/neorg",
     build = ":Neorg sync-parsers",
     opts = {
       load = {
-        ["core.defaults"] = {},          -- Loads default behaviour
-        ["core.concealer"] = {},         -- Adds pretty icons to your documents
-        ["core.integrations.telescope"] = {},         -- Adds pretty icons to your documents
-        ["core.dirman"] = {              -- Manages Neorg workspaces
+        ["core.defaults"] = {},               -- Loads default behaviour
+        ["core.concealer"] = {},              -- Adds pretty icons to your documents
+        ["core.integrations.telescope"] = {}, -- Adds Telscope support
+        ["core.dirman"] = {                   -- Manages Neorg workspaces
           config = {
             workspaces = {
               notes = "~/notes",
@@ -211,36 +270,38 @@ require("workspaces").setup({
 
 
 -- now for some customizations
-lvim.keys.visual_mode["<C-j>"] =  ':m \'>+1<CR>gv=gv'
-lvim.keys.visual_mode[ '<C-k>'] =  ':m \'<-2<CR>gv=gv'
+lvim.keys.visual_mode["<C-j>"] = ':m \'>+1<CR>gv=gv'
+lvim.keys.visual_mode['<C-k>'] = ':m \'<-2<CR>gv=gv'
 -- keep selection in visual mode when indenting
-lvim.keys.visual_mode[ '<'] =  '<gv'
-lvim.keys.visual_mode[ '>'] =  '>gv'
-lvim.keys.normal_mode[ 'Y'] = '0"*yg$'
+lvim.keys.visual_mode['<'] = '<gv'
+lvim.keys.visual_mode['>'] = '>gv'
+lvim.keys.normal_mode['Y'] = '0"*yg$'
 -- center after page up and down
-lvim.keys.normal_mode[ '<C-u>'] = '<C-u>zz'
-lvim.keys.normal_mode[ '<C-d>'] = '<C-d>zz'
+lvim.keys.normal_mode['<C-u>'] = '<C-u>zz'
+lvim.keys.normal_mode['<C-d>'] = '<C-d>zz'
 -- n jump to next match, and center the screen
 -- forward and opposite dircection
-lvim.keys.normal_mode[ 'n'] = 'nzzzv'
-lvim.keys.normal_mode[ 'N'] = 'Nzzzv'
-lvim.keys.normal_mode[ '<CR>'] = 'ciw'
-lvim.keys.normal_mode[ '<S-CR>'] = 'ciw'
+lvim.keys.normal_mode['n'] = 'nzzzv'
+lvim.keys.normal_mode['N'] = 'Nzzzv'
+lvim.keys.normal_mode['<CR>'] = 'ciw'
+lvim.keys.normal_mode['<S-CR>'] = 'ciw'
 -- quick escape by pressing jk at the same time
 -- lvim.keys.insert_mode[ 'jk'] = '<ESC>'
 -- J Join lines, but keep cursor on same line
-lvim.keys.normal_mode[ 'J'] = 'mzJ`z'
+lvim.keys.normal_mode['J'] = 'mzJ`z'
 -- Insane remapping of save to hammer
-lvim.keys.normal_mode[ '<leader><leader>'] = ':w<CR>'
+lvim.keys.normal_mode['<leader><leader>'] = ':w<CR>'
 lvim.keys.insert_mode['<C-i>'] = '<'
 lvim.keys.insert_mode['<C-o>'] = '>'
-lvim.keys.normal_mode['<leader>j'] =  require('harpoon.ui').nav_next
-lvim.keys.normal_mode['<leader>k'] =  require('harpoon.ui').nav_prev
-lvim.keys.normal_mode['<C-j>'] =  require('harpoon.ui').nav_next
-lvim.keys.normal_mode['<C-k>'] =  require('harpoon.ui').nav_prev
-lvim.keys.normal_mode['<leader>hh'] =  require('harpoon.ui').toggle_quick_menu
-lvim.keys.normal_mode['<leader>ha'] =  require('harpoon.mark').add_file
-lvim.keys.normal_mode['<leader>nrn'] =  ':Neorg workspace notes<CR>:Telescope neorg find_norg_files<CR>'
+lvim.keys.normal_mode['<leader>j'] = require('harpoon.ui').nav_next
+lvim.keys.normal_mode['<leader>k'] = require('harpoon.ui').nav_prev
+lvim.keys.normal_mode['<C-j>'] = require('harpoon.ui').nav_next
+lvim.keys.normal_mode['<C-k>'] = require('harpoon.ui').nav_prev
+lvim.keys.normal_mode['<leader>hh'] = require('harpoon.ui').toggle_quick_menu
+lvim.keys.normal_mode['<leader>ha'] = require('harpoon.mark').add_file
+lvim.keys.normal_mode['<leader>nrn'] = ':Neorg workspace notes<CR>:Telescope neorg find_norg_files<CR>'
+lvim.keys.normal_mode['<leader>ff'] = require('telescope.builtin').find_files
+lvim.keys.normal_mode['<leader>f'] = false
 
 lvim.builtin.cmp.formatting.source_names["copilot"] = "(Copilot)"
 
