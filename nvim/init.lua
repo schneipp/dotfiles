@@ -33,14 +33,13 @@ require('packer').startup(function(use)
       pcall(require('nvim-treesitter.install').update { with_sync = true })
     end,
   }
-
+  use 'nvim-treesitter/nvim-treesitter-context'
   use { -- Additional text objects via treesitter
     'nvim-treesitter/nvim-treesitter-textobjects',
     after = 'nvim-treesitter',
   }
 
   -- Git related plugins
-  use 'tpope/vim-fugitive'
   use 'tpope/vim-rhubarb'
   use 'lewis6991/gitsigns.nvim'
 
@@ -56,13 +55,19 @@ require('packer').startup(function(use)
   -- Fuzzy Finder Algorithm which requires local dependencies to be built. Only load if `make` is available
   use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable 'make' == 1 }
 
-  use { 'github/copilot.vim' }
+ -- use { 'github/copilot.vim' }
+  use { "zbirenbaum/copilot.lua" }
   use { 'mhartington/oceanic-next' }
   use { 'tanvirtin/monokai.nvim' }
+  use { "tpope/vim-fugitive" }
+  use { "pwntester/octo.nvim" }
   use { 'xiyaowong/nvim-transparent' }
   use { 'nvim-telescope/telescope-ui-select.nvim' }
   use { "MunifTanjim/nui.nvim" }
   use { "Bryley/neoai.nvim" }
+
+  -- Debugging
+  use 'nvim-lua/plenary.nvim'
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
   local has_plugins, plugins = pcall(require, 'custom.plugins')
   if has_plugins then
@@ -171,7 +176,9 @@ require('lualine').setup {
 }
 
 -- Enable Comment.nvim
-require('Comment').setup()
+-- gcc gbc
+require('Comment').setup({
+})
 
 -- Enable `lukas-reineke/indent-blankline.nvim`
 -- See `:help indent_blankline.txt`
@@ -205,23 +212,7 @@ require('telescope').setup {
   },
   extensions = {
     ["ui-select"] = {
-      require("telescope.themes").get_dropdown {
-        -- even more opts
-      }
-
-      -- pseudo code / specification for writing custom displays, like the one
-      -- for "codeactions"
-      -- specific_opts = {
-      --   [kind] = {
-      --     make_indexed = function(items) -> indexed_items, width,
-      --     make_displayer = function(widths) -> displayer
-      --     make_display = function(displayer) -> function(e)
-      --     make_ordinal = function(e) -> string
-      --   },
-      --   -- for example to disable the custom builtin "codeactions" display
-      --      do the following
-      --   codeactions = false,
-      -- }
+      require("telescope.themes").get_dropdown { }
     }
   }
 }
@@ -233,7 +224,7 @@ pcall(require('telescope').load_extension, 'fzf')
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
-vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
+vim.keymap.set('n', '<leader><space>', ':w<CR>', { desc = '[ ] Save file' })
 vim.keymap.set('n', '<leader>/', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
@@ -242,15 +233,16 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer]' })
 
-vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
+vim.keymap.set('n', '<leader>ff', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
-vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
-vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
-vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
+-- vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
+-- vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>fd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>fs', require('telescope.builtin').lsp_document_symbols, { desc = '[F]ind [S]ymbols' })
 vim.keymap.set('n', '<leader>ps', require('telescope.builtin').live_grep)
+vim.keymap.set('n', '<leader>ft', require('telescope.builtin').live_grep)
 vim.keymap.set('n', '<leader>bb', require('telescope.builtin').buffers)
+vim.keymap.set('n', '<leader>lf', ':lua vim.lsp.buf.format()<CR>')
 -- vim.keymap.set('n', '<leader>fa', require('telescope.builtin').lsp_code_actions, { desc = '[F]ind [C]ode Action' })
 
 -- [[ Configure Treesitter ]]
@@ -377,8 +369,18 @@ require('mason').setup()
 
 -- Enable the following language servers
 -- Feel free to add/remove any LSPs that you want here. They will automatically be installed
-local servers = { 'clangd','rust_analyzer', 'pyright', 'tsserver', 'intelephense' }
-
+local servers = { 'clangd', 'pyright', 'tsserver', 'intelephense' }
+local rt = require("rust-tools")
+rt.setup({
+  server = {
+    on_attach = function(_, bufnr)
+      -- Hover actions
+      vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
+      -- Code action groups
+      vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
+    end,
+  },
+})
 -- Ensure the servers above are installed
 require('mason-lspconfig').setup {
   ensure_installed = servers,
@@ -392,6 +394,24 @@ for _, lsp in ipairs(servers) do
   require('lspconfig')[lsp].setup {
     on_attach = on_attach,
     capabilities = capabilities,
+    settings = {
+        ['rust-analyzer'] = {
+            cargo = {
+                allFeatures = true,
+            },
+            checkOnSave = {
+                allFeatures = true,
+                command = 'clippy',
+            },
+            procMacro = {
+                ignored = {
+                    ['async-trait'] = { 'async_trait' },
+                    ['napi-derive'] = { 'napi' },
+                    ['async-recursion'] = { 'async_recursion' },
+                },
+            },
+        },
+    },
   }
 end
 
@@ -423,24 +443,6 @@ cmp.setup {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
---    ['<Tab>'] = cmp.mapping(function(fallback)
---      if cmp.visible() then
---        cmp.select_next_item()
---      elseif luasnip.expand_or_jumpable() then
---        luasnip.expand_or_jump()
---      else
---        fallback()
---      end
---    end, { 'i', 's' }), 
---    ['<S-Tab>'] = cmp.mapping(function(fallback)
---      if cmp.visible() then
---        cmp.select_prev_item()
---      elseif luasnip.jumpable(-1) then
---        luasnip.jump(-1)
---      else
---        fallback()
---      end
---    end, { 'i', 's' }),
   },
   sources = {
     { name = 'nvim_lsp' },
@@ -517,4 +519,50 @@ require('neoai').setup{
         },
     },
 }
+require("octo").setup()
+
+require('copilot').setup({
+  panel = {
+    enabled = true,
+    auto_refresh = true,
+    keymap = {
+      jump_prev = "[[",
+      jump_next = "]]",
+      accept = "<CR>",
+      refresh = "gr",
+      open = "<M-CR>"
+    },
+    layout = {
+      position = "bottom", -- | top | left | right
+      ratio = 0.4
+    },
+  },
+  suggestion = {
+    enabled = true,
+    auto_trigger = true,
+    debounce = 75,
+    keymap = {
+      accept = "<C-l>",
+      accept_word = false,
+      accept_line = false,
+      next = "<M-]>",
+      prev = "<M-[>",
+      dismiss = "<C-]>",
+    },
+  },
+  filetypes = {
+    yaml = false,
+    markdown = false,
+    help = false,
+    gitcommit = false,
+    gitrebase = false,
+    hgcommit = false,
+    svn = false,
+    cvs = false,
+    ["."] = false,
+  },
+  copilot_node_command = 'node', -- Node.js version must be > 16.x
+  server_opts_overrides = {},
+})
+
 -- The line beneath this is called `modeline`. See `:help modeline`

@@ -1,8 +1,4 @@
 return function(use)
---  use ({
---    "Bryley/neoai.nvim",
---    require = { "MunifTanjim/nui.nvim" },
---  })
   use({
     "folke/which-key.nvim",
       config = function()
@@ -12,7 +8,6 @@ return function(use)
   use {"akinsho/toggleterm.nvim", tag = '*', config = function()
     require("toggleterm").setup()
   end}
---  use ({"ggandor/leap.nvim", config = function() require("leap").set_default_keymaps() end})
   use "natecraddock/workspaces.nvim"
   use "mg979/vim-visual-multi"
   use "ThePrimeagen/harpoon"
