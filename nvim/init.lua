@@ -485,8 +485,7 @@ require('neoai').setup{
         ["select_up"] = "<C-k>",
         ["select_down"] = "<C-j>",
     },
-    open_api_key_env = "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",
-    open_api_key = "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",
+    open_api_key_env = "",
     shortcuts = {
         {
             name = "textify",
