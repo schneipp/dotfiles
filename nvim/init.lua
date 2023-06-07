@@ -65,7 +65,15 @@ require('packer').startup(function(use)
   use { 'nvim-telescope/telescope-ui-select.nvim' }
   use { "MunifTanjim/nui.nvim" }
   use { "Bryley/neoai.nvim" }
-
+  use({
+    "kylechui/nvim-surround",
+    tag = "*", -- Use for stability; omit to use `main` branch for the latest features
+    config = function()
+      require("nvim-surround").setup({
+        -- Configuration here, or leave empty to use defaults
+      })
+    end
+  })
   -- Debugging
   use 'nvim-lua/plenary.nvim'
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
@@ -332,8 +340,9 @@ local on_attach = function(_, bufnr)
   end
 
 
-  nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
+  nmap('<leader>lr', vim.lsp.buf.rename, '[L]sp [R]ename')
   nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+  nmap('<leader>la', vim.lsp.buf.code_action, '[L]sp Code[A]ction')
 
   nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
@@ -455,9 +464,9 @@ require('neoai').setup {
   ui = {
     output_popup_text = "NeoAI",
     input_popup_text = "Prompt",
-    width = 30,                   -- As percentage eg. 30%
-    output_popup_height = 80,     -- As percentage eg. 80%
-    submit = "<Enter>",           -- Key binding to submit the prompt
+    width = 30,               -- As percentage eg. 30%
+    output_popup_height = 80, -- As percentage eg. 80%
+    submit = "<Enter>",       -- Key binding to submit the prompt
   },
   models = {
     {
