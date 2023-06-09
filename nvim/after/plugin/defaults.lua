@@ -7,8 +7,8 @@ vim.keymap.set('n', '<leader>k', require('harpoon.ui').nav_prev, { desc = 'Harpo
 vim.keymap.set('n', '<leader>h', require('harpoon.ui').toggle_quick_menu, { desc = 'Harpoon Navigation' })
 vim.keymap.set('n', '<leader>ha', require('harpoon.mark').add_file, { desc = 'Harpoon Add File' })
 
-vim.keymap.set({'v'},'<C-j>',':m \'>+1<CR>gv=gv')
-vim.keymap.set({'v'},'<C-k>',':m \'<-2<CR>gv=gv')
+vim.keymap.set({'v'},'<S-j>',':m \'>+1<CR>gv=gv')
+vim.keymap.set({'v'},'<S-k>',':m \'<-2<CR>gv=gv')
 -- keep selection in visual mode when indenting
 vim.keymap.set({'v'},'<','<gv')
 vim.keymap.set({'v'},'>','>gv')
@@ -19,6 +19,7 @@ vim.keymap.set({'n'},'n','nzzzv')
 vim.keymap.set({'n'},'N','Nzzzv')
 -- J Join lines, but keep cursor on same line
 vim.keymap.set({'n'},'J','mzJ`z')
+vim.keymap.set({'n'},'<CR>','ciw')
 -- Insane remapping of save to hammer
 vim.keymap.set({'n'},'<leader><leader>',':w<CR>')
 --nnoremap <leader>ps :lua require('telescope.builtin').grep_string( { search = vim.fn.input("Grep for > ") } )<cr>
