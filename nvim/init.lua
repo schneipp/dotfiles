@@ -378,7 +378,7 @@ require('mason').setup()
 
 -- Enable the following language servers
 -- Feel free to add/remove any LSPs that you want here. They will automatically be installed
-local servers = { 'lua_ls', 'clangd', 'pyright', 'tsserver', 'intelephense' }
+local servers = { 'lua_ls', 'clangd', 'pyright', 'tsserver', 'intelephense','html' }
 local rt = require("rust-tools")
 rt.setup({
   server = {
