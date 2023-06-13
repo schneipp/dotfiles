@@ -22,18 +22,11 @@ vim.keymap.set({'n'},'J','mzJ`z')
 vim.keymap.set({'n'},'<CR>','ciw')
 -- Insane remapping of save to hammer
 vim.keymap.set({'n'},'<leader><leader>',':w<CR>')
---nnoremap <leader>ps :lua require('telescope.builtin').grep_string( { search = vim.fn.input("Grep for > ") } )<cr>
---nnoremap <leader>ff :lua require'telescope.builtin'.find_files{ hidden = true }<cr> vim.keymap.set('n', '<leader>ps', require('telescope.builtin').live_grep())
 vim.keymap.set({'i'},'<C-j>',':m \'>+1<CR>gv=gv')
 vim.cmd [[set clipboard=unnamedplus]]
 require("telescope").load_extension('workspaces')
 vim.keymap.set('n', '<leader>fw', ":Telescope workspaces\n")
 vim.opt.guicursor = ""
-vim.keymap.set({'i'},'<M-j>','[', { noremap = true })
-vim.keymap.set({'i'},'<M-k>',']' , { noremap = true })	      
-vim.keymap.set({'i'},'<C-k>','}')
-vim.keymap.set({'i'},'<C-j>','{')
-
 vim.keymap.set('n', '<leader>db', ":lua require'dap'.toggle_breakpoint()<CR>", { desc = 'Toggle Breakpoint' })
 vim.keymap.set('n', '<leader>dB', ":lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint Condition: '))<CR>", { desc = 'Toggle Breakpoint' })
 vim.keymap.set('n', '<leader>dr', ":RustDebuggables<CR>:lua require'dapui'.toggle()<CR>", { desc = 'Start Debugger' })
@@ -44,28 +37,11 @@ vim.keymap.set('n', '<leader>dc', ":lua require'dap'.step_over()<CR>", { desc = 
 vim.keymap.set('n', '<leader>di', ":lua require'dap'.step_into()<CR>", { desc = 'Step Into' })
 vim.keymap.set('n', '<leader>di', ":lua require'dap'.stop()<CR>", { desc = 'Stop'} )
 vim.keymap.set('n', '<leader>ds', ":lua require'dap'.stop()<CR>:lua require'dapui'.toggle()<CR>", { desc = 'Stop and Close UI'} )
- 
--- Update this path
-local extension_path = vim.env.HOME .. '/.vscode/extensions/vadimcn.vscode-lldb-1.9.1/'
-local codelldb_path = extension_path .. 'adapter/codelldb'
-local liblldb_path = extension_path .. 'lldb/lib/liblldb'
-local this_os = vim.loop.os_uname().sysname;
--- The path in windows is different
-if this_os:find "Windows" then
-  codelldb_path = package_path .. "adapter\\codelldb.exe"
-  liblldb_path = package_path .. "lldb\\bin\\liblldb.dll"
-else
-  -- The liblldb extension is .so for linux and .dylib for macOS
-  liblldb_path = liblldb_path .. (this_os == "Linux" and ".so" or ".dylib")
-end
+vim.keymap.set('n', '<C-h>', "<cmd> TmuxNavigateLeft<CR>", { desc = 'Window Left'} )
+vim.keymap.set('n', '<C-l>', "<cmd> TmuxNavigateRight<CR>", { desc = 'Window Right'} )
+vim.keymap.set('n', '<C-j>', "<cmd> TmuxNavigateDown<CR>", { desc = 'Window Down'} )
+vim.keymap.set('n', '<C-k>', "<cmd> TmuxNavigateUp<CR>", { desc = 'Window Up'} )
 
-local opts = {
-    -- ... other configs
-    dap = {
-        adapter = require('rust-tools.dap').get_codelldb_adapter(
-            codelldb_path, liblldb_path)
-    }
-}
 
 require('dapui').setup()
 
