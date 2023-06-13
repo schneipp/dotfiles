@@ -42,7 +42,7 @@ require('packer').startup(function(use)
   -- Git related plugins
   use 'tpope/vim-rhubarb'
   use 'lewis6991/gitsigns.nvim'
-
+  use 'christoomey/vim-tmux-navigator'
   use 'navarasu/onedark.nvim'               -- Theme inspired by Atom
   use 'nvim-lualine/lualine.nvim'           -- Fancier statusline
   use 'lukas-reineke/indent-blankline.nvim' -- Add indentation guides even on blank lines
@@ -64,7 +64,19 @@ require('packer').startup(function(use)
   use { 'xiyaowong/nvim-transparent' }
   use { 'nvim-telescope/telescope-ui-select.nvim' }
   use { "MunifTanjim/nui.nvim" }
-  use { "Bryley/neoai.nvim" }
+  use({
+    "jackMort/ChatGPT.nvim",
+    config = function()
+      require("chatgpt").setup({
+        async_api_key_cmd = "pass show chatgpt/key",
+      })
+    end,
+    requires = {
+      "MunifTanjim/nui.nvim",
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope.nvim"
+    }
+  })
   use({
     "kylechui/nvim-surround",
     tag = "*", -- Use for stability; omit to use `main` branch for the latest features
@@ -154,7 +166,11 @@ vim.g.maplocalleader = ' '
 -- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 
-
+require('chatgpt').setup({
+  -- your config
+  -- see configuration section below
+  async_api_key_cmd = "pass show chatgpt/key",
+})
 
 
 -- Remap for dealing with word wrap
@@ -251,7 +267,6 @@ vim.keymap.set('n', '<leader>ps', require('telescope.builtin').live_grep)
 vim.keymap.set('n', '<leader>ft', require('telescope.builtin').live_grep)
 vim.keymap.set('n', '<leader>bb', require('telescope.builtin').buffers)
 vim.keymap.set('n', '<leader>lf', ':lua vim.lsp.buf.format()<CR>')
--- vim.keymap.set('n', '<leader>fa', require('telescope.builtin').lsp_code_actions, { desc = '[F]ind [C]ode Action' })
 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
@@ -378,18 +393,18 @@ require('mason').setup()
 
 -- Enable the following language servers
 -- Feel free to add/remove any LSPs that you want here. They will automatically be installed
-local servers = { 'lua_ls', 'clangd', 'pyright', 'tsserver', 'intelephense','html' }
-local rt = require("rust-tools")
-rt.setup({
-  server = {
-    on_attach = function(_, bufnr)
-      -- Hover actions
-      vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
-      -- Code action groups
-      vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
-    end,
-  },
-})
+local servers = { 'lua_ls', 'clangd','rust_analyzer', 'pyright', 'tsserver', 'intelephense', 'html' }
+-- local rt = require("rust-tools")
+-- rt.setup({
+--   server = {
+--     on_attach = function(_, bufnr)
+--       -- Hover actions
+--       vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
+--       -- Code action groups
+--       vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
+--     end,
+--   },
+-- })
 -- Ensure the servers above are installed
 require('mason-lspconfig').setup {
   ensure_installed = servers,
@@ -459,75 +474,6 @@ cmp.setup {
   },
 }
 
-require('neoai').setup {
-  -- Below are the default options, feel free to override what you would like changed
-  ui = {
-    output_popup_text = "NeoAI",
-    input_popup_text = "Prompt",
-    width = 30,               -- As percentage eg. 30%
-    output_popup_height = 80, -- As percentage eg. 80%
-    submit = "<Enter>",       -- Key binding to submit the prompt
-  },
-  models = {
-    {
-      name = "openai",
-      model = "gpt-3.5-turbo",
-      params = nil
-    },
-  },
-  register_output = {
-    ["g"] = function(output)
-      return output
-    end,
-    ["c"] = require("neoai.utils").extract_code_snippets,
-  },
-  inject = {
-    cutoff_width = 75,
-  },
-  prompts = {
-    context_prompt = function(context)
-      return "Hey, I'd like to provide some context for future "
-          .. "messages. Here is the code/text that I want to refer "
-          .. "to in our upcoming conversations:\n\n"
-          .. context
-    end,
-  },
-  mappings = {
-    ["select_up"] = "<C-k>",
-    ["select_down"] = "<C-j>",
-  },
-  open_api_key_env = "",
-  shortcuts = {
-    {
-      name = "textify",
-      key = "<leader>as",
-      desc = "fix text with AI",
-      use_context = true,
-      prompt = [[
-                Please rewrite the text to make it more readable, clear,
-                concise, and fix any grammatical, punctuation, or spelling
-                errors
-            ]],
-      modes = { "v" },
-      strip_function = nil,
-    },
-    {
-      name = "gitcommit",
-      key = "<leader>ag",
-      desc = "generate git commit message",
-      use_context = false,
-      prompt = function()
-        return [[
-                    Using the following git diff generate a consise and
-                    clear git commit message, with a short title summary
-                    that is 75 characters or less:
-                ]] .. vim.fn.system("git diff --cached")
-      end,
-      modes = { "n" },
-      strip_function = nil,
-    },
-  },
-}
 require("octo").setup()
 
 require('copilot').setup({
