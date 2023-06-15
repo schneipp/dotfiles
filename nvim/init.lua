@@ -148,8 +148,8 @@ vim.wo.signcolumn = 'yes'
 
 -- Set colorscheme
 vim.o.termguicolors = true
-vim.cmd [[colorscheme monokai_soda]]
--- vim.cmd [[colorscheme catppuccin-mocha]]
+--- vim.cmd [[colorscheme monokai_soda]]
+vim.cmd [[colorscheme catppuccin]]
 -- vim.cmd [[colorscheme catppuccin-mocha]]
 
 -- Set completeopt to have a better completion experience
