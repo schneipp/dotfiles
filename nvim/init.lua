@@ -26,7 +26,7 @@ require('packer').startup(function(use)
     'hrsh7th/nvim-cmp',
     requires = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
   }
-
+  use { "ellisonleao/gruvbox.nvim" }
   use { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     run = function()
@@ -48,7 +48,15 @@ require('packer').startup(function(use)
   use 'lukas-reineke/indent-blankline.nvim' -- Add indentation guides even on blank lines
   use 'numToStr/Comment.nvim'               -- "gc" to comment visual regions/lines
   use 'tpope/vim-sleuth'                    -- Detect tabstop and shiftwidth automatically
-
+  use {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v2.x",
+    requires = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+      "MunifTanjim/nui.nvim",
+    }
+  }
   -- Fuzzy Finder (files, lsp, etc)
   use { 'nvim-telescope/telescope.nvim', branch = '0.1.x', requires = { 'nvim-lua/plenary.nvim' } }
 
@@ -149,7 +157,8 @@ vim.wo.signcolumn = 'yes'
 -- Set colorscheme
 vim.o.termguicolors = true
 --- vim.cmd [[colorscheme monokai_soda]]
-vim.cmd [[colorscheme catppuccin]]
+-- vim.cmd [[colorscheme catppuccin]]
+vim.cmd [[colorscheme gruvbox]]
 -- vim.cmd [[colorscheme catppuccin-mocha]]
 
 -- Set completeopt to have a better completion experience
@@ -393,7 +402,7 @@ require('mason').setup()
 
 -- Enable the following language servers
 -- Feel free to add/remove any LSPs that you want here. They will automatically be installed
-local servers = { 'lua_ls', 'clangd','rust_analyzer', 'pyright', 'tsserver', 'intelephense', 'html' }
+local servers = { 'lua_ls', 'clangd', 'rust_analyzer', 'pyright', 'tsserver', 'intelephense', 'html' }
 -- local rt = require("rust-tools")
 -- rt.setup({
 --   server = {
@@ -473,6 +482,11 @@ cmp.setup {
     { name = 'luasnip' },
   },
 }
+vim.o.background = "dark"
+
+require("gruvbox").setup({
+  contrast = "hard"
+})
 
 require("octo").setup()
 
