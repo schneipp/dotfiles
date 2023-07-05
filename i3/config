@@ -15,7 +15,7 @@
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
-font pango:DejaVu Sans Mono 0
+#font pango:DejaVu Sans Mono 0
 for_window [class="^.*"] border pixel 1
 # Start XDG autostart .desktop files using dex. See also
 # https://wiki.archlinux.org/index.php/XDG_Autostart
@@ -124,15 +124,15 @@ bindsym Mod4+minus scratchpad show
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
-set $ws1 "(1)Code"
-set $ws2 "(2)Code2"
-set $ws3 "(3)Web"
-set $ws4 "(4)DB"
-set $ws5 "(5)Msg"
-set $ws6 "(6)Gfx"
-set $ws7 "(7)Snd"
-set $ws8 "(8)Misc"
-set $ws9 "(9)Settings"
+set $ws1 "(1)"
+set $ws2 "(2)"
+set $ws3 "(3)"
+set $ws4 "(4)"
+set $ws5 "(5)"
+set $ws6 "(6)"
+set $ws7 "(7)"
+set $ws8 "(8)"
+set $ws9 "(9)"
 set $ws10 "10"
 
 set $laptop eDP-1
@@ -141,9 +141,6 @@ set $horizontal1 DP-5
 set $horizontal2 DP-4-8
 
 # assign [class="Alacritty"] $ws1
-assign [class="Microsoft Teams - Preview"] $ws5
-assign [class="discord"] $ws5
-assign [class="DBeaver"] $ws4
 
 workspace $ws1 output $laptop
 workspace $ws2 output $vertical1
@@ -280,9 +277,9 @@ mode $ssh {
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
-#        status_command i3status
-    tray_output none
-    mode hide
+    status_command i3status
+    #tray_output none
+#    mode hide
 }
 gaps inner 5 
 
@@ -302,7 +299,8 @@ exec_always picom &
 exec_always flameshot &
 exec_always blueman-applet &
 #exec_always pkill polybar
-exec_always polybar &
+#exec_always polybar &
+exec_always picom &
 exec_always /home/rams/fix_system.sh &
 exec_always pasystray &
 exec_always emacs --daemon &
