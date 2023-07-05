@@ -88,13 +88,21 @@
 
 
 ;; accept completion from copilot and fallback to company
+;;(use-package! copilot
+;;  :hook (prog-mode . copilot-mode)
+;;  :bind (("C-TAB" . 'copilot-accept-completion-by-word)
+;;         ("C-<tab>" . 'copilot-accept-completion-by-word)
+;;         :map copilot-completion-map
+;;         ("<tab>" . 'copilot-accept-completion)
+;;         ("TAB" . 'copilot-accept-completion)))
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
-  :bind (("C-TAB" . 'copilot-accept-completion-by-word)
-         ("C-<tab>" . 'copilot-accept-completion-by-word)
+  :bind (;;("C-l" . 'copilot-accept-completion-by-word)
+         ;;("C-l" . 'copilot-accept-completion-by-word)
          :map copilot-completion-map
-         ("<tab>" . 'copilot-accept-completion)
-         ("TAB" . 'copilot-accept-completion)))
+         ("C-l" . 'copilot-accept-completion)
+         ))
+
 
 (setq elfeed-feeds (quote
                     (("https://www.reddit.com/r/emacs.rss" reddit linux)
@@ -207,3 +215,7 @@
    (setq tree-sitter-debug-jump-buttons t
          ;; and this highlights the entire sub tree in your code
          tree-sitter-debug-highlight-jump-region t))
+
+(map! :leader
+      (:prefix ("l" . "Lsp Menu")
+      :desc "LSP Action" "a" #'lsp-execute-code-action))
