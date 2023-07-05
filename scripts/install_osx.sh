@@ -1,0 +1,18 @@
+qemu-system-x86_64 -enable-kvm -m 8192 -cpu Penryn,vendor=GenuineIntel,kvm=on,+sse3,+sse4.2,+aes,+xsave,+avx,+xsaveopt,+xsavec,+xgetbv1,+avx2 -machine q35 \
+-smp 4,cores=2 \
+-usb -device usb-kbd -device usb-mouse \
+-device isa-applesmc,osk="ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc" \
+-drive if=pflash,format=raw,readonly,file=/usr/share/OVMF/OVMF_CODE.fd \
+-drive if=pflash,format=raw,file=/usr/share/OVMF/OVMF_VARS-1024x768.fd \
+-smbios type=2 \
+-device ich9-intel-hda -device hda-duplex \
+-device ich9-ahci,id=sata \
+-drive id=ESP,if=none,format=qcow2,file=esp.qcow2 \
+-device ide-hd,bus=sata.2,drive=ESP \
+-drive id=InstallMedia,format=raw,if=none,file=HighSierra-libvirt.qcow2 \
+-device ide-hd,bus=sata.3,drive=InstallMedia \
+-netdev user,id=net0 \
+-device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:c9:18:27 \
+-vga qxl \
+-spice port=5900,disable-ticketing \
+-monitor stdio
