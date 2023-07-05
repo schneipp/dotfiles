@@ -32,12 +32,12 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
-
+(setq doom-theme 'doom-monokai-classic doom-font (font-spec :family "JetBrainsMono NF" :size 13.0)
+      doom-variable-pitch-font (font-spec :family "JetBrainsMono NF" :size 13.0))
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'relative)
-
+(setq doom-font-increment 1)
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
@@ -88,13 +88,21 @@
 
 
 ;; accept completion from copilot and fallback to company
+;;(use-package! copilot
+;;  :hook (prog-mode . copilot-mode)
+;;  :bind (("C-TAB" . 'copilot-accept-completion-by-word)
+;;         ("C-<tab>" . 'copilot-accept-completion-by-word)
+;;         :map copilot-completion-map
+;;         ("<tab>" . 'copilot-accept-completion)
+;;         ("TAB" . 'copilot-accept-completion)))
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
-  :bind (("C-TAB" . 'copilot-accept-completion-by-word)
-         ("C-<tab>" . 'copilot-accept-completion-by-word)
+  :bind (;;("C-l" . 'copilot-accept-completion-by-word)
+         ;;("C-l" . 'copilot-accept-completion-by-word)
          :map copilot-completion-map
-         ("<tab>" . 'copilot-accept-completion)
-         ("TAB" . 'copilot-accept-completion)))
+         ("C-l" . 'copilot-accept-completion)
+         ))
+
 
 (setq elfeed-feeds (quote
                     (("https://www.reddit.com/r/emacs.rss" reddit linux)
@@ -121,7 +129,6 @@
 
 (require 'ob-async)
 
-(setq doom-theme 'doom-one)
 (setq tramp-default-method "ssh")
 
 (set-frame-parameter (selected-frame) 'alpha '(99 99))
@@ -208,3 +215,7 @@
    (setq tree-sitter-debug-jump-buttons t
          ;; and this highlights the entire sub tree in your code
          tree-sitter-debug-highlight-jump-region t))
+
+(map! :leader
+      (:prefix ("l" . "Lsp Menu")
+      :desc "LSP Action" "a" #'lsp-execute-code-action))
