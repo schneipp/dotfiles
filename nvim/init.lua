@@ -9,6 +9,7 @@ require('packer').startup(function(use)
   -- Package manager
   use 'wbthomason/packer.nvim'
   use 'andweeb/presence.nvim'
+  use 'GustavoPrietoP/doom-themes.nvim'
   use { "ggandor/leap.nvim", config = function() require("leap").set_default_keymaps() end }
   use { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
@@ -21,7 +22,43 @@ require('packer').startup(function(use)
       'j-hui/fidget.nvim',
     },
   }
+  use({
+    'NTBBloodbath/doom-one.nvim',
+    setup = function()
+      -- Add color to cursor
+      vim.g.doom_one_cursor_coloring = false
+      -- Set :terminal colors
+      vim.g.doom_one_terminal_colors = true
+      -- Enable italic comments
+      vim.g.doom_one_italic_comments = false
+      -- Enable TS support
+      vim.g.doom_one_enable_treesitter = true
+      -- Color whole diagnostic text or only underline
+      vim.g.doom_one_diagnostics_text_color = false
+      -- Enable transparent background
+      vim.g.doom_one_transparent_background = false
 
+      -- Pumblend transparency
+      vim.g.doom_one_pumblend_enable = false
+      vim.g.doom_one_pumblend_transparency = 20
+
+      -- Plugins integration
+      vim.g.doom_one_plugin_neorg = true
+      vim.g.doom_one_plugin_barbar = false
+      vim.g.doom_one_plugin_telescope = false
+      vim.g.doom_one_plugin_neogit = true
+      vim.g.doom_one_plugin_nvim_tree = true
+      vim.g.doom_one_plugin_dashboard = true
+      vim.g.doom_one_plugin_startify = true
+      vim.g.doom_one_plugin_whichkey = true
+      vim.g.doom_one_plugin_indent_blankline = true
+      vim.g.doom_one_plugin_vim_illuminate = true
+      vim.g.doom_one_plugin_lspsaga = false
+    end,
+    config = function()
+      vim.cmd("colorscheme doom-one")
+    end,
+  })
   use { -- Autocompletion
     'hrsh7th/nvim-cmp',
     requires = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
@@ -38,7 +75,12 @@ require('packer').startup(function(use)
     'nvim-treesitter/nvim-treesitter-textobjects',
     after = 'nvim-treesitter',
   }
-
+  use {
+    "max397574/better-escape.nvim",
+    config = function()
+      require("better_escape").setup()
+    end,
+  }
   -- Git related plugins
   use 'tpope/vim-rhubarb'
   use 'lewis6991/gitsigns.nvim'
@@ -487,6 +529,18 @@ vim.o.background = "dark"
 require("gruvbox").setup({
   contrast = "hard"
 })
+
+require("better_escape").setup {
+  mapping = { "jk", "jj", "fj" },  -- a table with mappings to use
+  timeout = vim.o.timeoutlen,      -- the jkjkjkjkjkjkjjjjtime in which the keys must be hit in ms. Use option timeoutlen by default
+  clear_empty_lines = false,       -- clear line after escaping if there is only whitespace
+  keys = "<Esc>",                  -- keys used for escaping, if it is a function will use the result everytime
+  -- example(recommended)
+  -- keys = function()
+  --   return vim.api.nvim_win_get_cursor(0)[2] > 1 and '<esc>l' or '<esc>'
+  -- end,
+}
+
 
 require("octo").setup()
 
