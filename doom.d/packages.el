@@ -51,11 +51,10 @@
 (package! transient :pin "c2bdf7e12c530eb85476d3aef317eb2941ab9440")
 (package! with-editor :pin "bbc60f68ac190f02da8a100b6fb67cf1c27c53ab")
 ;; (package! emacs-application-framework)
-(package! copilot
-  :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
+(package! copilot :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 (package! ob-async)
 (package! ement)
-
+(unpin! lsp-mode)
 ;; let's unpin for org-roam ui :)
 (unpin! org-roam)
 (package! org-roam-ui)

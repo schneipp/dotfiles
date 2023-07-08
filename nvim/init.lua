@@ -10,6 +10,7 @@ require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
   use 'andweeb/presence.nvim'
   use 'GustavoPrietoP/doom-themes.nvim'
+  use { 'lvimuser/lsp-inlayhints.nvim' }
   use { "ggandor/leap.nvim", config = function() require("leap").set_default_keymaps() end }
   use { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
@@ -56,7 +57,7 @@ require('packer').startup(function(use)
       vim.g.doom_one_plugin_lspsaga = false
     end,
     config = function()
-      vim.cmd("colorscheme doom-one")
+--      vim.cmd("colorscheme doom-one")
     end,
   })
   use { -- Autocompletion
@@ -200,7 +201,7 @@ vim.wo.signcolumn = 'yes'
 vim.o.termguicolors = true
 --- vim.cmd [[colorscheme monokai_soda]]
 -- vim.cmd [[colorscheme catppuccin]]
-vim.cmd [[colorscheme gruvbox]]
+vim.cmd [[colorscheme monokai_soda]]
 -- vim.cmd [[colorscheme catppuccin-mocha]]
 
 -- Set completeopt to have a better completion experience
@@ -390,7 +391,7 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
 
 -- LSP settings.
 --  This function gets run when an LSP connects to a particular buffer.
-local on_attach = function(_, bufnr)
+local on_attach = function(client, bufnr)
   -- NOTE: Remember that lua is a real programming language, and as such it is possible
   -- to define small helper and utility functions so you don't have to repeat yourself
   -- many times.
@@ -405,7 +406,7 @@ local on_attach = function(_, bufnr)
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
   end
 
-
+  require("lsp-inlayhints").on_attach(client, bufnr)
   nmap('<leader>lr', vim.lsp.buf.rename, '[L]sp [R]ename')
   nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
   nmap('<leader>la', vim.lsp.buf.code_action, '[L]sp Code[A]ction')
@@ -423,6 +424,7 @@ local on_attach = function(_, bufnr)
 
   -- Lesser used LSP functionality
   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+  nmap('<leader>ti', require('lsp-inlayhints').toggle(), '[T]oggle [I]nlayhints')
   nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
   nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
   nmap('<leader>wl', function()
@@ -540,6 +542,8 @@ require("better_escape").setup {
   --   return vim.api.nvim_win_get_cursor(0)[2] > 1 and '<esc>l' or '<esc>'
   -- end,
 }
+
+require("lsp-inlayhints").setup()
 
 
 require("octo").setup()
