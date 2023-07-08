@@ -219,3 +219,15 @@
 (map! :leader
       (:prefix ("l" . "Lsp Menu")
       :desc "LSP Action" "a" #'lsp-execute-code-action))
+(map! :leader
+      (:prefix ("l" . "Lsp Menu")
+      :desc "Inline Hints Toggle" "i" #'lsp-inline-hints-mode))
+(use-package! lsp-rust
+  :config
+  (setq! lsp-rust-analyzer-cargo-watch-enable t
+         lsp-rust-analyzer-cargo-watch-command "clippy"
+         lsp-rust-analyzer-proc-macro-enable t
+         lsp-rust-analyzer-cargo-load-out-dirs-from-check t
+         lsp-rust-analyzer-inlay-hints-mode t
+         lsp-rust-analyzer-display-chaining-hints t
+         lsp-rust-analyzer-display-parameter-hints t))
