@@ -11,7 +11,9 @@ require('packer').startup(function(use)
   use 'andweeb/presence.nvim'
   use 'GustavoPrietoP/doom-themes.nvim'
   use { 'lvimuser/lsp-inlayhints.nvim' }
-  use { "ggandor/leap.nvim", config = function() require("leap").set_default_keymaps() end }
+  use { "folke/flash.nvim" }
+  --  use { "ggandor/leap.nvim", config = function() require("leap").set_default_keymaps() end }
+
   use { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
     requires = {
@@ -57,7 +59,7 @@ require('packer').startup(function(use)
       vim.g.doom_one_plugin_lspsaga = false
     end,
     config = function()
---      vim.cmd("colorscheme doom-one")
+      --      vim.cmd("colorscheme doom-one")
     end,
   })
   use { -- Autocompletion
@@ -139,6 +141,25 @@ require('packer').startup(function(use)
   })
   -- Debugging
   use 'nvim-lua/plenary.nvim'
+  use({
+    "folke/which-key.nvim",
+    config = function()
+      require("which-key").setup({})
+    end
+  })
+  use { "akinsho/toggleterm.nvim", tag = '*', config = function()
+    require("toggleterm").setup()
+  end }
+  use "natecraddock/workspaces.nvim"
+  use "mg979/vim-visual-multi"
+  use "ThePrimeagen/harpoon"
+  use 'mfussenegger/nvim-dap'
+  use "folke/neodev.nvim"
+  use "theHamsta/nvim-dap-virtual-text"
+  use "nvim-telescope/telescope-dap.nvim"
+  use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
+  use { "catppuccin/nvim", as = "catppuccin" }
+  use 'simrat39/rust-tools.nvim'
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
   local has_plugins, plugins = pcall(require, 'custom.plugins')
   if has_plugins then
@@ -255,6 +276,78 @@ require('lualine').setup {
 -- gcc gbc
 require('Comment').setup({
 })
+
+require('flash').setup({
+  opts = function(_, opts)
+    local function flash(prompt_bufnr)
+      require("flash").jump({
+        pattern = "^",
+        label = { after = { 0, 0 } },
+        search = {
+          mode = "search",
+          exclude = {
+            function(win)
+              return vim.bo[vim.api.nvim_win_get_buf(win)].filetype ~= "TelescopeResults"
+            end,
+          },
+        },
+        action = function(match)
+          local picker = require("telescope.actions.state").get_current_picker(prompt_bufnr)
+          picker:set_selection(match.pos[1] - 1)
+        end,
+      })
+    end
+    opts.defaults = vim.tbl_deep_extend("force", opts.defaults or {}, {
+      mappings = {
+        n = { s = flash },
+        i = { ["<c-s>"] = flash },
+      },
+    })
+  end,
+  keys = {
+    {
+      "s",
+      mode = { "n", "x", "o" },
+      function()
+        require("flash").jump()
+      end,
+      desc = "Flash",
+    },
+    {
+      "S",
+      mode = { "n", "o", "x" },
+      function()
+        require("flash").treesitter()
+      end,
+      desc = "Flash Treesitter",
+    },
+    {
+      "r",
+      mode = "o",
+      function()
+        require("flash").remote()
+      end,
+      desc = "Remote Flash",
+    },
+    {
+      "R",
+      mode = { "o", "x" },
+      function()
+        require("flash").treesitter_search()
+      end,
+      desc = "Flash Treesitter Search",
+    },
+    {
+      "<c-s>",
+      mode = { "c" },
+      function()
+        require("flash").toggle()
+      end,
+      desc = "Toggle Flash Search",
+    },
+  },
+})
+
 
 -- Enable `lukas-reineke/indent-blankline.nvim`
 -- See `:help indent_blankline.txt`
@@ -441,6 +534,11 @@ local on_attach = function(client, bufnr)
   end, { desc = 'Format current buffer with LSP' })
 end
 
+require("neodev").setup({
+  -- add any options here, or leave empty to use the default settings
+  library = { plugins = { "nvim-dap-ui" }, types = true },
+})
+require("dapui").setup()
 -- Setup mason so it can manage external tooling
 require('mason').setup()
 
@@ -533,10 +631,10 @@ require("gruvbox").setup({
 })
 
 require("better_escape").setup {
-  mapping = { "jk", "jj", "fj" },  -- a table with mappings to use
-  timeout = vim.o.timeoutlen,      -- the jkjkjkjkjkjkjjjjtime in which the keys must be hit in ms. Use option timeoutlen by default
-  clear_empty_lines = false,       -- clear line after escaping if there is only whitespace
-  keys = "<Esc>",                  -- keys used for escaping, if it is a function will use the result everytime
+  mapping = { "jk", "jj", "fj" }, -- a table with mappings to use
+  timeout = vim.o.timeoutlen,     -- the jkjkjkjkjkjkjjjjtime in which the keys must be hit in ms. Use option timeoutlen by default
+  clear_empty_lines = false,      -- clear line after escaping if there is only whitespace
+  keys = "<Esc>",                 -- keys used for escaping, if it is a function will use the result everytime
   -- example(recommended)
   -- keys = function()
   --   return vim.api.nvim_win_get_cursor(0)[2] > 1 and '<esc>l' or '<esc>'

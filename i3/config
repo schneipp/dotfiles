@@ -66,10 +66,10 @@ bindsym Mod4+n exec "variety -n"
 # bindsym Mod4+d exec --no-startup-id i3-dmenu-desktop
 
 # change focus
-bindsym Mod4+$left focus left
-bindsym Mod4+$down focus down
-bindsym Mod4+$up focus up
-bindsym Mod4+$right focus right
+bindsym Mod4+Shift+$left focus left
+bindsym Mod4+Shift+$down focus down
+bindsym Mod4+Shift+$up focus up
+bindsym Mod4+Shift+$right focus right
 
 # alternatively, you can use the cursor keys:
 bindsym Mod4+Left focus left
@@ -78,10 +78,10 @@ bindsym Mod4+Up focus up
 bindsym Mod4+Right focus right
 
 # move focused window
-bindsym Mod4+Shift+$left move left
-bindsym Mod4+Shift+$down move down
-bindsym Mod4+Shift+$up move up
-bindsym Mod4+Shift+$right move right
+#bindsym Mod4+Shift+$left move left
+#bindsym Mod4+Shift+$down move down
+#bindsym Mod4+Shift+$up move up
+#bindsym Mod4+Shift+$right move right
 
 # alternatively, you can use the cursor keys:
 bindsym Mod4+Shift+Left move left
