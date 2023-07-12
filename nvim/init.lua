@@ -10,10 +10,22 @@ require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
   use 'andweeb/presence.nvim'
   use 'GustavoPrietoP/doom-themes.nvim'
+  use { "alexghergh/nvim-tmux-navigation", config = function()
+    require 'nvim-tmux-navigation'.setup {
+      disable_when_zoomed = true,       -- defaults to false
+      keybindings = {
+        left = "<C-h>",
+        down = "<C-j>",
+        up = "<C-k>",
+        right = "<C-l>",
+        -- last_active = "<C-\\>",
+        -- next = "<C-Space>",
+      }
+    }
+  end
+  }
   use { 'lvimuser/lsp-inlayhints.nvim' }
   use { "folke/flash.nvim" }
-  --  use { "ggandor/leap.nvim", config = function() require("leap").set_default_keymaps() end }
-
   use { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
     requires = {
@@ -247,6 +259,7 @@ cmp.setup {
       luasnip.lsp_expand(args.body)
     end,
   },
+
   mapping = cmp.mapping.preset.insert {
     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
