@@ -21,7 +21,7 @@ vim.keymap.set({ 'n' }, 'N', 'Nzzzv')
 vim.keymap.set({ 'n' }, 'J', 'mzJ`z')
 vim.keymap.set({ 'n' }, '<CR>', 'ciw')
 -- Insane remapping of save to hammer
-vim.keymap.set({ 'n' }, '<leader><leader>', ':w<CR>')
+-- vim.keymap.set({ 'n' }, '<leader><leader>', ':w<CR>')
 vim.keymap.set({ 'i' }, '<C-j>', ':m \'>+1<CR>gv=gv')
 vim.cmd [[set clipboard=unnamedplus]]
 require("telescope").load_extension('workspaces')
