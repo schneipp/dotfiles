@@ -38,7 +38,6 @@ local on_attach = function(client, bufnr)
   require("lsp-inlayhints").on_attach(client, bufnr)
 
   nmap('<leader>lr', vim.lsp.buf.rename, '[L]sp [R]ename')
-  nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
   nmap('<leader>la', vim.lsp.buf.code_action, '[L]sp Code[A]ction')
 
   nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')

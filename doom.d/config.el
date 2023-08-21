@@ -222,6 +222,9 @@
 (map! :leader
       (:prefix ("l" . "Lsp Menu")
       :desc "Inline Hints Toggle" "i" #'lsp-inline-hints-mode))
+(map! :leader
+      (:prefix ("e" . "Explore Menu")
+      :desc "Toggle Treemacs" "e" #'treemacs))
 (use-package! lsp-rust
   :config
   (setq! lsp-rust-analyzer-cargo-watch-enable t
@@ -231,3 +234,8 @@
          lsp-rust-analyzer-inlay-hints-mode t
          lsp-rust-analyzer-display-chaining-hints t
          lsp-rust-analyzer-display-parameter-hints t))
+
+;; (lsp-headerline-breadcrumb-mode t)
+
+(setq! beacon-size 80
+       beacon-blink-when-point-moves-vertically 8)

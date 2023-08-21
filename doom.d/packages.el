@@ -61,3 +61,9 @@
 
 (package! tree-sitter)
 (package! tree-sitter-langs)
+
+;;flashy cursor
+(package! beacon)
+
+(package! ob-async)
+(package! epresent)
