@@ -30,7 +30,7 @@ vim.keymap.set('n', '<leader>ss', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
     winblend = 10,
-    previewer = false,
+    previewer = true,
   })
 end, { desc = '[/] Fuzzily search in current buffer]' })
 
@@ -41,7 +41,7 @@ vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc
 vim.keymap.set('n', '<leader>fd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>fs', require('telescope.builtin').lsp_document_symbols, { desc = '[F]ind [S]ymbols' })
 vim.keymap.set('n', '<leader>ps', require('telescope.builtin').live_grep)
-vim.keymap.set('n', '<leader><leader>', require('telescope.builtin').live_grep)
+vim.keymap.set('n', '<leader><leader>', require('telescope.builtin').find_files)
 vim.keymap.set('n', '<leader>ft', require('telescope.builtin').live_grep)
 vim.keymap.set('n', '<leader>bb', require('telescope.builtin').buffers)
 vim.keymap.set('n', '<leader>lf', ':lua vim.lsp.buf.format()<CR>')
