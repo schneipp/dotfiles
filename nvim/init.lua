@@ -50,7 +50,7 @@ require('packer').startup(function(use)
       vim.g.doom_one_pumblend_transparency = 20
       vim.g.doom_one_plugin_neorg = true
       vim.g.doom_one_plugin_barbar = false
-      vim.g.doom_one_plugin_telescope = false
+      vim.g.doom_one_plugin_telescope = true
       vim.g.doom_one_plugin_neogit = true
       vim.g.doom_one_plugin_nvim_tree = true
       vim.g.doom_one_plugin_dashboard = true
@@ -218,7 +218,7 @@ vim.cmd [[colorscheme monokai_soda]]
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
 vim.g.mapleader = ' '
-vim.g.maplocalleader = ' '
+vim.g.mapocalleader = ' '
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
