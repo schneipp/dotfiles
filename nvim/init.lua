@@ -26,6 +26,12 @@ require('packer').startup(function(use)
   }
   use { 'lvimuser/lsp-inlayhints.nvim' }
   use { "folke/flash.nvim" }
+  -- Treesitter playground
+  use { 'nvim-treesitter/playground', setup = function()
+    vim.cmd [[
+      nnoremap <leader>tp :TSPlaygroundToggle<CR>
+    ]]
+  end }
   use { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
     requires = {
@@ -90,6 +96,8 @@ require('packer').startup(function(use)
   use 'tpope/vim-rhubarb'
   use 'lewis6991/gitsigns.nvim'
   use 'christoomey/vim-tmux-navigator'
+  use 'RishabhRD/popfix'
+  use 'RishabhRD/nvim-cheat.sh'
   use 'navarasu/onedark.nvim'               -- Theme inspired by Atom
   use 'nvim-lualine/lualine.nvim'           -- Fancier statusline
   use 'lukas-reineke/indent-blankline.nvim' -- Add indentation guides even on blank lines
@@ -113,7 +121,13 @@ require('packer').startup(function(use)
   -- use { 'github/copilot.vim' }
   use { "zbirenbaum/copilot.lua" }
   use { 'mhartington/oceanic-next' }
-  use { 'tanvirtin/monokai.nvim' }
+--  use { 'tanvirtin/monokai.nvim' }
+  use {
+  "loctvl842/monokai-pro.nvim",
+  config = function()
+    require("monokai-pro").setup()
+  end
+  }
   use { "tpope/vim-fugitive" }
   use { "pwntester/octo.nvim" }
   use { 'xiyaowong/nvim-transparent' }
@@ -158,6 +172,13 @@ require('packer').startup(function(use)
   use 'mfussenegger/nvim-dap'
   use "folke/neodev.nvim"
   use "theHamsta/nvim-dap-virtual-text"
+  use {
+    'chipsenkbeil/distant.nvim',
+    branch = 'v0.3',
+    config = function()
+        require('distant'):setup()
+    end
+  }
   use "nvim-telescope/telescope-dap.nvim"
   use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
   use { "catppuccin/nvim", as = "catppuccin" }
@@ -214,7 +235,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = 'yes'
 -- Set colorscheme
 vim.o.termguicolors = true
-vim.cmd [[colorscheme monokai_soda]]
+vim.cmd [[colorscheme monokai-pro-spectrum]]
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
 vim.g.mapleader = ' '
