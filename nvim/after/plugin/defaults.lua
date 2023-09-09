@@ -40,6 +40,7 @@ vim.keymap.set('n', '<leader>di', ":lua require'dap'.stop()<CR>", { desc = 'Stop
 vim.keymap.set('n', '<leader>ds', ":lua require'dap'.stop()<CR>:lua require'dapui'.toggle()<CR>",
   { desc = 'Stop and Close UI' })
 vim.keymap.set('n', '<leader>e', ":NeoTreeFocusToggle<CR>", { desc = 'NeoTree Explorer' })
+vim.keymap.set('n', '<leader>hc', ":Cheat<CR>", { desc = 'Cheat' })
 vim.keymap.set('n', '<C-h>', "<cmd> TmuxNavigateLeft<CR>", { desc = 'Window Left' })
 vim.keymap.set('n', '<C-l>', "<cmd> TmuxNavigateRight<CR>", { desc = 'Window Right' })
 vim.keymap.set('n', '<C-j>', "<cmd> TmuxNavigateDown<CR>", { desc = 'Window Down' })
