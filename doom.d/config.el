@@ -77,12 +77,12 @@
 
 
 (custom-set-faces
-  '(org-level-1 ((t (:inherit outline-1 :height 1.2))))
-  '(org-level-2 ((t (:inherit outline-2 :height 1.1))))
-  '(org-level-3 ((t (:inherit outline-3 :height 1.0))))
-  '(org-level-4 ((t (:inherit outline-4 :height 0.9))))
-  '(org-level-5 ((t (:inherit outline-5 :height 0.8))))
-)
+ '(org-level-1 ((t (:inherit outline-1 :height 1.2))))
+ '(org-level-2 ((t (:inherit outline-2 :height 1.1))))
+ '(org-level-3 ((t (:inherit outline-3 :height 1.0))))
+ '(org-level-4 ((t (:inherit outline-4 :height 0.9))))
+ '(org-level-5 ((t (:inherit outline-5 :height 0.8))))
+ )
 
 
 
@@ -106,25 +106,25 @@
 
 (setq elfeed-feeds (quote
                     (("https://www.reddit.com/r/emacs.rss" reddit linux)
-                    ("https://rss.slashdot.org/Slashdot/slashdotMain" slashdot linux)
+                     ("https://rss.slashdot.org/Slashdot/slashdotMain" slashdot linux)
                      ("https://www.reddit.com/r/commandline.rss" reddit linux)
                      ("https://www.reddit.com/r/unixporn.rss" reddit linux)
                      )))
 (use-package! websocket
-    :after org-roam)
+  :after org-roam)
 
 ;; copied straight from the github readme
 (use-package! org-roam-ui
-    :after org-roam ;; or :after org
-;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
-;;         a hookable mode anymore, you're advised to pick something yourself
-;;         if you don't care about startup time, use
-;;  :hook (after-init . org-roam-ui-mode)
-    :config
-    (setq org-roam-ui-sync-theme t
-          org-roam-ui-follow t
-          org-roam-ui-update-on-save t
-          org-roam-ui-open-on-start t))
+  :after org-roam ;; or :after org
+  ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+  ;;         a hookable mode anymore, you're advised to pick something yourself
+  ;;         if you don't care about startup time, use
+  ;;  :hook (after-init . org-roam-ui-mode)
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
 
 
 (require 'ob-async)
@@ -145,34 +145,34 @@
         ;; ex. of org-link-abbrev-alist in action
         ;; [[arch-wiki:Name_of_Page][Description]]
         org-link-abbrev-alist    ; This overwrites the default Doom org-link-abbrev-list
-          '(("google" . "http://www.google.com/search?q=")
-            ("arch-wiki" . "https://wiki.archlinux.org/index.php/")
-            ("ddg" . "https://duckduckgo.com/?q=")
-            ("wiki" . "https://en.wikipedia.org/wiki/"))
+        '(("google" . "http://www.google.com/search?q=")
+          ("arch-wiki" . "https://wiki.archlinux.org/index.php/")
+          ("ddg" . "https://duckduckgo.com/?q=")
+          ("wiki" . "https://en.wikipedia.org/wiki/"))
         org-table-convert-region-max-lines 20000
         org-todo-keywords        ; This overwrites the default Doom org-todo-keywords
-          '((sequence
-             "TODO(t)"           ; A task that is ready to be tackled
-             "IDEA(i)"           ; Ideas
-             "PROJ(p)"           ; A project that contains other tasks
-             "VIDEO(v)"          ; Video assignments
-             "WAIT(w)"           ; Something is holding up this task
-             "|"                 ; The pipe necessary to separate "active" states and "inactive" states
-             "DONE(d)"           ; Task has been completed
-             "CANCELLED(c)" )))) ; Task has been cancelled
+        '((sequence
+           "TODO(t)"           ; A task that is ready to be tackled
+           "IDEA(i)"           ; Ideas
+           "PROJ(p)"           ; A project that contains other tasks
+           "VIDEO(v)"          ; Video assignments
+           "WAIT(w)"           ; Something is holding up this task
+           "|"                 ; The pipe necessary to separate "active" states and "inactive" states
+           "DONE(d)"           ; Task has been completed
+           "CANCELLED(c)" )))) ; Task has been cancelled
 
 (after! org
   (setq org-agenda-files '("~/org/agenda.org")))
 
 (setq
-   ;; org-fancy-priorities-list '("[A]" "[B]" "[C]")
-   ;; org-fancy-priorities-list '("❗" "[B]" "[C]")
-   org-fancy-priorities-list '("🟥" "🟧" "🟨")
-   org-priority-faces
-   '((?A :foreground "#ff6c6b" :weight bold)
-     (?B :foreground "#98be65" :weight bold)
-     (?C :foreground "#c678dd" :weight bold))
-   org-agenda-block-separator 8411)
+ ;; org-fancy-priorities-list '("[A]" "[B]" "[C]")
+ ;; org-fancy-priorities-list '("❗" "[B]" "[C]")
+ org-fancy-priorities-list '("🟥" "🟧" "🟨")
+ org-priority-faces
+ '((?A :foreground "#ff6c6b" :weight bold)
+   (?B :foreground "#98be65" :weight bold)
+   (?C :foreground "#c678dd" :weight bold))
+ org-agenda-block-separator 8411)
 
 (setq org-agenda-custom-commands
       '(("v" "A better agenda view"
@@ -207,24 +207,25 @@
 ;;; Tree Sitter
 
 (use-package! tree-sitter
-   :hook (prog-mode . turn-on-tree-sitter-mode)
-   :hook (tree-sitter-after-on . tree-sitter-hl-mode)
-   :config
-   (require 'tree-sitter-langs)
-   ;; This makes every node a link to a section of code
-   (setq tree-sitter-debug-jump-buttons t
-         ;; and this highlights the entire sub tree in your code
-         tree-sitter-debug-highlight-jump-region t))
+  :hook (prog-mode . turn-on-tree-sitter-mode)
+  :hook (tree-sitter-after-on . tree-sitter-hl-mode)
+  :config
+  (require 'tree-sitter-langs)
+  ;; This makes every node a link to a section of code
+  (setq tree-sitter-debug-jump-buttons t
+        ;; and this highlights the entire sub tree in your code
+        tree-sitter-debug-highlight-jump-region t))
 
-(map! :leader
-      (:prefix ("l" . "Lsp Menu")
-      :desc "LSP Action" "a" #'lsp-execute-code-action))
-(map! :leader
-      (:prefix ("l" . "Lsp Menu")
-      :desc "Inline Hints Toggle" "i" #'lsp-inline-hints-mode))
+(map! :leader (:prefix ("l" . "Lsp/Lump Menu")
+                       (:desc "LSP Action" "a" #'lsp-execute-code-action)
+                       (:desc "Cht.sh" "c" #'cheat-sh-search-topic)
+                       (:desc "Inline Hints Toggle" "i" #'lsp-inline-hints-mode)
+                       (:desc "Format Buffer" "f" #'+format/buffer)
+                       )
+      )
 (map! :leader
       (:prefix ("e" . "Explore Menu")
-      :desc "Toggle Treemacs" "e" #'treemacs))
+       :desc "Toggle Treemacs" "e" #'treemacs))
 (use-package! lsp-rust
   :config
   (setq! lsp-rust-analyzer-cargo-watch-enable t
