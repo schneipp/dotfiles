@@ -40,7 +40,7 @@ require('packer').startup(function(use)
       'williamboman/mason-lspconfig.nvim',
 
       -- Useful status updates for LSP
-      'j-hui/fidget.nvim',
+      -- 'j-hui/fidget.nvim',
     },
   }
   use({
@@ -131,7 +131,7 @@ require('packer').startup(function(use)
   }
   use { "tpope/vim-fugitive" }
   use { "pwntester/octo.nvim" }
-  use { 'xiyaowong/nvim-transparent' }
+  -- use { 'xiyaowong/nvim-transparent' }
   use { 'nvim-telescope/telescope-ui-select.nvim' }
   use { "MunifTanjim/nui.nvim" }
   use({
@@ -173,13 +173,13 @@ require('packer').startup(function(use)
   use 'mfussenegger/nvim-dap'
   use "folke/neodev.nvim"
   use "theHamsta/nvim-dap-virtual-text"
-  use {
-    'chipsenkbeil/distant.nvim',
-    branch = 'v0.3',
-    config = function()
-        require('distant'):setup()
-    end
-  }
+  -- use {
+  --   'chipsenkbeil/distant.nvim',
+  --   branch = 'v0.3',
+  --   config = function()
+  --       require('distant'):setup()
+  --   end
+  -- }
   use "nvim-telescope/telescope-dap.nvim"
   use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
   use { "catppuccin/nvim", as = "catppuccin" }
@@ -236,7 +236,8 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = 'yes'
 -- Set colorscheme
 vim.o.termguicolors = true
-vim.cmd [[colorscheme monokai-pro-spectrum]]
+vim.cmd [[colorscheme catppuccin-mocha]]
+-- vim.cmd [[colorscheme monokai-pro-spectrum]]
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
 vim.g.mapleader = ' '
@@ -299,3 +300,21 @@ cmp.setup {
 vim.o.background = "dark"
 
 -- The line beneath this is called `modeline`. See `:help modeline`
+--
+-- Configure netrw to be less annoying
+vim.g.netrw_banner = 0
+vim.g.netrw_liststyle = 3 -- Tree view
+-- vim.g.netrw_browse_split = 4 -- Open in previous window
+-- vim.g.netrw_altv = 1 -- Open splits to the right
+-- vim.g.netrw_winsize = 25 -- Size of netrw window
+vim.g.netrw_localrmdir = 'rm -r' -- Delete recursively
+vim.g.netrw_keepdir = 0 -- Delete empty directories
+vim.g.netrw_sizestyle = 'H' -- Human-readable file sizes
+vim.g.netrw_list_hide = '.*.swp$' -- Hide swap files
+vim.g.netrw_list_hide = '.git$' -- Hide git files
+vim.g.netrw_list_hide = '.gitignore$' -- Hide git files
+vim.g.netrw_list_hide = '.gitmodules$' -- Hide git files
+vim.g.netrw_list_hide = '.DS_Store$' -- Hide git files
+vim.g.netrw_list_hide = '.gitkeep$' -- Hide git files
+vim.g.netrw_list_hide = '.gitconfig$' -- Hide git files
+vim.g.netrw_list_hide = '.gitattributes$' -- Hide git files

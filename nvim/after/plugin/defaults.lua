@@ -7,6 +7,7 @@ vim.keymap.set('n', '<leader>k', require('harpoon.ui').nav_prev, { desc = 'Harpo
 vim.keymap.set('n', '<leader>h', require('harpoon.ui').toggle_quick_menu, { desc = 'Harpoon Navigation' })
 vim.keymap.set('n', '<leader>ha', require('harpoon.mark').add_file, { desc = 'Harpoon Add File' })
 
+
 vim.keymap.set({ 'v' }, '<S-j>', ':m \'>+1<CR>gv=gv')
 vim.keymap.set({ 'v' }, '<S-k>', ':m \'<-2<CR>gv=gv')
 -- keep selection in visual mode when indenting
@@ -37,8 +38,7 @@ vim.keymap.set('n', '<leader>dd', ":lua require'dap'.continue()<CR>", { desc = '
 vim.keymap.set('n', '<leader>dc', ":lua require'dap'.step_over()<CR>", { desc = 'Step Over' })
 vim.keymap.set('n', '<leader>di', ":lua require'dap'.step_into()<CR>", { desc = 'Step Into' })
 vim.keymap.set('n', '<leader>di', ":lua require'dap'.stop()<CR>", { desc = 'Stop' })
-vim.keymap.set('n', '<leader>ds', ":lua require'dap'.stop()<CR>:lua require'dapui'.toggle()<CR>",
-  { desc = 'Stop and Close UI' })
+vim.keymap.set('n', '<leader>ds', ":lua require'dap'.stop()<CR>:lua require'dapui'.toggle()<CR>", { desc = 'Stop and Close UI' })
 vim.keymap.set('n', '<leader>e', ":NeoTreeFocusToggle<CR>", { desc = 'NeoTree Explorer' })
 vim.keymap.set('n', '<leader>hc', ":Cheat<CR>", { desc = 'Cheat' })
 vim.keymap.set('n', '<C-h>', "<cmd> TmuxNavigateLeft<CR>", { desc = 'Window Left' })
