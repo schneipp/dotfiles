@@ -38,16 +38,17 @@ vim.keymap.set('n', '<leader>dd', ":lua require'dap'.continue()<CR>", { desc = '
 vim.keymap.set('n', '<leader>dc', ":lua require'dap'.step_over()<CR>", { desc = 'Step Over' })
 vim.keymap.set('n', '<leader>di', ":lua require'dap'.step_into()<CR>", { desc = 'Step Into' })
 vim.keymap.set('n', '<leader>di', ":lua require'dap'.stop()<CR>", { desc = 'Stop' })
-vim.keymap.set('n', '<leader>ds', ":lua require'dap'.stop()<CR>:lua require'dapui'.toggle()<CR>", { desc = 'Stop and Close UI' })
+vim.keymap.set('n', '<leader>ds', ":lua require'dap'.stop()<CR>:lua require'dapui'.toggle()<CR>",
+  { desc = 'Stop and Close UI' })
 vim.keymap.set('n', '<leader>e', ":NeoTreeFocusToggle<CR>", { desc = 'NeoTree Explorer' })
 vim.keymap.set('n', '<leader>hc', ":Cheat<CR>", { desc = 'Cheat' })
 vim.keymap.set('n', '<C-h>', "<cmd> TmuxNavigateLeft<CR>", { desc = 'Window Left' })
 vim.keymap.set('n', '<C-l>', "<cmd> TmuxNavigateRight<CR>", { desc = 'Window Right' })
 vim.keymap.set('n', '<C-j>', "<cmd> TmuxNavigateDown<CR>", { desc = 'Window Down' })
 vim.keymap.set('n', '<C-k>', "<cmd> TmuxNavigateUp<CR>", { desc = 'Window Up' })
-vim.keymap.set({'n', 'x', 'o'}, 'H', '^')
-vim.keymap.set({'n', 'x', 'o'}, 'L', '$')
-
+vim.keymap.set({ 'n', 'x', 'o' }, 'H', '^')
+vim.keymap.set({ 'n', 'x', 'o' }, 'L', '$')
+vim.keymap.set('n', '<leader>nrn', ":ObsidianQuickSwitch<CR>", { desc = 'Toggle ObsidianQuickSwitch' })
 
 require('dapui').setup()
 
@@ -94,7 +95,7 @@ dap.configurations.rust = {
     -- If you get an "Operation not permitted" error using this, try disabling YAMA:
     --  echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     name = "Attach to process",
-    type = 'lldb',   -- Adjust this to match your adapter name (`dap.adapters.<name>`)
+    type = 'lldb', -- Adjust this to match your adapter name (`dap.adapters.<name>`)
     request = 'attach',
     pid = require('dap.utils').pick_process,
     args = {},

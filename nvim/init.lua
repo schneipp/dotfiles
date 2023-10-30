@@ -12,7 +12,7 @@ require('packer').startup(function(use)
   use 'GustavoPrietoP/doom-themes.nvim'
   use { "alexghergh/nvim-tmux-navigation", config = function()
     require 'nvim-tmux-navigation'.setup {
-      disable_when_zoomed = true,       -- defaults to false
+      disable_when_zoomed = true, -- defaults to false
       keybindings = {
         left = "<C-h>",
         down = "<C-j>",
@@ -43,6 +43,31 @@ require('packer').startup(function(use)
       -- 'j-hui/fidget.nvim',
     },
   }
+  use({
+    "epwalsh/obsidian.nvim",
+    requires = {
+      -- Required.
+      "nvim-lua/plenary.nvim",
+
+      -- see below for full list of optional dependencies 👇
+    },
+    config = function()
+      require("obsidian").setup({
+        workspaces = {
+          {
+            name = "personal",
+            path = "~/vaults/personal",
+          },
+          {
+            name = "work",
+            path = "~/vaults/work",
+          },
+        },
+
+        -- see below for full list of options 👇
+      })
+    end,
+  })
   use({
     'NTBBloodbath/doom-one.nvim',
     setup = function()
@@ -122,12 +147,12 @@ require('packer').startup(function(use)
   -- use { 'github/copilot.vim' }
   use { "zbirenbaum/copilot.lua" }
   use { 'mhartington/oceanic-next' }
---  use { 'tanvirtin/monokai.nvim' }
+  --  use { 'tanvirtin/monokai.nvim' }
   use {
-  "loctvl842/monokai-pro.nvim",
-  config = function()
-    require("monokai-pro").setup()
-  end
+    "loctvl842/monokai-pro.nvim",
+    config = function()
+      require("monokai-pro").setup()
+    end
   }
   use { "tpope/vim-fugitive" }
   use { "pwntester/octo.nvim" }
@@ -307,14 +332,14 @@ vim.g.netrw_liststyle = 3 -- Tree view
 -- vim.g.netrw_browse_split = 4 -- Open in previous window
 -- vim.g.netrw_altv = 1 -- Open splits to the right
 -- vim.g.netrw_winsize = 25 -- Size of netrw window
-vim.g.netrw_localrmdir = 'rm -r' -- Delete recursively
-vim.g.netrw_keepdir = 0 -- Delete empty directories
-vim.g.netrw_sizestyle = 'H' -- Human-readable file sizes
-vim.g.netrw_list_hide = '.*.swp$' -- Hide swap files
-vim.g.netrw_list_hide = '.git$' -- Hide git files
-vim.g.netrw_list_hide = '.gitignore$' -- Hide git files
-vim.g.netrw_list_hide = '.gitmodules$' -- Hide git files
-vim.g.netrw_list_hide = '.DS_Store$' -- Hide git files
-vim.g.netrw_list_hide = '.gitkeep$' -- Hide git files
-vim.g.netrw_list_hide = '.gitconfig$' -- Hide git files
+vim.g.netrw_localrmdir = 'rm -r'          -- Delete recursively
+vim.g.netrw_keepdir = 0                   -- Delete empty directories
+vim.g.netrw_sizestyle = 'H'               -- Human-readable file sizes
+vim.g.netrw_list_hide = '.*.swp$'         -- Hide swap files
+vim.g.netrw_list_hide = '.git$'           -- Hide git files
+vim.g.netrw_list_hide = '.gitignore$'     -- Hide git files
+vim.g.netrw_list_hide = '.gitmodules$'    -- Hide git files
+vim.g.netrw_list_hide = '.DS_Store$'      -- Hide git files
+vim.g.netrw_list_hide = '.gitkeep$'       -- Hide git files
+vim.g.netrw_list_hide = '.gitconfig$'     -- Hide git files
 vim.g.netrw_list_hide = '.gitattributes$' -- Hide git files
