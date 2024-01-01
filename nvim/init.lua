@@ -198,13 +198,13 @@ require('packer').startup(function(use)
   use 'mfussenegger/nvim-dap'
   use "folke/neodev.nvim"
   use "theHamsta/nvim-dap-virtual-text"
-  -- use {
-  --   'chipsenkbeil/distant.nvim',
-  --   branch = 'v0.3',
-  --   config = function()
-  --       require('distant'):setup()
-  --   end
-  -- }
+  use {
+    'chipsenkbeil/distant.nvim',
+    branch = 'v0.3',
+    config = function()
+        require('distant'):setup()
+    end
+  }
   use "nvim-telescope/telescope-dap.nvim"
   use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
   use { "catppuccin/nvim", as = "catppuccin" }
