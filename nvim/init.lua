@@ -323,6 +323,7 @@ cmp.setup {
   },
 }
 vim.o.background = "dark"
+vim.o.conceallevel = 2
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 --
