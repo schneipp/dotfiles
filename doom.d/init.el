@@ -95,7 +95,7 @@
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
        lookup              ; navigate your code and its documentation
-       lsp               ; M-x vscode
+       (lsp +peek)              ; M-x vscode
        magit             ; a git porcelain for Emacs
        ;;make              ; run make tasks from Emacs
        ;;pass              ; password manager for nerds
@@ -140,9 +140,9 @@
        ;;(haskell +lsp)    ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ; a language you can depend on
-       json              ; At least it ain't XML
+       (json  +lsp)             ; At least it ain't XML
        ;;(java +lsp)       ; the poster child for carpal tunnel syndrome
-       (javascript +lsp)       ; all(hope(abandon(ye(who(enter(here))))))
+       (javascript +lsp +tide)       ; all(hope(abandon(ye(who(enter(here))))))
        ;;julia             ; a better, faster MATLAB
        ;;kotlin            ; a better, slicker Java(Script)
        ;;latex             ; writing papers in Emacs has never been so fun
@@ -154,10 +154,10 @@
        ;;nix               ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
        (org
-                +journal             ; enable org journal
-                +roam2               ; create a personal wiki
-                +pretty              ; replace asterisks with pretty org bullets
-                +publish)            ; create static websites with org
+        +journal             ; enable org journal
+        +roam2               ; create a personal wiki
+        +pretty              ; replace asterisks with pretty org bullets
+        +publish)            ; create static websites with org
 
        (php +lsp)              ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
@@ -177,7 +177,7 @@
        ;;solidity          ; do you need a blockchain? No.
        ;;swift             ; who asked for emoji variables?
        ;;terra             ; Earth and Moon in alignment for performance.
-       web               ; the tubes
+       (web +lsp)              ; the tubes
        yaml              ; JSON, but readable
        ;;zig               ; C, but simpler
 
@@ -195,7 +195,7 @@
        ;;twitter           ; twitter client https://twitter.com/vnought
 
        :config
-;;       literate
+       ;;       literate
        (default +bindings +smartparens))
 
 ;;(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
