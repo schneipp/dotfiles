@@ -1,0 +1,28 @@
+#start warp terminal or create new window if not exist
+cmd - return : osascript /Users/rams/.config/skhd/new-iterm-window.scpt
+
+#start and focus terminal
+
+cmd - h : yabai -m window --focus west
+cmd - l : yabai -m window --focus east 
+cmd - j : yabai -m window --focus south 
+cmd - k : yabai -m window --focus north
+
+#prpare to split v
+cmd + shift - v : yabai -m window --insert east
+cmd + shift - h : yabai -m window --insert south
+
+
+cmd + shift - 1 : yabai -m window --space 1
+cmd + shift - 2 : yabai -m window --space 2
+cmd + shift - 3 : yabai -m window --space 3
+cmd + shift - 4 : yabai -m window --space 4
+cmd + shift - 5 : yabai -m window --space 5
+cmd + shift - 6 : yabai -m window --space 6
+
+cmd - 1 : yabai -m space --focus 1
+cmd - 2 : yabai -m space --focus 2
+cmd - 3 : yabai -m space --focus 3
+cmd - 4 : yabai -m space --focus 4
+cmd - 5 : yabai -m space --focus 5
+cmd - 6 : yabai -m space --focus 6

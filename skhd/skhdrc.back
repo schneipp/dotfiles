@@ -1,0 +1,46 @@
+# altifying the alt key to match i3's default alt key (Super/Command)
+# Change "alt" to "alt" if you prefer the Alt key as the alt key.
+
+alt - e : yabai -m space --layout bsp
+alt - s : yabai -m space --layout stack
+
+alt - down : yabai -m window --focus stack.next || yabai -m window --focus south
+alt - up : yabai -m window --focus stack.prev || yabai -m window --focus north
+alt - h  : yabai -m window --focus west
+alt - l  : yabai -m window --focus east 
+alt - j  : yabai -m window --focus south 
+alt - k  : yabai -m window --focus north
+
+ctrl - 1 : yabai -m space --focus 1
+ctrl - 2 : yabai -m space --focus 2
+ctrl - 3 : yabai -m space --focus 3
+ctrl - 4 : yabai -m space --focus 4
+ctrl - 5 : yabai -m space --focus 5
+ctrl - 6 : yabai -m space --focus 6
+
+alt + shift - 2 : yabai -m window --space next
+alt + shift - 1 : yabai -m window --space prev
+
+alt + shift - 1 : yabai -m window --space 1
+alt + shift - 2 : yabai -m window --space 2
+alt + shift - 3 : yabai -m window --space 3
+alt + shift - 4 : yabai -m window --space 4
+alt + shift - 5 : yabai -m window --space 5
+alt + shift - 6 : yabai -m window --space 6
+
+alt - f : yabai -m window --toggle maximize
+
+ctrl + alt + cmd - r : launchctl kickstart -k "gui/${UID}/homebrew.mxcl.yabai"
+
+ctrl + alt - 1 : yabai -m window --space  1; yabai -m space --focus 1
+ctrl + alt - 2 : yabai -m window --space  2; yabai -m space --focus 2
+ctrl + alt - 3 : yabai -m window --space  3; yabai -m space --focus 3
+ctrl + alt - 4 : yabai -m window --space  4; yabai -m space --focus 4
+ctrl + alt - 5 : yabai -m window --space  5; yabai -m space --focus 5
+ctrl + alt - 6 : yabai -m window --space  6; yabai -m space --focus 6
+ctrl + alt - 7 : yabai -m window --space  7; yabai -m space --focus 7
+ctrl + alt - 8 : yabai -m window --space  8; yabai -m space --focus 8
+ctrl + alt - 9 : yabai -m window --space  9; yabai -m space --focus 9
+ctrl + alt - 0 : yabai -m window --space 10; yabai -m space --focus 10
+
+cmd + return : /Applications/Iterm.app/Contents/MacOS/iTerm2
