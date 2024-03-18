@@ -1,5 +1,5 @@
 #start warp terminal or create new window if not exist
-cmd - return : osascript /Users/rams/.config/skhd/new-iterm-window.scpt
+cmd + shift - return : osascript /Users/rams/.config/skhd/new-iterm-window.scpt
 
 #start and focus terminal
 
