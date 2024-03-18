@@ -21,8 +21,8 @@ yabai -m rule --add app="^Google Chrome|Firefox|Opera$" space=1
 # Text editors
 yabai -m rule --add app="^(Code|RStudio|Emacs)$" space=2
 # Jetbrains apps
-apps="^(IntelliJ IDEA|WebStorm|RubyMine|PyCharm|DataGrip|RustRover|Rider)$"
-yabai -m rule --add app="${apps}" space=3  manage=off
+#apps="^(IntelliJ IDEA|WebStorm|RubyMine|PyCharm|DataGrip|RustRover|Rider)$"
+#yabai -m rule --add app="${apps}" space=3  manage=off
 # Terminal
 yabai -m rule --add app="^(Alacritty|iTerm|Iterm)$" space=4
 # Music

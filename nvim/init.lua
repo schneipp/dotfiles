@@ -129,6 +129,8 @@ require('packer').startup(function(use)
   use 'lukas-reineke/indent-blankline.nvim' -- Add indentation guides even on blank lines
   use 'numToStr/Comment.nvim'               -- "gc" to comment visual regions/lines
   use 'tpope/vim-sleuth'                    -- Detect tabstop and shiftwidth automatically
+  -- neogit
+  use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' }
   use {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v2.x",
@@ -345,3 +347,9 @@ vim.g.netrw_list_hide = '.DS_Store$'      -- Hide git files
 vim.g.netrw_list_hide = '.gitkeep$'       -- Hide git files
 vim.g.netrw_list_hide = '.gitconfig$'     -- Hide git files
 vim.g.netrw_list_hide = '.gitattributes$' -- Hide git files
+
+
+
+if vim.g.neovide then
+vim.o.guifont = "JetBrainsMonoNL Nerd Font:h15"
+end
