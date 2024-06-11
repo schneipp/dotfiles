@@ -17,18 +17,18 @@ yabai -m config mouse_action1 move
 yabai -m config mouse_action2 resize
 
 # Web browsers
-yabai -m rule --add app="^Google Chrome|Firefox|Opera$" space=1
+#yabai -m rule --add app="^Google Chrome|Firefox|Opera$" space=1
 # Text editors
-yabai -m rule --add app="^(Code|RStudio|Emacs)$" space=2
+#yabai -m rule --add app="^(Code|RStudio|Emacs)$" space=2
 # Jetbrains apps
 #apps="^(IntelliJ IDEA|WebStorm|RubyMine|PyCharm|DataGrip|RustRover|Rider)$"
 #yabai -m rule --add app="${apps}" space=3  manage=off
 # Terminal
-yabai -m rule --add app="^(Alacritty|iTerm|Iterm)$" space=4
+#yabai -m rule --add app="^(Alacritty|iTerm|Iterm)$" space=4
 # Music
-yabai -m rule --add app="^(Spotify|Amazon Music)$" space=5
+#yabai -m rule --add app="^(Spotify|Amazon Music)$" space=5
 # Social
-yabai -m rule --add app="^(Slack|WhatsApp|Microsoft Teams)$" space=6
+#yabai -m rule --add app="^(Slack|WhatsApp|Microsoft Teams)$" space=6
 
 SPACEBAR_HEIGHT=$(spacebar -m config height)
 yabai -m config external_bar all:$SPACEBAR_HEIGHT:0

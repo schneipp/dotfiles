@@ -104,6 +104,8 @@
          ))
 
 
+
+
 (setq elfeed-feeds (quote
                     (("https://www.reddit.com/r/emacs.rss" reddit linux)
                      ("https://rss.slashdot.org/Slashdot/slashdotMain" slashdot linux)
@@ -135,7 +137,7 @@
 (add-to-list 'default-frame-alist '(alpha 99 99))
 
 (after! org
-  (setq org-directory "~/org/"
+  (setq org-directory "~/Documents/allthethings"
         org-default-notes-file (expand-file-name "notes.org" org-directory)
         org-ellipsis " ▼ "
         org-superstar-headline-bullets-list '("◉" "●" "○" "◆" "●" "○" "◆")
@@ -193,17 +195,17 @@
           (alltodo "")))))
 
 (define-key evil-visual-state-map "K"
-  (concat ":m '<-2" (kbd "RET") "gv=gv"))
+            (concat ":m '<-2" (kbd "RET") "gv=gv"))
 (define-key evil-visual-state-map "J"
-  (concat ":m '>+1" (kbd "RET") "gv=gv"))
+            (concat ":m '>+1" (kbd "RET") "gv=gv"))
 (define-key evil-normal-state-map "E"
-  'er/expand-region)
+            'er/expand-region)
 (define-key evil-visual-state-map "E"
-  'er/expand-region)
+            'er/expand-region)
 (define-key evil-normal-state-map "R"
-  'er/contract-region)
+            'er/contract-region)
 (define-key evil-visual-state-map "R"
-  'er/contract-region)
+            'er/contract-region)
 ;;; Tree Sitter
 
 (use-package! tree-sitter
@@ -240,3 +242,4 @@
 
 (setq! beacon-size 80
        beacon-blink-when-point-moves-vertically 8)
+

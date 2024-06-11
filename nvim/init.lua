@@ -24,6 +24,12 @@ require('packer').startup(function(use)
     }
   end
   }
+  -- templ treesitter
+  use { 'vrischmann/tree-sitter-templ', config = function()
+    require 'nvim-treesitter.parsers'.get_parser_configs().templ = {
+      filetype = 'templ',
+    }
+  end }
   -- folke/noice.nvim
   use { 'folke/noice.nvim', config = function()
     require("noice").setup({
