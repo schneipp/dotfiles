@@ -1,6 +1,7 @@
 #start warp terminal or create new window if not exist
 #cmd + shift - return : osascript /Users/rams/.config/skhd/new-warp-window.scpt
-cmd + shift - return : /Application/Warp.app/Contents/MacOS/Warp
+cmd + shift - return : osascript /Users/rams/.config/skhd/new-iterm-window.scpt
+#cmd + shift - return : /Application/Warp.app/Contents/MacOS/Warp
 
 #start and focus terminal
 
