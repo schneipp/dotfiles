@@ -2,7 +2,8 @@
 require('mason').setup()
 -- Enable the following language servers
 -- Feel free to add/remove any LSPs that you want here. They will automatically be installed
-local servers = { 'lua_ls', 'gopls','omnisharp', 'rust_analyzer', 'pyright', 'tsserver', 'intelephense', 'html','elixirls','angularls','gleam' }
+-- local servers = { 'lua_ls', 'gopls','omnisharp', 'rust_analyzer', 'pyright', 'tsserver', 'intelephense', 'html','elixirls','angularls','gleam' }
+local servers = { 'lua_ls', 'gopls','rust_analyzer', 'pyright', 'tsserver', 'intelephense', 'html','angularls' }
 -- local rt = require("rust-tools")
 -- rt.setup({
 --   server = {
