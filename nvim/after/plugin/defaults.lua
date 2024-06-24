@@ -40,6 +40,7 @@ vim.keymap.set('n', '<leader>fw', ":Telescope workspaces\n")
 -- vim.keymap.set('n', '<leader>di', ":lua require'dap'.stop()<CR>", { desc = 'Stop' })
 -- vim.keymap.set('n', '<leader>ds', ":lua require'dap'.stop()<CR>:lua require'dapui'.toggle()<CR>",
 --   { desc = 'Stop and Close UI' })
+-- vim.keymap.set('n', '<leader>dr', ":RustDebuggables<CR>:lua require'dapui'.toggle()<CR>", { desc = 'Start Debugger' })
 vim.keymap.set('n', '<leader>e', ":NeoTreeFocusToggle<CR>", { desc = 'NeoTree Explorer' })
 vim.keymap.set('n', '<leader>hc', ":Cheat<CR>", { desc = 'Cheat' })
 vim.keymap.set('n', '<C-h>', "<cmd> TmuxNavigateLeft<CR>", { desc = 'Window Left' })
@@ -49,7 +50,6 @@ vim.keymap.set('n', '<C-k>', "<cmd> TmuxNavigateUp<CR>", { desc = 'Window Up' })
 vim.keymap.set({ 'n', 'x', 'o' }, 'H', '^')
 vim.keymap.set({ 'n', 'x', 'o' }, 'L', '$')
 vim.keymap.set('n', '<leader>nrn', ":ObsidianQuickSwitch<CR>", { desc = 'Toggle ObsidianQuickSwitch' })
-
 -- require('dapui').setup()
 --
 -- local dap = require('dap')
