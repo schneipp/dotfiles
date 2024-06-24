@@ -243,3 +243,11 @@
 (setq! beacon-size 80
        beacon-blink-when-point-moves-vertically 8)
 
+(require 'tramp)
+
+(setq tramp-shell-prompt-pattern "\\(?:^\\|\r\\)[^]#$%>\n]*#?[]#$%>] *\\(\\[[0-9;]*[a-zA-Z] *\\)*")
+(after! tramp
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
+
+(after! tramp
+  (setq tramp-remote-path '(tramp-own-remote-path "/snap/bin" tramp-default-remote-path)))

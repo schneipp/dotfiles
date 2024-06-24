@@ -10,6 +10,47 @@ require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
   use 'andweeb/presence.nvim'
   use 'GustavoPrietoP/doom-themes.nvim'
+  -- Remote-nvim
+  use "MunifTanjim/nui.nvim"
+  use { "nvim-neotest/nvim-nio" }
+  use 'mfussenegger/nvim-dap'
+  use { "amitds1997/remote-nvim.nvim", config = function()
+    require("remote-nvim").setup({
+      ssh_config = {
+        ssh_binary = "ssh",                              -- Binary to use for running SSH command
+        scp_binary = "scp",                              -- Binary to use for running SSH copy commands
+        ssh_config_file_paths = { "$HOME/.ssh/config" }, -- Which files should be considered to contain the ssh host configurations. NOTE: `Include` is respected in the provided files.
+
+        -- These are useful for password-based SSH authentication.
+        -- It provides parsing pattern for the plugin to detect that an input is requested.
+        -- Each element contains the following attributes:
+        -- match - The string to match (plain matching is done)
+        -- type - Supports two values "plain"|"secret". Secret means when you provide the value, it should not be stored in the completion history of Neovim.
+        -- value - Default value for the prompt
+        -- value_type - "static"|"dynamic". For things like password, it would be needed for each new connection that the plugin initiates which could be obtrusive.
+        -- So, we save the value (only for current session's interval) to ease the process. If set to "dynamic", we do not save the value even for the session. You have to provide a fresh value each time.
+        ssh_prompts = {
+          {
+            match = "password:",
+            type = "secret",
+            value_type = "static",
+            value = "",
+          },
+          {
+            match = "continue connecting (yes/no/[fingerprint])?",
+            type = "plain",
+            value_type = "static",
+            value = "",
+          },
+          -- There are other values here which can be checked in lua/remote-nvim/init.lua
+        },
+      },
+      progress_view = {
+        type = "popup",
+      },
+    })
+  end
+  }
   use { "alexghergh/nvim-tmux-navigation", config = function()
     require 'nvim-tmux-navigation'.setup {
       disable_when_zoomed = true, -- defaults to false
@@ -47,7 +88,7 @@ require('packer').startup(function(use)
         command_palette = true,       -- position the cmdline and popupmenu together
         long_message_to_split = true, -- long messages will be sent to a split
         inc_rename = false,           -- enables an input dialog for inc-rename.nvim
-        lsp_doc_border = true,       -- add a border to hover docs and signature help
+        lsp_doc_border = true,        -- add a border to hover docs and signature help
       },
     })
   end }
@@ -83,11 +124,7 @@ require('packer').startup(function(use)
         workspaces = {
           {
             name = "personal",
-            path = "~/vaults/personal",
-          },
-          {
-            name = "work",
-            path = "~/vaults/work",
+            path = "~/Documents/allthethings",
           },
         },
 
@@ -188,19 +225,20 @@ require('packer').startup(function(use)
   -- use { 'xiyaowong/nvim-transparent' }
   use { 'nvim-telescope/telescope-ui-select.nvim' }
   use { "MunifTanjim/nui.nvim" }
-  use({
-    "jackMort/ChatGPT.nvim",
-    config = function()
-      require("chatgpt").setup({
-        async_api_key_cmd = "pass show chatgpt/key",
-      })
-    end,
-    requires = {
-      "MunifTanjim/nui.nvim",
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope.nvim"
-    }
-  })
+
+  -- use({
+  --   "jackMort/ChatGPT.nvim",
+  --   config = function()
+  --     require("chatgpt").setup({
+  --       async_api_key_cmd = "pass show chatgpt/key",
+  --     })
+  --   end,
+  --   requires = {
+  --     "MunifTanjim/nui.nvim",
+  --     "nvim-lua/plenary.nvim",
+  --     "nvim-telescope/telescope.nvim"
+  --   }
+  -- })
   use({
     "kylechui/nvim-surround",
     tag = "*", -- Use for stability; omit to use `main` branch for the latest features
@@ -224,18 +262,18 @@ require('packer').startup(function(use)
   use "natecraddock/workspaces.nvim"
   use "mg979/vim-visual-multi"
   use "ThePrimeagen/harpoon"
-  use 'mfussenegger/nvim-dap'
-  use "folke/neodev.nvim"
-  use "theHamsta/nvim-dap-virtual-text"
-  use {
-    'chipsenkbeil/distant.nvim',
-    branch = 'v0.3',
-    config = function()
-      require('distant'):setup()
-    end
-  }
-  use "nvim-telescope/telescope-dap.nvim"
-  use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
+  -- use 'mfussenegger/nvim-dap'
+  -- use "folke/neodev.nvim"
+  -- use "theHamsta/nvim-dap-virtual-text"
+  -- use {
+  --   'chipsenkbeil/distant.nvim',
+  --   branch = 'v0.3',
+  --   config = function()
+  --     require('distant'):setup()
+  --   end
+  -- }
+  -- use "nvim-telescope/telescope-dap.nvim"
+  -- use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
   use { "catppuccin/nvim", as = "catppuccin" }
   use 'simrat39/rust-tools.nvim'
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
