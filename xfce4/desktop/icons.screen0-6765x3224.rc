@@ -1,0 +1,15 @@
+[xfdesktop-version-4.10.3+-rcfile_format]
+4.10.3+=true
+
+[Trash]
+row=23
+col=0
+
+[/]
+row=22
+col=0
+
+[/home/rams]
+row=21
+col=0
+

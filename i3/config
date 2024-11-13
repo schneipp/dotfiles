@@ -239,14 +239,14 @@ bindsym Mod4+F4 mode "$mode_system"
 
 bindsym Mod4+r mode "resize"
 
-set $displayMode "Set display mode [w]ork [l]aptop"
+set $displayMode "Set location and display mode [w]ork [l]aptop"
 bindsym Mod4+o mode $displayMode
 mode $displayMode {
     bindsym o exec "\
-                ~/.screenlayout/buero.sh"; \
+                ~/scripts/buero.sh"; \
                 mode "default"
     bindsym l exec "\
-                ~/.screenlayout/laptop.sh"; \
+                ~/scripts/laptop.sh"; \
                 mode "default"
 
     bindsym Return mode "default"
@@ -293,14 +293,15 @@ gaps inner 5
 #
 # Please remove the following exec line:
 #######################################################################
-#exec_always feh --bg-scale /home/rams/wallpapers/calm.jpg
-exec_always variety -n &
+#exec_always feh --bg-scale /home/rams/wallpapers/caml.png
+exec_always feh --randomize --bg-fill /home/rams/wallpapers/
+#exec_always variety -n &
 exec_always picom & 
 exec_always flameshot &
-exec_always blueman-applet &
+#exec_always blueman-applet &
 #exec_always pkill polybar
 #exec_always polybar &
 exec_always picom &
-exec_always /home/rams/fix_system.sh &
+#exec_always /home/rams/fix_system.sh &
 exec_always pasystray &
 exec_always emacs --daemon &
