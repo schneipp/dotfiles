@@ -32,8 +32,14 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec_always nm-applet --indicator
 
+#set keyboard layout to ch for sway wayland
+#exec_always setxkbmap ch
+input * {
+    xkb_layout "ch"
+}
+
 # Use pactl to adjust volume in PulseAudio.
-set $refresh_i3status killall -SIGUSR1 i3status
+#set $refresh_i3status killall -SIGUSR1 i3status
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
 bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
@@ -294,13 +300,24 @@ gaps inner 5
 # Please remove the following exec line:
 #######################################################################
 #exec_always feh --bg-scale /home/rams/wallpapers/calm.jpg
-exec_always variety -n &
+exec_always {
+  pkill variety
+  variety -n &
+}
 exec_always picom & 
 exec_always flameshot &
 exec_always blueman-applet &
 #exec_always pkill polybar
 #exec_always polybar &
-exec_always picom &
-exec_always /home/rams/fix_system.sh &
+#exec_always picom &
+#exec_always /home/rams/fix_system.sh &
 exec_always pasystray &
 exec_always emacs --daemon &
+exec_always {
+  pkill kanshi
+  kanshi &
+}
+exec_always {
+  pkill waybar
+  waybar &
+}
