@@ -4,3 +4,5 @@
 -- local map = LazyVim.safe_keymap_set
 local map = vim.keymap.set
 map("n", "<leader>fw", ":Telescope workspaces<CR>", { desc = "List Workspaces", remap = true })
+map("v", "<S-j>", ":m '>+1<CR>gv=gv")
+map("v", "<S-k>", ":m '<-2<CR>gv=gv")
