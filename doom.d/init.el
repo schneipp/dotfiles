@@ -22,9 +22,9 @@
 
        :completion
        company           ; the ultimate code completion backend
-       helm              ; the *other* search engine for love and life
+       ;; helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
-       ivy               ; a search engine for love and life
+       ;; ivy               ; a search engine for love and life
        vertico           ; the search engine of the future
 
        :ui
@@ -133,7 +133,7 @@
        ;;ess               ; emacs speaks statistics
        ;;factor
        ;;faust             ; dsp, but you get to keep your soul
-       ;;fortran           ; in FORTRAN, GOD is REAL (unless declared INTEGER)
+       ;;fortran          ; in FORTRAN, GOD is REAL (unless declared INTEGER)
        ;;fsharp            ; ML stands for Microsoft's Language
        ;;fstar             ; (dependent) types and (monadic) effects and Z3
        ;;gdscript          ; the language you waited for
@@ -159,6 +159,8 @@
         +journal             ; enable org journal
         +roam2               ; create a personal wiki
         +pretty              ; replace asterisks with pretty org bullets
+        +dragndrop           ; file drag & drop support
+        +sql
         +publish)            ; create static websites with org
 
        (php +lsp)              ; perl's insecure younger brother
