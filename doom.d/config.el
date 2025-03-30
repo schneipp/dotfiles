@@ -195,17 +195,17 @@
           (alltodo "")))))
 
 (define-key evil-visual-state-map "K"
-            (concat ":m '<-2" (kbd "RET") "gv=gv"))
+  (concat ":m '<-2" (kbd "RET") "gv=gv"))
 (define-key evil-visual-state-map "J"
-            (concat ":m '>+1" (kbd "RET") "gv=gv"))
+  (concat ":m '>+1" (kbd "RET") "gv=gv"))
 (define-key evil-normal-state-map "E"
-            'er/expand-region)
+  'er/expand-region)
 (define-key evil-visual-state-map "E"
-            'er/expand-region)
+  'er/expand-region)
 (define-key evil-normal-state-map "R"
-            'er/contract-region)
+  'er/contract-region)
 (define-key evil-visual-state-map "R"
-            'er/contract-region)
+  'er/contract-region)
 ;;; Tree Sitter
 
 (use-package! tree-sitter
@@ -287,3 +287,5 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((sql . t))))
+
+(setq shell-file-name "/bin/zsh")
