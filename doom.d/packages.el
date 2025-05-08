@@ -48,26 +48,20 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-(package! transient :pin "c2bdf7e12c530eb85476d3aef317eb2941ab9440")
-(package! with-editor :pin "bbc60f68ac190f02da8a100b6fb67cf1c27c53ab")
-;; (package! emacs-application-framework)
-;; (package! copilot :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
+(package! transient)
+(package! with-editor)
 (package! copilot :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el")))
-
 (package! ob-async)
 (package! ement)
-(unpin! lsp-mode)
-;; let's unpin for org-roam ui :)
-(unpin! org-roam)
-(package! org-roam-ui)
-
+(package! sqlite3)
+;;(package! org-roam-ui)
 (package! tree-sitter)
 (package! tree-sitter-langs)
-
 (package! cheat-sh)
 ;;flashy cursor
-(package! beacon)
-
 (package! ob-async)
 (package! epresent)
-(package! elcord)
+
+(when (eq emacs-major-version 30)
+  (package! eldoc :built-in t))
+(package! aider :recipe (:host github :repo "tninja/aider.el" ))
