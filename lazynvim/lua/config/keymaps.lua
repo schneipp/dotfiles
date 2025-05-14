@@ -8,3 +8,4 @@ map("n", "<leader>bi", ":Telescope buffers<CR>", { desc = "List Buffers", remap 
 
 map("v", "<S-j>", ":m '>+1<CR>gv=gv")
 map("v", "<S-k>", ":m '<-2<CR>gv=gv")
+map("n", "<leader>db", ":lua require('dbee').open()")
