@@ -65,3 +65,14 @@
 (when (eq emacs-major-version 30)
   (package! eldoc :built-in t))
 (package! aider :recipe (:host github :repo "tninja/aider.el" ))
+;; DATABASE
+(package! sqlup-mode)
+(package! org-modern)
+(package! eaf :recipe (:host github
+                       :repo "emacs-eaf/emacs-application-framework"
+                       :files ("*.el" "*.py" "app" "core")
+                       :build (:not compile)))
+(package! ctable :recipe (:host github :repo "kiwanami/emacs-ctable"))
+(package! deferred :recipe (:host github :repo "kiwanami/emacs-deferred"))
+(package! epc :recipe (:host github :repo "kiwanami/emacs-epc"))
+(package! evil-matchit)
