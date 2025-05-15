@@ -1,61 +1,11 @@
-;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
-
-;; Place your private configuration here! Remember, you do not need to run 'doom
-;; sync' after modifying this file!
-
-
-;; Some functionality uses this to identify you, e.g. GPG configuration, email
-;; clients, file templates and snippets. It is optional.
 (setq user-full-name "Ramon Ott"
-      user-mail-address "ramon.ott@camso.ch")
+      user-mail-address "ramon@julith.gmbh")
+(setq doom-theme 'doom-monokai-classic doom-font (font-spec :family "JetBrainsMono NF" :size 12.0)
+      doom-variable-pitch-font (font-spec :family "JetBrainsMono NF" :size 12.0))
 
-;; Doom exposes five (optional) variables for controlling fonts in Doom:
-;;
-;; - `doom-font' -- the primary font to use
-;; - `doom-variable-pitch-font' -- a non-monospace font (where applicable)
-;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
-;;   presentations or streaming.
-;; - `doom-unicode-font' -- for unicode glyphs
-;; - `doom-serif-font' -- for the `fixed-pitch-serif' face
-;;
-;; See 'C-h v doom-font' for documentation and more examples of what they
-;; accept. For example:
-;;
-;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
-;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
-;;
-;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
-;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
-;; refresh your font settings. If Emacs still can't find your font, it likely
-;; wasn't installed correctly. Font issues are rarely Doom issues!
-
-;; There are two ways to load a theme. Both assume the theme is installed and
-;; available. You can either set `doom-theme' or manually load a theme with the
-;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-monokai-classic doom-font (font-spec :family "JetBrainsMono NF" :size 13.0)
-      doom-variable-pitch-font (font-spec :family "JetBrainsMono NF" :size 13.0))
-;; This determines the style of line numbers in effect. If set to `nil', line
-;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'relative)
 (setq doom-font-increment 1)
-;; If you use `org' and don't want your org files in the default location below,
-;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
-
-
-;; Whenever you reconfigure a package, make sure to wrap your config in an
-;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
-;;
-;;   (after! PACKAGE
-;;     (setq x y))
-;;
-;; The exceptions to this rule:
-;;
-;;   - Setting file/directory variables (like `org-directory')
-;;   - Setting variables which explicitly tell you to set them before their
-;;     package is loaded (see 'C-h v VARIABLE' to look up their documentation).
-;;   - Setting doom variables (which start with 'doom-' or '+').
-;;
 ;; Here are some additional functions/macros that will help you configure Doom.
 ;;
 ;; - `load!' for loading external *.el files relative to this one
@@ -65,16 +15,6 @@
 ;;   this file. Emacs searches the `load-path' when you load packages with
 ;;   `require' or `use-package'.
 ;; - `map!' for binding new keys
-;;
-;; To get information about any of these functions/macros, move the cursor over
-;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
-;; This will open documentation for it, including demos of how they are used.
-;; Alternatively, use `C-h o' to look up a symbol (functions, variables, faces,
-;; etc).
-;;
-;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
-;; they are implemented.
-
 
 (custom-set-faces
  '(org-level-1 ((t (:inherit outline-1 :height 1.2))))
@@ -84,57 +24,22 @@
  '(org-level-5 ((t (:inherit outline-5 :height 0.8))))
  )
 
-
-
-
-;; accept completion from copilot and fallback to company
-;;(use-package! copilot
-;;  :hook (prog-mode . copilot-mode)
-;;  :bind (("C-TAB" . 'copilot-accept-completion-by-word)
-;;         ("C-<tab>" . 'copilot-accept-completion-by-word)
-;;         :map copilot-completion-map
-;;         ("<tab>" . 'copilot-accept-completion)
-;;         ("TAB" . 'copilot-accept-completion)))
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
-  :bind (;;("C-l" . 'copilot-accept-completion-by-word)
-         ;;("C-l" . 'copilot-accept-completion-by-word)
-         :map copilot-completion-map
-         ("C-l" . 'copilot-accept-completion)
-         ))
+  :bind (:map copilot-completion-map
+              ("C-l" . 'copilot-accept-completion)
+              ))
 
-
-
-
-(setq elfeed-feeds (quote
-                    (("https://www.reddit.com/r/emacs.rss" reddit linux)
-                     ("https://rss.slashdot.org/Slashdot/slashdotMain" slashdot linux)
-                     ("https://www.reddit.com/r/commandline.rss" reddit linux)
-                     ("https://www.reddit.com/r/unixporn.rss" reddit linux)
-                     )))
-(use-package! websocket
-  :after org-roam)
-
-;; copied straight from the github readme
-(use-package! org-roam-ui
-  :after org-roam ;; or :after org
-  ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
-  ;;         a hookable mode anymore, you're advised to pick something yourself
-  ;;         if you don't care about startup time, use
-  ;;  :hook (after-init . org-roam-ui-mode)
-  :config
-  (setq org-roam-ui-sync-theme t
-        org-roam-ui-follow t
-        org-roam-ui-update-on-save t
-        org-roam-ui-open-on-start t))
-
-
+;;(use-package! ob-async)
 (require 'ob-async)
 
-(setq tramp-default-method "ssh")
+(setq tramp-default-method "sshx")
 
 (set-frame-parameter (selected-frame) 'alpha '(99 99))
 (add-to-list 'default-frame-alist '(alpha 99 99))
+
+;; (when (eq emacs-major-version 30)
+;;   (package! eldoc :built-in t))
 
 (after! org
   (setq org-directory "~/Documents/allthethings"
@@ -163,8 +68,10 @@
            "DONE(d)"           ; Task has been completed
            "CANCELLED(c)" )))) ; Task has been cancelled
 
-(after! org
-  (setq org-agenda-files '("~/org/agenda.org")))
+(after! org (setq org-agenda-files '("~/org/agenda.org")))
+
+;;Set org roam directory
+(setq org-roam-directory "~/Documents/allthethings/roam")
 
 (setq
  ;; org-fancy-priorities-list '("[A]" "[B]" "[C]")
@@ -228,6 +135,7 @@
 (map! :leader
       (:prefix ("e" . "Explore Menu")
        :desc "Toggle Treemacs" "e" #'treemacs))
+
 (use-package! lsp-rust
   :config
   (setq! lsp-rust-analyzer-cargo-watch-enable t
@@ -238,52 +146,351 @@
          lsp-rust-analyzer-display-chaining-hints t
          lsp-rust-analyzer-display-parameter-hints t))
 
-;; (lsp-headerline-breadcrumb-mode t)
+(lsp-headerline-breadcrumb-mode t)
 
-(setq! beacon-size 80
-       beacon-blink-when-point-moves-vertically 8)
-
-(require 'tramp)
-
-(setq tramp-shell-prompt-pattern "\\(?:^\\|\r\\)[^]#$%>\n]*#?[]#$%>] *\\(\\[[0-9;]*[a-zA-Z] *\\)*")
-(after! tramp
-  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
-
-(after! tramp
-  (setq tramp-remote-path '(tramp-own-remote-path "/snap/bin" tramp-default-remote-path)))
-
-(map! :map dap-mode-map
-      :leader
-      :prefix ("d" . "dap")
-      ;; basics
-      :desc "dap next"          "n" #'dap-next
-      :desc "dap step in"       "i" #'dap-step-in
-      :desc "dap step out"      "o" #'dap-step-out
-      :desc "dap continue"      "c" #'dap-continue
-      :desc "dap hydra"         "h" #'dap-hydra
-      :desc "dap debug restart" "r" #'dap-debug-restart
-      :desc "dap debug"         "s" #'dap-debug
-
-      ;; debug
-      :prefix ("dd" . "Debug")
-      :desc "dap debug recent"  "r" #'dap-debug-recent
-      :desc "dap debug last"    "l" #'dap-debug-last
-
-      ;; eval
-      :prefix ("de" . "Eval")
-      :desc "eval"                "e" #'dap-eval
-      :desc "eval region"         "r" #'dap-eval-region
-      :desc "eval thing at point" "s" #'dap-eval-thing-at-point
-      :desc "add expression"      "a" #'dap-ui-expressions-add
-      :desc "remove expression"   "d" #'dap-ui-expressions-remove
-
-      :prefix ("db" . "Breakpoint")
-      :desc "dap breakpoint toggle"      "b" #'dap-breakpoint-toggle
-      :desc "dap breakpoint condition"   "c" #'dap-breakpoint-condition
-      :desc "dap breakpoint hit count"   "h" #'dap-breakpoint-hit-condition
-      :desc "dap breakpoint log message" "l" #'dap-breakpoint-log-message)
-
-(with-eval-after-load 'org
+(use-package! org
+  :config
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((sql . t))))
+
+(setq shell-file-name "/bin/zsh")
+
+(add-to-list 'load-path "/snap/maildir-utils/current/share/emacs/site-lisp/mu4e/")
+;; (require! mu4e)
+
+(setq
+ mu4e-maildir "~/Mail/office365"
+ mu4e-get-mail-command "mbsync office365"
+ mu4e-update-interval 300
+ mu4e-sent-folder "/Sent Items"
+ mu4e-drafts-folder "/Drafts"
+ mu4e-trash-folder "/Deleted Items"
+ mu4e-refile-folder "/Archive"
+ mu4e-maildir-shortcuts
+ '(("/Inbox" . ?i)
+   ("/Sent Items" . ?s)
+   ("/Deleted Items" . ?t))
+ mu4e-sent-messages-behavior 'sent
+ message-send-mail-function 'message-send-mail-with-sendmail
+ sendmail-program "/usr/bin/msmtp"
+ message-sendmail-envelope-from 'header
+ mail-user-agent 'mu4e-user-agent
+ user-mail-address "ramon@julith.gmbh"
+ user-full-name "Ramon Julith")
+
+(after! mu4e
+  ;; use msmtp as our sendmail
+  (setq sendmail-program "/usr/bin/msmtp"
+        message-send-mail-function 'message-send-mail-with-sendmail
+
+        ;; tell msmtp to pull the envelope-from from the headers...
+        ;;message-sendmail-extra-arguments '("--read-envelope-from")
+
+        ;; ...but don’t have Emacs add its own -f flag
+        message-sendmail-envelope-from nil))
+
+;; update mu4e index every 5 minutes
+(run-at-time nil (* 5 60) #'mu4e-update-index)
+
+;; enable notifications when a new mail arrives
+;;(after! mu4e
+;;  (+mu4e-notifications-enable))
+
+
+;; Toggle window dedication
+(defun toggle-window-dedicated ()
+  "Toggle whether the current active window is dedicated or not"
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+         (set-window-dedicated-p window
+                                 (not (window-dedicated-p window))))
+       "Window '%s' is dedicated"
+     "Window '%s' is normal")
+   (current-buffer)))
+
+;; Press [pause] key in each window you want to "freeze"
+(global-set-key [pause] 'toggle-window-dedicated)
+
+(after! lsp-mode
+  ;; Use a more robust Angular Language Server configuration
+  (setq lsp-clients-angular-language-server-command
+        `(,(let ((root (or (locate-dominating-file default-directory "node_modules")
+                           default-directory)))
+             (expand-file-name "node_modules/.bin/ngserver" root))
+          "--stdio"
+          "--tsProbeLocations" ,(let ((root (or (locate-dominating-file default-directory "node_modules")
+                                                default-directory)))
+                                  (expand-file-name "node_modules" root))
+          "--ngProbeLocations" ,(let ((root (or (locate-dominating-file default-directory "node_modules")
+                                                default-directory)))
+                                  (expand-file-name "node_modules" root))))
+
+  ;; Make sure Angular client is registered with the proper activation conditions
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection (lambda () lsp-clients-angular-language-server-command))
+    :major-modes '(typescript-mode typescript-tsx-mode web-mode html-mode)
+    :priority -1
+    :activation-fn (lambda (&rest _)
+                     (and (lsp-workspace-root)
+                          (or (locate-dominating-file default-directory "angular.json")
+                              (locate-dominating-file default-directory ".angular-cli.json"))))
+    :server-id 'angular-ls)))
+;;force sqls!
+(after! lsp-mode
+  (add-to-list 'lsp-language-id-configuration '(sql-mode . "sql"))
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection "sqls")
+    :major-modes '(sql-mode sql-interactive-mode)
+    :server-id 'sqls)))
+
+;;disable the shitty one
+(setq lsp-disabled-clients '(sql-ls))
+
+(use-package aider
+  :config
+  (setq aider-args '("--model" "gpt-4.1-mini"))
+  (require 'aider-doom))
+
+(defun rams/toggle-fixed-window-width ()
+  "Toggle whether the current buffer's windows have a fixed width."
+  (interactive)
+  (if (eq window-size-fixed 'width)
+      (progn
+        ;; turn it off
+        (kill-local-variable 'window-size-fixed)
+        (kill-local-variable 'window-min-width)
+        (message "🔓 window width unlocked"))
+    ;; turn it on
+    (let ((w (window-total-width)))
+      ;; fix the width at its current value...
+      (setq-local window-size-fixed 'width)
+      ;; …and prevent it from ever shrinking below that
+      (setq-local window-min-width w)
+      (message "🔒 window width locked at %d columns" w))))
+
+
+(defun rams/window-or-frame-right ()
+  "Move to the window on the right, or to the next frame if there is none."
+  (interactive)
+  (if (windmove-find-other-window 'right)
+      (windmove-right)
+    (other-frame 1)))
+
+(defun rams/window-or-frame-left ()
+  "Move to the window on the left, or to the previous frame if there is none."
+  (interactive)
+  (if (windmove-find-other-window 'left)
+      (windmove-left)
+    (other-frame -1)))
+
+(defun rams/window-or-frame-up ()
+  "Move to the window above, or wrap around to the last frame."
+  (interactive)
+  (if (windmove-find-other-window 'up)
+      (windmove-up)
+    (other-frame -1)))
+
+(defun rams/window-or-frame-down ()
+  "Move to the window below, or wrap around to the next frame."
+  (interactive)
+  (if (windmove-find-other-window 'down)
+      (windmove-down)
+    (other-frame 1)))
+
+(map! :map evil-window-map
+      "f" #'other-frame)
+
+(after! circe
+  (set-irc-server! "localhost"
+    `(:tls t
+      :port 6667
+      :nick "rams"
+                                        ;      :sasl-username "myusername"
+                                        ;      :sasl-password "mypassword"
+      :channels ("#ayb"))))
+
+;;
+;; SQL Configuration
+(use-package! sql
+  :config
+  (setq sql-postgres-program "psql") ; Ensure psql is used
+  (setq sql-connection-alist
+        '((postgresdb-postgres
+           (sql-product 'postgres)
+           (sql-user "postgres")
+           (sql-database "postgres")
+           (sql-server "172.17.0.1")
+           (sql-port 5432))
+          (postgresdb-hrcore
+           (sql-product 'postgres)
+           (sql-user "postgres")
+           (sql-password "${POSTGRES_PASSWORD}") ; For org-babel
+           (sql-database "hrcore")
+           (sql-server "172.17.0.1")
+           (sql-port 5432)))))
+
+;; LSP for SQL
+(use-package! lsp-mode
+  :hook (sql-mode . lsp)
+  :config
+  (setq lsp-sqls-workspace-config-path nil)
+  (setq lsp-sqls-connections
+        '(((driver . "postgresql")
+           (dataSourceName . "host=172.17.0.1 port=5432 user=postgres password=${POSTGRES_PASSWORD} dbname=hrcore sslmode=disable"))))
+  ;; Ensure LSP logs for debugging
+  (setq lsp-log-io t))
+
+;; SQL Keyword Capitalization
+(use-package! sqlup-mode
+  :hook ((sql-mode sql-interactive-mode) . sqlup-mode)
+  :config
+  (setq sqlup-blacklist '("name")))
+
+;; Org-mode for SQL
+;; (use-package! org
+;;   :config
+;;   (org-babel-do-load-languages
+;;    'org-babel-load-languages
+;;    '((sql . t)))
+;;   (add-to-list 'org-src-lang-modes '("sql" . sql))
+;;   (defun my/org-edit-sql-src ()
+;;     "Enable sql-mode and LSP in Org SQL source blocks."
+;;     (let ((lang (org-element-property :language (org-element-context))))
+;;       (when (string= lang "sql")
+;;         (message "Activating sql-mode and LSP for SQL source block")
+;;         (sql-mode)
+;;         (lsp-deferred) ; Use lsp-deferred for asynchronous LSP startup
+;;   :hook (org-edit-src-hook . my/org-edit-sql-src)) ; Use org-edit-src-hook instead
+;;         (setq-local lsp-enabled-clients '(sqls))))) ; Explicitly enable sqls client
+
+(defun my/org-sql-src-lsp-setup ()
+  "Enable LSP and company in SQL source blocks in Org mode."
+  (when (string= (file-name-extension (or (buffer-file-name) "")) "org")
+    (when (and (derived-mode-p 'sql-mode)
+               (fboundp 'lsp))
+      (lsp)
+      (company-mode 1))))
+
+(add-hook 'org-src-mode-hook #'my/org-sql-src-lsp-setup)
+(add-hook 'org-src-mode-hook #'company-mode)
+
+(use-package! org-modern
+  :hook (org-mode . org-modern-mode)
+  :config
+  ;; Optional: Customize org-modern settings
+  (setq
+   org-modern-table t           ; Enable modern table styling
+   org-modern-star '("◉" "○" "✸" "✿") ; Customize headline stars
+   org-modern-block-fringe nil  ; Adjust block appearance
+   org-modern-todo t            ; Style TODO keywords
+   org-modern-priority t        ; Style priority cookies
+   org-modern-timestamp t       ; Style timestamps
+   org-modern-tag t))           ; Style tags
+
+
+
+;;by the power of emacs lisp, we can generate a config file for sqls on the fly
+(defun my/generate-sqls-config-from-sql-connection (connection-name)
+  "Generate .sqls/config.yml from CONNECTION-NAME in `sql-connection-alist`."
+  (interactive
+   (list (completing-read "Choose SQL connection: " (mapcar #'car sql-connection-alist))))
+  (let* ((conn-info (cdr (assoc (intern connection-name) sql-connection-alist)))
+         (get-val (lambda (keys)
+                    (or (plist-get conn-info keys)
+                        (when (assoc keys conn-info)
+                          (cadr (assoc keys conn-info))))))
+         (user (funcall get-val 'sql-user))
+         (password (funcall get-val 'sql-password))
+         (database (funcall get-val 'sql-database))
+         (server (funcall get-val 'sql-server))
+         (port (number-to-string (or (funcall get-val 'sql-port) 5432)))
+         (config-yml
+          (format "databases:\n  %s:\n    dialect: postgresql\n    host: %s\n    port: %s\n    user: %s\n    password: %s\n    database: %s\n"
+                  connection-name server port user password database)))
+    (make-directory "~/.sqls" t)
+    (with-temp-file "~/.sqls/config.yml"
+      (insert config-yml))
+    (message "Wrote ~/.sqls/config.yml for %s" connection-name)))
+;; tell lsp-sqls to use the config file
+(setq lsp-sqls-workspace-config-path "~/.sqls/config.yml")
+
+
+(use-package! eaf
+  :commands (eaf-open-browser eaf-open)
+  :custom
+  (eaf-browser-continue-where-left-off t)
+  (eaf-browser-enable-adblocker t)
+  (browse-url-browser-function 'eaf-open-browser)
+  :config
+  (require 'eaf-browser)  ; Load browser module
+  (when (featurep 'eaf-evil)  ; Load eaf-evil only if available
+    (require 'eaf-evil)
+    (define-key key-translation-map (kbd "SPC")
+                (lambda (prompt)
+                  (if (derived-mode-p 'eaf-mode)
+                      (pcase eaf--buffer-app-name
+                        ("browser" (if (string= (eaf-call-sync "call_function" eaf--buffer-id "is_focus") "True")
+                                       (kbd "SPC")
+                                     (kbd eaf-evil-leader-key)))
+                        ("pdf-viewer" (kbd eaf-evil-leader-key))
+                        ("image-viewer" (kbd eaf-evil-leader-key))
+                        (_ (kbd "SPC")))
+                    (kbd "SPC")))))
+  (defalias 'browse-web #'eaf-open-browser))
+
+;; (defun eaf-browser-defocus ()
+;;   "Defocus the EAF browser and switch to another window."
+;;   (interactive)
+;;   (when (derived-mode-p 'eaf-mode)
+;;     (eaf-call-async "call_function" eaf--buffer-id "blur")
+;;     (other-window 1)))
+
+;;(define-key eaf-mode-map (kbd "C-c") #'eaf-browser-defocus)
+
+(defun my/sql-connect-advice (orig-fn &rest args)
+  "Advice for `sql-connect` to auto-generate sqls config."
+  (let ((connection-name (car args)))
+    (apply orig-fn args)
+    (my/generate-sqls-config-from-connection connection-name)))
+
+(advice-add 'sql-connect :around #'my/sql-connect-advice)
+
+(setq org-src-lang-modes (append '(("sql" . sql)) org-src-lang-modes))
+
+
+;; Make sure vterm is loaded
+(use-package! vterm :commands vterm)
+(defun rams/hrcore-setup()
+  "When switching to the project, open two vterm splits running Postgres and Angular."
+  (when (and (projectile-project-p)
+             (string-equal (projectile-project-name) "hrcore-php"))
+    ;; start from a single window
+    (delete-other-windows)
+    ;; right split for Postgres shell
+    (let ((docker-cmd "docker exec -it HRCORE-PG-RO bash")
+          (angular-cmd "npm run startro"))
+      (split-window-right)
+      (other-window 1)
+      (vterm)
+      (vterm-send-string docker-cmd)
+      (vterm-send-return)
+      ;; below split for Angular
+      (split-window-below)
+      (other-window 1)
+      (vterm)
+      (vterm-send-string angular-cmd)
+      (vterm-send-return)
+      ;; go back to the left pane
+      (other-window -2))))
+
+;; hook it up so it runs whenever you switch projects
+(add-hook 'projectile-after-switch-project-hook #'rams/hrcore-setup)
+
+(use-package! evil-matchit
+  :after evil
+  :config
+  (global-evil-matchit-mode 1))
