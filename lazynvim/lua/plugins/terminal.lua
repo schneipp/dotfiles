@@ -1,6 +1,7 @@
 return {
   {
     "akinsho/toggleterm.nvim",
+    --    tag = "*",
     version = "*",
     opts = {
       direction = "float",

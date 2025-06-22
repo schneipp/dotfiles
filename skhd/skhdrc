@@ -1,6 +1,7 @@
 #start warp terminal or create new window if not exist
 #cmd + shift - return : osascript /Users/rams/.config/skhd/new-warp-window.scpt
-cmd + shift - return : osascript /Users/rams/.config/skhd/new-iterm-window.scpt
+#cmd + shift - return : osascript /Users/rams/.config/skhd/new-iterm-window.scpt
+cmd + shift - return : wezterm
 #cmd + shift - return : /Application/Warp.app/Contents/MacOS/Warp
 
 #start and focus terminal
@@ -18,16 +19,21 @@ cmd + shift - h : yabai -m window --insert south
 cmd + shift - 1 : yabai -m window --space 1
 cmd + shift - 2 : yabai -m window --space 2
 cmd + shift - 3 : yabai -m window --space 3
-cmd + shift - 4 : yabai -m window --space 4
-cmd + shift - 5 : yabai -m window --space 5
-cmd + shift - 6 : yabai -m window --space 6
+cmd + shift - 4 : yabai -m window --space 1  --display 1
+cmd + shift - 5 : yabai -m window --space 2  --display 1
+cmd + shift - 6 : yabai -m window --space 3  --display 1
+cmd + shift - 7 : yabai -m window --space 1  --display 2
+cmd + shift - 8 : yabai -m window --space 2  --display 2
+cmd + shift - 9 : yabai -m window --space 3  --display 2
 
 cmd - 1 : yabai -m space --focus 1
 cmd - 2 : yabai -m space --focus 2
 cmd - 3 : yabai -m space --focus 3
-cmd - 4 : yabai -m space --focus 4
-cmd - 5 : yabai -m space --focus 5
-cmd - 6 : yabai -m space --focus 6
-
+cmd - 4 : yabai -m space --focus 1 --display 2
+cmd - 5 : yabai -m space --focus 2 --display 2
+cmd - 6 : yabai -m space --focus 3 --display 2
+cmd - 7 : yabai -m space --focus 1 --display 3
+cmd - 8 : yabai -m space --focus 2 --display 3
+cmd - 9 : yabai -m space --focus 3 --display 3
 #maximize window
 alt - f : yabai -m window --toggle zoom-fullscreen
