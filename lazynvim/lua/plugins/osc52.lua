@@ -8,7 +8,7 @@ local function copy_to_osc52(lines, regtype)
   -- Write to stderr to avoid tmux interception
   io.stderr:write(osc52)
   -- Debug notification
-  vim.notify("Sent to OSC52 clipboard: " .. text:sub(1, 20) .. "...", vim.log.levels.INFO)
+  -- vim.notify("Sent to OSC52 clipboard: " .. text:sub(1, 20) .. "...", vim.log.levels.INFO)
 end
 
 -- Fallback paste function
