@@ -124,10 +124,49 @@ sketchybar --add item volume right \
     icon.color=0xff8aadf4 \
     label.drawing=true \
     script="$PLUGIN_SHARED_DIR/volume.sh" \
+    click_script="open 'x-apple.systempreferences:com.apple.preference.sound?output'" \
     --subscribe volume volume_change
 
-# osascript -e 'quit app "Rectangle"'
-# open -a Rectangle
+# sketchybar --add alias "Control Centre,WiFi" right
+
+# Shottr
+sketchybar --add alias "Shottr,Item-0" right
+sketchybar --set "Shottr,Item-0" \
+  click_script="osascript -e 'tell application \"System Events\" to tell (value of attribute \"AXExtrasMenuBar\" of process \"Shottr\") to click first menu bar item'"
+
+# Control Centre → BentoBox
+sketchybar --add alias "Control Centre,BentoBox" right
+sketchybar --set "Control Centre,BentoBox" \
+  click_script="osascript -e 'tell application \"System Events\" to tell process \"Control Centre\" to perform action \"AXPress\" of menu bar item 2 of menu bar 1'"
+
+#OpenVPN
+#launch openvpn connect
+/Applications/OpenVPN\ Connect.app/Contents/MacOS/OpenVPN\ Connect --minimize &
+sketchybar --add alias "OpenVPN Connect,Item-0" right
+sketchybar --set "OpenVPN Connect,Item-0" \
+  click_script="osascript -e 'tell application \"System Events\" to tell (value of attribute \"AXExtrasMenuBar\" of process \"OpenVPN Connect\") to click first menu bar item'"
+
+#launch unsplash wallpapers
+/Applications/Unsplash\ Wallpapers.app/Contents/MacOS/Unsplash\ Wallpapers &
+# # Unsplash Wallpapers
+sketchybar --add alias "Unsplash Wallpapers,Item-0" right
+sketchybar --set "Unsplash Wallpapers,Item-0" \
+   click_script="osascript -e 'tell application \"System Events\" to tell (value of attribute \"AXExtrasMenuBar\" of process \"Unsplash Wallpapers\") to click first menu bar item'"
+
+
+# Show current input
+# sketchybar --add item  input right                                \
+#            --set       input  script="$HOME/.config/sketchybar/plugins/audio_source.sh input" \
+#                        update_freq=5                            \
+#                        label.padding_left=5                     \
+#                        click_script="open 'x-apple.systempreferences:com.apple.preference.sound?input'"
+#
+# # Show current output
+# sketchybar --add item    output right                               \
+#            --set         output script="$HOME/.config/sketchybar/plugins/audio_source.sh output" \
+#                           update_freq=5                            \
+#                           label.padding_left=5                     \
+#                           click_script="open 'x-apple.systempreferences:com.apple.preference.sound?output'"
 
 ##### Finalizing Setup #####
 sketchybar --update
