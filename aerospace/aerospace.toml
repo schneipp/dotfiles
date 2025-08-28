@@ -1,0 +1,124 @@
+# AeroSpace config generated from your skhdrc (one-to-one where possible)
+# Mode: main (you can move these into any custom mode)
+
+[mode.main.binding]
+    # Move inside current screen; at the edge, hop to the monitor in that direction
+    cmd-shift-h = 'move --boundaries all-monitors-outer-frame --boundaries-action create-implicit-container left'
+    cmd-shift-j = 'move --boundaries all-monitors-outer-frame --boundaries-action create-implicit-container down'
+    cmd-shift-k = 'move --boundaries all-monitors-outer-frame --boundaries-action create-implicit-container up'
+    cmd-shift-l = 'move --boundaries all-monitors-outer-frame --boundaries-action create-implicit-container right'
+
+    cmd-ctrl-h = 'move --boundaries all-monitors-outer-frame --boundaries-action create-implicit-container left'
+    cmd-ctrl-j = 'move --boundaries all-monitors-outer-frame --boundaries-action create-implicit-container down'
+    cmd-ctrl-k = 'move --boundaries all-monitors-outer-frame --boundaries-action create-implicit-container up'
+    cmd-ctrl-l = 'move --boundaries all-monitors-outer-frame --boundaries-action create-implicit-container right'
+    # skhd: cmd + shift - return : /Applications/kitty.app/Contents/MacOS/kitty
+    cmd-shift-enter = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty'
+
+    # skhd: cmd + shift - a: /Applications/firefox.app/Contents/MacOS/firefox --new-window https://grok.com
+    cmd-shift-a = 'exec-and-forget /Applications/firefox.app/Contents/MacOS/firefox --new-window https://grok.com'
+
+    # skhd: cmd + shift - m: /Applications/firefox.app/Contents/MacOS/firefox --new-window https://mail.office365.com
+    cmd-shift-m = 'exec-and-forget /Applications/firefox.app/Contents/MacOS/firefox --new-window https://mail.office365.com'
+
+    # skhd: cmd - b: /Applications/firefox.app/Contents/MacOS/firefox --new-window https://search.brave.com
+    cmd-b = 'exec-and-forget /Applications/firefox.app/Contents/MacOS/firefox --new-window https://search.brave.com'
+
+    # skhd: cmd - e: open .
+    cmd-e = 'exec-and-forget open .'
+
+    # skhd: cmd - h : yabai -m window --focus west  || yabai -m display --focus west
+    cmd-h = 'focus --boundaries all-monitors-outer-frame --boundaries-action wrap-around-all-monitors left'
+
+    # skhd: cmd - l : yabai -m window --focus east  || yabai -m display --focus east
+    cmd-l = 'focus --boundaries all-monitors-outer-frame --boundaries-action wrap-around-all-monitors right'
+
+    # skhd: cmd - j : yabai -m window --focus south || yabai -m display --focus south
+    cmd-j = 'focus --boundaries all-monitors-outer-frame --boundaries-action wrap-around-all-monitors down'
+
+    # skhd: cmd - k : yabai -m window --focus north || yabai -m display --focus north
+    cmd-k = 'focus --boundaries all-monitors-outer-frame --boundaries-action wrap-around-all-monitors up'
+
+    # skhd: cmd + shift - v : yabai -m window --insert east
+    #cmd-shift-v = 'join-with right'
+
+    # skhd: cmd + shift - h : yabai -m window --insert south
+    #cmd-shift-h = 'join-with down'
+
+    # skhd: cmd + shift - 1 : yabai -m window --space 1
+    cmd-shift-1 = 'move-node-to-workspace 1'
+
+    # skhd: cmd + shift - 2 : yabai -m window --space 2
+    cmd-shift-2 = 'move-node-to-workspace 2'
+
+    # skhd: cmd + shift - 3 : yabai -m window --space 3
+    cmd-shift-3 = 'move-node-to-workspace 3'
+
+    # skhd: cmd + shift - 4 : yabai -m window --space 4
+    cmd-shift-4 = 'move-node-to-workspace 4'
+
+    # skhd: cmd + shift - 5 : yabai -m window --space 5
+    cmd-shift-5 = 'move-node-to-workspace 5'
+
+    # skhd: cmd + shift - 6 : yabai -m window --space 6
+    cmd-shift-6 = 'move-node-to-workspace 6'
+
+    # skhd: cmd + shift - 7 : yabai -m window --space 7
+    cmd-shift-7 = 'move-node-to-workspace 7'
+
+    # skhd: cmd + shift - 8 : yabai -m window --space 8
+    cmd-shift-8 = 'move-node-to-workspace 8'
+
+    # skhd: cmd + shift - 9 : yabai -m window --space 9
+    cmd-shift-9 = 'move-node-to-workspace 9'
+
+    # skhd: cmd - 1 : yabai -m space --focus 1
+    cmd-1 = 'workspace 1'
+
+    # skhd: cmd - 2 : yabai -m space --focus 2
+    cmd-2 = 'workspace 2'
+
+    # skhd: cmd - 3 : yabai -m space --focus 3
+    cmd-3 = 'workspace 3'
+
+    # skhd: cmd - 4 : yabai -m space --focus 4
+    cmd-4 = 'workspace 4'
+
+    # skhd: cmd - 5 : yabai -m space --focus 5
+    cmd-5 = 'workspace 5'
+
+    # skhd: cmd - 6 : yabai -m space --focus 6
+    cmd-6 = 'workspace 6'
+
+    # skhd: cmd - 7 : yabai -m space --focus 7
+    cmd-7 = 'workspace 7'
+
+    # skhd: cmd - 8 : yabai -m space --focus 8
+    cmd-8 = 'workspace 8'
+
+    # skhd: cmd - 9 : yabai -m space --focus 9
+    cmd-9 = 'workspace 9'
+
+    # skhd: alt - f : yabai -m window --toggle zoom-fullscreen
+    alt-f = 'macos-native-fullscreen'
+
+    # Force assignment with graceful fallback:
+    [workspace-to-monitor-force-assignment]
+    # Workspaces 1..5 -> 2nd monitor; if not present, fall back to main
+    1 = [2, 'main']
+    2 = [2, 'main']
+    3 = [2, 'main']
+    4 = [2, 'main']
+    5 = [2, 'main']
+    
+    # Workspaces 6..8 -> 1st (leftmost) monitor; if mismatch, fall back to main
+    6 = [1, 'main']
+    7 = [1, 'main']
+    8 = [1, 'main']
+    
+    # Workspaces 9..10 -> 3rd monitor; if absent, fall back to 2nd, then main
+    9  = [3, 2, 'main']
+    10 = [3, 2, 'main']
+    
+    
+    

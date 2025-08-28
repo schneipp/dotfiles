@@ -1,6 +1,11 @@
 #start warp terminal or create new window if not exist
 #cmd + shift - return : osascript /Users/rams/.config/skhd/new-warp-window.scpt
-cmd + shift - return : osascript /Users/rams/.config/skhd/new-iterm-window.scpt
+#cmd + shift - return : osascript /Users/rams/.config/skhd/new-iterm-window.scpt
+cmd + shift - return : /Applications/kitty.app/Contents/MacOS/kitty
+cmd + shift - a: /Applications/firefox.app/Contents/MacOS/firefox --new-window https://grok.com
+cmd + shift - m: /Applications/firefox.app/Contents/MacOS/firefox --new-window https://mail.office365.com
+cmd - b: /Applications/firefox.app/Contents/MacOS/firefox --new-window https://search.brave.com
+cmd - e: open .
 #cmd + shift - return : wezterm
 #cmd + shift - return : /Applications/Alacritty.app/Contents/MacOS/alacritty
 #cmd + shift - return : /Applications/Alacritty.app/Contents/MacOS/alacritty
