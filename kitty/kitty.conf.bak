@@ -1,0 +1,4 @@
+map super+up change_font_size all +2.0
+map super+down change_font_size all -2.0
+startup_session ~/.config/kitty/kitty-startup.session
+
