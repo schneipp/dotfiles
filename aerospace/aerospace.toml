@@ -13,16 +13,19 @@
     cmd-ctrl-k = 'move --boundaries all-monitors-outer-frame --boundaries-action create-implicit-container up'
     cmd-ctrl-l = 'move --boundaries all-monitors-outer-frame --boundaries-action create-implicit-container right'
     # skhd: cmd + shift - return : /Applications/kitty.app/Contents/MacOS/kitty
-    cmd-shift-enter = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty'
+#cmd-shift-enter = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty'
+    # ghostty
+    cmd-shift-enter = 'exec-and-forget /Applications/ghostty.app/Contents/MacOS/ghostty'
+
 
     # skhd: cmd + shift - a: /Applications/firefox.app/Contents/MacOS/firefox --new-window https://grok.com
-    cmd-shift-a = 'exec-and-forget /Applications/firefox.app/Contents/MacOS/firefox --new-window https://grok.com'
+    cmd-shift-a = 'exec-and-forget /Applications/Brave\ Browser.app/Contents/MacOS/Brave\ Browser --new-window https://grok.com'
 
     # skhd: cmd + shift - m: /Applications/firefox.app/Contents/MacOS/firefox --new-window https://mail.office365.com
-    cmd-shift-m = 'exec-and-forget /Applications/firefox.app/Contents/MacOS/firefox --new-window https://mail.office365.com'
+    cmd-shift-m = 'exec-and-forget /Applications/Brave\ Browser.app/Contents/MacOS/Brave\ Browser --new-window https://mail.office365.com'
 
     # skhd: cmd - b: /Applications/firefox.app/Contents/MacOS/firefox --new-window https://search.brave.com
-    cmd-b = 'exec-and-forget /Applications/firefox.app/Contents/MacOS/firefox --new-window https://search.brave.com'
+    cmd-b = 'exec-and-forget /Applications/Brave\ Browser.app/Contents/MacOS/Brave\ Browser --new-window https://search.brave.com'
 
     # skhd: cmd - e: open .
     cmd-e = 'exec-and-forget open .'

@@ -1,0 +1,4 @@
+keybind = ctrl+arrow_up=increase_font_size:1
+keybind = ctrl+arrow_down=decrease_font_size:1
+keybind = super+arrow_up=increase_font_size:1
+keybind = super+arrow_down=decrease_font_size:1
