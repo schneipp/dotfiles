@@ -50,7 +50,7 @@
                                         ;(unpin! t)
 (package! transient)
 (package! with-editor)
-(package! copilot :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el")))
+;;(package! copilot :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el")))
 (package! ob-async)
 (package! ement)
 (package! sqlite3)

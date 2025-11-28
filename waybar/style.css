@@ -13,7 +13,7 @@
 @define-color white #c0caf5;
 
 * {
-    font-family: "JetBrainsMono Nerd Font", "Font Awesome 6 Free", sans-serif;
+    font-family: "JetBrains Mono", "Font Awesome 6 Free Solid", "Font Awesome 6 Brands", sans-serif;
     font-size: 14px;
     font-weight: bold;
     min-height: 0;
