@@ -24,11 +24,11 @@
  '(org-level-5 ((t (:inherit outline-5 :height 0.8))))
  )
 
-(use-package! copilot
-  :hook (prog-mode . copilot-mode)
-  :bind (:map copilot-completion-map
-              ("C-l" . 'copilot-accept-completion)
-              ))
+;(use-package! copilot
+;  :hook (prog-mode . copilot-mode)
+;  :bind (:map copilot-completion-map
+;              ("C-l" . 'copilot-accept-completion)
+;              ))
 
 ;;(use-package! ob-async)
 (require 'ob-async)
