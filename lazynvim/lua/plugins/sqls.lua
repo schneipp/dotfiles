@@ -1,3 +1,10 @@
+-- Database connections use environment variables for security
+-- Set POSTGRES_PASSWORD in your shell environment
+local db_password = os.getenv("POSTGRES_PASSWORD") or ""
+local db_host = os.getenv("POSTGRES_HOST") or "172.17.0.1"
+local db_port = os.getenv("POSTGRES_PORT") or "5432"
+local db_user = os.getenv("POSTGRES_USER") or "root"
+
 return {
   "neovim/nvim-lspconfig",
   opts = {
@@ -8,11 +15,17 @@ return {
             connections = {
               {
                 driver = "postgresql-hrcore",
-                dataSourceName = "host=172.17.0.1 port=5432 user=root password=${POSTGRES_PASSWORD} dbname=hrcore sslmode=disable",
+                dataSourceName = string.format(
+                  "host=%s port=%s user=%s password=%s dbname=hrcore sslmode=disable",
+                  db_host, db_port, db_user, db_password
+                ),
               },
               {
                 driver = "postgresql-public",
-                dataSourceName = "host=172.17.0.1 port=5432 user=root password=${POSTGRES_PASSWORD} dbname=postgres sslmode=disable",
+                dataSourceName = string.format(
+                  "host=%s port=%s user=%s password=%s dbname=postgres sslmode=disable",
+                  db_host, db_port, db_user, db_password
+                ),
               },
             },
           },

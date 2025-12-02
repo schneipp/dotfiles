@@ -314,33 +314,36 @@
       :channels ("#ayb"))))
 
 ;;
-;; SQL Configuration
+;; SQL Configuration - uses environment variables for credentials
+;; Set POSTGRES_PASSWORD in your shell environment
 (use-package! sql
   :config
   (setq sql-postgres-program "psql") ; Ensure psql is used
   (setq sql-connection-alist
-        '((postgresdb-postgres
+        `((postgresdb-postgres
            (sql-product 'postgres)
            (sql-user "postgres")
            (sql-database "postgres")
-           (sql-server "172.17.0.1")
+           (sql-server ,(or (getenv "POSTGRES_HOST") "172.17.0.1"))
            (sql-port 5432))
           (postgresdb-hrcore
            (sql-product 'postgres)
            (sql-user "postgres")
-           (sql-password "${POSTGRES_PASSWORD}") ; For org-babel
+           (sql-password ,(getenv "POSTGRES_PASSWORD"))
            (sql-database "hrcore")
-           (sql-server "172.17.0.1")
+           (sql-server ,(or (getenv "POSTGRES_HOST") "172.17.0.1"))
            (sql-port 5432)))))
 
-;; LSP for SQL
+;; LSP for SQL - uses environment variables for credentials
 (use-package! lsp-mode
   :hook (sql-mode . lsp)
   :config
   (setq lsp-sqls-workspace-config-path nil)
   (setq lsp-sqls-connections
-        '(((driver . "postgresql")
-           (dataSourceName . "host=172.17.0.1 port=5432 user=postgres password=${POSTGRES_PASSWORD} dbname=hrcore sslmode=disable"))))
+        `(((driver . "postgresql")
+           (dataSourceName . ,(format "host=%s port=5432 user=postgres password=%s dbname=hrcore sslmode=disable"
+                                      (or (getenv "POSTGRES_HOST") "172.17.0.1")
+                                      (or (getenv "POSTGRES_PASSWORD") ""))))))
   ;; Ensure LSP logs for debugging
   (setq lsp-log-io t))
 
