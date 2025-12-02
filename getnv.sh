@@ -159,6 +159,10 @@ case ":$PATH:" in
 esac
 
 # Offer to install schneipp's neovim config
+printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n"
+printf "${CYAN}⚙️  Configuration Setup${RESET}\n"
+printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n\n"
+
 # Detect script directory (only works when run from file, not from curl | sh)
 if [ -n "$0" ] && [ "$0" != "sh" ] && [ "$0" != "bash" ] && [ "$0" != "-sh" ] && [ "$0" != "-bash" ]; then
   SCRIPT_DIR="$(cd "$(dirname "$0")" 2>/dev/null && pwd)"
@@ -166,44 +170,59 @@ else
   SCRIPT_DIR=""
 fi
 
-LAZY_CONFIG="$SCRIPT_DIR/lazynvim"
+DOTFILES_DIR="$HOME/dotfiles"
 NVIM_CONFIG="$HOME/.config/nvim"
 
-# Only offer config if script is run locally (not via curl | sh)
-if [ -n "$SCRIPT_DIR" ] && [ -d "$LAZY_CONFIG" ]; then
-  printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n"
-  printf "${CYAN}⚙️  Configuration Setup${RESET}\n"
-  printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n\n"
+# Ask if user wants LazyVim config
+printf "${YELLOW}Install schneipp's LazyVim config? (y/n): ${RESET}"
+read -r REPLY
 
-  printf "${YELLOW}Install schneipp's LazyVim config? (y/n): ${RESET}"
-  read -r REPLY
+case "$REPLY" in
+  [Yy]*)
+    # Backup existing config if present
+    if [ -d "$NVIM_CONFIG" ] || [ -L "$NVIM_CONFIG" ]; then
+      BACKUP="$NVIM_CONFIG.backup.$(date +%s)"
+      printf "${YELLOW}📦 Backing up existing config to ${BOLD}$BACKUP${RESET}\n"
+      mv "$NVIM_CONFIG" "$BACKUP"
+    fi
 
-  case "$REPLY" in
-    [Yy]*)
-      # Backup existing config if present
-      if [ -d "$NVIM_CONFIG" ]; then
-        BACKUP="$NVIM_CONFIG.backup.$(date +%s)"
-        printf "${YELLOW}📦 Backing up existing config to ${BOLD}$BACKUP${RESET}\n"
-        mv "$NVIM_CONFIG" "$BACKUP"
+    # Check if running locally with lazynvim folder
+    if [ -n "$SCRIPT_DIR" ] && [ -d "$SCRIPT_DIR/lazynvim" ]; then
+      # Running locally - symlink from script directory
+      printf "${YELLOW}🔗 Creating symlink from ${BOLD}$SCRIPT_DIR/lazynvim${RESET}\n"
+      ln -s "$SCRIPT_DIR/lazynvim" "$NVIM_CONFIG"
+      printf "${GREEN}✓ LazyVim config symlinked to ${BOLD}$NVIM_CONFIG${RESET}\n\n"
+    else
+      # Running remotely or no local config - clone dotfiles
+      if [ -d "$DOTFILES_DIR" ]; then
+        printf "${YELLOW}📂 Dotfiles directory already exists at ${BOLD}$DOTFILES_DIR${RESET}\n"
+        printf "${YELLOW}   Pulling latest changes...${RESET}\n"
+        cd "$DOTFILES_DIR" && git pull
+      else
+        printf "${YELLOW}📥 Cloning dotfiles repository...${RESET}\n"
+        if ! git clone https://github.com/schneipp/dotfiles.git "$DOTFILES_DIR"; then
+          printf "${RED}❌ Failed to clone dotfiles repository${RESET}\n"
+          printf "${BLUE}You can manually clone it later:${RESET}\n"
+          printf "${BOLD}   git clone https://github.com/schneipp/dotfiles.git${RESET}\n\n"
+        else
+          printf "${GREEN}✓ Dotfiles cloned to ${BOLD}$DOTFILES_DIR${RESET}\n"
+        fi
       fi
 
-      # Copy config
-      mkdir -p "$(dirname "$NVIM_CONFIG")"
-      cp -r "$LAZY_CONFIG" "$NVIM_CONFIG"
-      printf "${GREEN}✓ LazyVim config installed to ${BOLD}$NVIM_CONFIG${RESET}\n\n"
-      ;;
-    *)
-      printf "${BLUE}Skipped config installation${RESET}\n\n"
-      ;;
-  esac
-elif [ -n "$SCRIPT_DIR" ]; then
-  # Script run locally but no lazynvim config found
-  :
-else
-  # Script run via curl | sh
-  printf "${CYAN}💡 Tip: Clone the dotfiles repo to get schneipp's LazyVim config!${RESET}\n"
-  printf "${BOLD}   git clone https://github.com/schneipp/dotfiles.git${RESET}\n\n"
-fi
+      # Create symlink if clone succeeded
+      if [ -d "$DOTFILES_DIR/lazynvim" ]; then
+        printf "${YELLOW}🔗 Creating symlink...${RESET}\n"
+        ln -s "$DOTFILES_DIR/lazynvim" "$NVIM_CONFIG"
+        printf "${GREEN}✓ LazyVim config symlinked to ${BOLD}$NVIM_CONFIG${RESET}\n\n"
+      else
+        printf "${RED}❌ LazyVim config not found in dotfiles${RESET}\n\n"
+      fi
+    fi
+    ;;
+  *)
+    printf "${BLUE}Skipped config installation${RESET}\n\n"
+    ;;
+esac
 
 # Verify installation
 printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n"
