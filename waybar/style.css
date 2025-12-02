@@ -38,6 +38,8 @@ window#waybar.hidden {
 
 /* Module Styling */
 #workspaces,
+#cava,
+#mpris,
 #pulseaudio,
 #clock,
 #bluetooth,
@@ -187,6 +189,38 @@ window#waybar.hidden {
 
 #tray menu menuitem:hover {
     background: alpha(@blue, 0.3);
+}
+
+/* Cava Visualizer */
+#custom-cava {
+    color: @cyan;
+    background: alpha(@cyan, 0.15);
+    letter-spacing: -2px;
+    font-family: monospace;
+}
+
+#custom-cava:hover {
+    background: alpha(@cyan, 0.3);
+}
+
+/* MPRIS Media Player */
+#mpris {
+    color: @green;
+    background: alpha(@green, 0.15);
+}
+
+#mpris:hover {
+    background: alpha(@green, 0.3);
+}
+
+#mpris.paused {
+    color: @yellow;
+    background: alpha(@yellow, 0.15);
+}
+
+#mpris.stopped {
+    color: @fg-dark;
+    background: transparent;
 }
 
 /* Tooltips */
