@@ -134,16 +134,17 @@ case ":$PATH:" in
             *)
               printf "${RED}⚠️  Unknown shell: $SHELL${RESET}\n"
               printf "${BLUE}Manually add to your shell config:${RESET}\n"
-              printf "${BOLD}  export PATH=\"$NVIM_DIR/bin:\$PATH\"${RESET}\n\n"
+              printf "${BOLD}  export PATH=\"%s/bin:\$PATH\"${RESET}\n\n" "$NVIM_DIR"
               ;;
           esac
 
           if [ -n "$SHELL_RC" ]; then
             # Check if already in config
-            if grep -q "export PATH=\"$NVIM_DIR/bin:\$PATH\"" "$SHELL_RC" 2>/dev/null; then
+            PATH_EXPORT="export PATH=\"$NVIM_DIR/bin:\$PATH\""
+            if grep -q "$PATH_EXPORT" "$SHELL_RC" 2>/dev/null; then
               printf "${GREEN}✓ PATH already configured in ${BOLD}$SHELL_RC${RESET}\n\n"
             else
-              printf "\n# Neovim\nexport PATH=\"$NVIM_DIR/bin:\$PATH\"\n" >> "$SHELL_RC"
+              printf "\n# Neovim\n%s\n" "$PATH_EXPORT" >> "$SHELL_RC"
               printf "${GREEN}✓ Added to ${BOLD}$SHELL_RC${RESET}\n"
               printf "${CYAN}💡 Run: ${BOLD}source $SHELL_RC${RESET}${CYAN} (or restart your terminal)${RESET}\n\n"
             fi
@@ -151,7 +152,7 @@ case ":$PATH:" in
           ;;
         *)
           printf "${BLUE}Skipped. Manually add to your shell config:${RESET}\n"
-          printf "${BOLD}  export PATH=\"$NVIM_DIR/bin:\$PATH\"${RESET}\n\n"
+          printf "${BOLD}  export PATH=\"%s/bin:\$PATH\"${RESET}\n\n" "$NVIM_DIR"
           ;;
       esac
     fi
