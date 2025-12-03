@@ -44,6 +44,13 @@ $HOME/.tmux.conf
 $HOME/.tmux/tmux.conf
 "
 
+# Check if running as root (skip sudo if so)
+if [ "$(id -u)" -eq 0 ]; then
+  SUDO=""
+else
+  SUDO="sudo"
+fi
+
 # ============================================================
 # Step 1: Install tmux
 # ============================================================
@@ -76,14 +83,14 @@ else
         apk add --no-cache tmux git
       elif [ -f /etc/fedora-release ]; then
         printf "${GREEN}Fedora detected${RESET}\n"
-        sudo dnf install -y tmux git
+        $SUDO dnf install -y tmux git
       elif [ -f /etc/arch-release ]; then
         printf "${GREEN}Arch Linux detected${RESET}\n"
-        sudo pacman -S --noconfirm tmux git
+        $SUDO pacman -S --noconfirm tmux git
       elif [ -f /etc/apt/sources.list ]; then
         printf "${GREEN}Debian-based system detected${RESET}\n"
-        sudo apt update
-        sudo apt install -y tmux git
+        $SUDO apt update
+        $SUDO apt install -y tmux git
       else
         printf "${RED}Unsupported Linux distribution${RESET}\n"
         printf "${BLUE}Please install tmux manually and run this script again${RESET}\n"

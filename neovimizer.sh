@@ -29,6 +29,13 @@ printf "${MAGENTA}    ==========================================${RESET}\n\n"
 
 NVIM_DIR="$HOME/apps/nvim"
 
+# Check if running as root (skip sudo if so)
+if [ "$(id -u)" -eq 0 ]; then
+  SUDO=""
+else
+  SUDO="sudo"
+fi
+
 # Fetch latest version from GitHub API
 printf "${YELLOW}Fetching latest Neovim version...${RESET}\n"
 VERSION=$(curl -sSL https://api.github.com/repos/neovim/neovim/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
@@ -75,13 +82,13 @@ case "$OS_TYPE" in
 
     elif [ -f /etc/fedora-release ]; then
       printf "${GREEN}Fedora detected${RESET}\n\n"
-      sudo dnf install -y neovim
+      $SUDO dnf install -y neovim
 
     elif [ -f /etc/apt/sources.list ]; then
       printf "${GREEN}Debian-based system detected${RESET}\n\n"
 
-      sudo apt update
-      sudo apt install -y curl
+      $SUDO apt update
+      $SUDO apt install -y curl
 
       printf "${YELLOW}Downloading...${RESET}\n"
       if ! curl -fL "https://github.com/neovim/neovim/releases/download/${VERSION}/nvim-linux64.tar.gz" -o /tmp/nvim.tar.gz; then
