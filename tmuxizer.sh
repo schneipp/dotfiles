@@ -24,7 +24,7 @@ cat << "EOF"
     |_||_| |_| |_|\__,_/_/\_\
 
 EOF
-printf "${CYAN}${BOLD}    schneipp's Tmux Installation Script${RESET}\n"
+printf "${CYAN}${BOLD}    schneipp Tmux Installation Script${RESET}\n"
 printf "${MAGENTA}    ===========================================${RESET}\n\n"
 
 # Detect script directory (only works when run from file, not from curl | sh)
@@ -157,7 +157,7 @@ else
 fi
 
 # ============================================================
-# Step 4: Install schneipp's tmux config
+# Step 4: Install schneipp tmux config
 # ============================================================
 printf "${MAGENTA}===========================================${RESET}\n"
 printf "${CYAN}Installing Configuration${RESET}\n"

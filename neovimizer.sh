@@ -24,7 +24,7 @@ cat << "EOF"
   |_| \_|\___|\___/ \_/ |_|_| |_| |_|
 
 EOF
-printf "${CYAN}${BOLD}    schneipp's Neovim Installation Script${RESET}\n"
+printf "${CYAN}${BOLD}    schneipp Neovim Installation Script${RESET}\n"
 printf "${MAGENTA}    ==========================================${RESET}\n\n"
 
 NVIM_DIR="$HOME/apps/nvim"
@@ -158,7 +158,7 @@ case ":$PATH:" in
     ;;
 esac
 
-# Offer to install schneipp's neovim config
+# Offer to install schneipp neovim config
 printf "${MAGENTA}===========================================${RESET}\n"
 printf "${CYAN}Configuration Setup${RESET}\n"
 printf "${MAGENTA}===========================================${RESET}\n\n"
@@ -174,7 +174,7 @@ DOTFILES_DIR="$HOME/dotfiles"
 NVIM_CONFIG="$HOME/.config/nvim"
 
 # Ask if user wants LazyVim config
-printf "${YELLOW}Install schneipp's LazyVim config? (y/n): ${RESET}"
+printf "${YELLOW}Install schneipp LazyVim config? (y/n): ${RESET}"
 read -r REPLY
 
 case "$REPLY" in
@@ -273,7 +273,7 @@ printf "${MAGENTA}===========================================${RESET}\n"
 printf "${CYAN}Tmux Configuration${RESET}\n"
 printf "${MAGENTA}===========================================${RESET}\n\n"
 
-printf "${YELLOW}Would you also like to set up tmux with schneipp's config? (y/n): ${RESET}"
+printf "${YELLOW}Would you also like to set up tmux with schneipp config? (y/n): ${RESET}"
 read -r REPLY
 
 case "$REPLY" in
