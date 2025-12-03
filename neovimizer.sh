@@ -130,7 +130,8 @@ printf "${CYAN}Running Local Installer${RESET}\n"
 printf "${MAGENTA}===========================================${RESET}\n\n"
 
 if [ -f "$DOTFILES_DIR/install-nvim.sh" ]; then
-  exec sh "$DOTFILES_DIR/install-nvim.sh"
+  # Use /dev/tty for interactive input when running via curl pipe
+  exec sh "$DOTFILES_DIR/install-nvim.sh" </dev/tty
 else
   printf "${RED}Local installer not found at $DOTFILES_DIR/install-nvim.sh${RESET}\n"
   exit 1
