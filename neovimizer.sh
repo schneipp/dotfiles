@@ -202,6 +202,9 @@ case "$REPLY" in
       mv "$NVIM_STATE" "$STATE_BACKUP"
     fi
 
+    # Ensure .config directory exists
+    mkdir -p "$(dirname "$NVIM_CONFIG")"
+
     # Check if running locally with lazynvim folder
     if [ -n "$SCRIPT_DIR" ] && [ -d "$SCRIPT_DIR/lazynvim" ]; then
       # Running locally - symlink from script directory
