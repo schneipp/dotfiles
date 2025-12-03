@@ -69,11 +69,12 @@ install_neovim() {
       ;;
 
     Linux)
+      # Alpine uses musl - check if we can use glibc binaries or need apk
       if [ -f /etc/alpine-release ]; then
         printf "${GREEN}Alpine Linux detected${RESET}\n"
-        apk add --no-cache neovim
-        printf "${GREEN}[OK] Neovim installed via apk${RESET}\n\n"
-        return
+        # Install gcompat for glibc compatibility, then download binary
+        apk add --no-cache gcompat libgcc libstdc++
+        printf "${YELLOW}Downloading Neovim binary...${RESET}\n"
       elif [ -f /etc/fedora-release ]; then
         printf "${GREEN}Fedora detected${RESET}\n"
         $SUDO dnf install -y neovim
@@ -84,10 +85,12 @@ install_neovim() {
         $SUDO pacman -S --noconfirm neovim
         printf "${GREEN}[OK] Neovim installed via pacman${RESET}\n\n"
         return
+      else
+        printf "${GREEN}Linux detected${RESET}\n"
       fi
 
-      # For other Linux distros, download binary
-      printf "${GREEN}Linux detected, downloading binary${RESET}\n"
+      # Download binary for Alpine and other distros
+      printf "${YELLOW}Downloading binary...${RESET}\n"
       if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
         ASSET="nvim-linux-arm64.tar.gz"
       else
