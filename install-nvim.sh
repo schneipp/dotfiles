@@ -69,12 +69,19 @@ install_neovim() {
       ;;
 
     Linux)
-      # Alpine uses musl - check if we can use glibc binaries or need apk
+      # Alpine uses musl - glibc binaries won't work, must use apk
       if [ -f /etc/alpine-release ]; then
         printf "${GREEN}Alpine Linux detected${RESET}\n"
-        # Install gcompat for glibc compatibility, then download binary
-        apk add --no-cache gcompat libgcc libstdc++
-        printf "${YELLOW}Downloading Neovim binary...${RESET}\n"
+        # Try edge/testing repo for latest neovim
+        printf "${YELLOW}Adding Alpine edge repo for latest Neovim...${RESET}\n"
+        echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
+        apk update
+        apk add --no-cache neovim
+        printf "${GREEN}[OK] Neovim installed via apk${RESET}\n"
+        # Check version
+        INSTALLED_VER=$(nvim --version 2>/dev/null | head -n1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+        printf "${CYAN}Installed version: $INSTALLED_VER${RESET}\n\n"
+        return
       elif [ -f /etc/fedora-release ]; then
         printf "${GREEN}Fedora detected${RESET}\n"
         $SUDO dnf install -y neovim
