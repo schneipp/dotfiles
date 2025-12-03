@@ -207,13 +207,19 @@ printf "${MAGENTA}===========================================${RESET}\n"
 printf "${CYAN}Installing Tmux Plugins${RESET}\n"
 printf "${MAGENTA}===========================================${RESET}\n\n"
 
-printf "${YELLOW}Running TPM plugin installer...${RESET}\n"
-# Run TPM install script (works without tmux running)
-if [ -x "$TPM_DIR/bin/install_plugins" ]; then
-  "$TPM_DIR/bin/install_plugins" || true
-  printf "${GREEN}[OK] Plugins installed${RESET}\n\n"
+# TPM requires bash - check if available
+if command -v bash >/dev/null 2>&1; then
+  printf "${YELLOW}Running TPM plugin installer...${RESET}\n"
+  if [ -x "$TPM_DIR/bin/install_plugins" ]; then
+    "$TPM_DIR/bin/install_plugins" || true
+    printf "${GREEN}[OK] Plugins installed${RESET}\n\n"
+  else
+    printf "${YELLOW}TPM install script not found. Plugins will install on first tmux start.${RESET}\n"
+    printf "${CYAN}Press ${BOLD}prefix + I${RESET}${CYAN} inside tmux to install plugins${RESET}\n\n"
+  fi
 else
-  printf "${YELLOW}TPM install script not found. Plugins will install on first tmux start.${RESET}\n"
+  printf "${YELLOW}Bash not found - skipping automatic plugin installation.${RESET}\n"
+  printf "${CYAN}Plugins will install on first tmux start.${RESET}\n"
   printf "${CYAN}Press ${BOLD}prefix + I${RESET}${CYAN} inside tmux to install plugins${RESET}\n\n"
 fi
 
