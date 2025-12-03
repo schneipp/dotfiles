@@ -28,7 +28,15 @@ printf "${CYAN}${BOLD}    schneipp Neovim Installation Script${RESET}\n"
 printf "${MAGENTA}    ==========================================${RESET}\n\n"
 
 NVIM_DIR="$HOME/apps/nvim"
-VERSION="v0.10.4"
+
+# Fetch latest version from GitHub API
+printf "${YELLOW}Fetching latest Neovim version...${RESET}\n"
+VERSION=$(curl -sSL https://api.github.com/repos/neovim/neovim/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+
+if [ -z "$VERSION" ]; then
+  printf "${RED}Failed to fetch latest version, using fallback v0.10.4${RESET}\n"
+  VERSION="v0.10.4"
+fi
 
 printf "${BLUE}Installing Neovim ${BOLD}$VERSION${RESET}${BLUE}...${RESET}\n\n"
 
