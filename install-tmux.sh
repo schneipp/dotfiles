@@ -56,7 +56,7 @@ else
     Linux)
       if [ -f /etc/alpine-release ]; then
         printf "${GREEN}Alpine Linux detected${RESET}\n"
-        apk add --no-cache tmux
+        apk add --no-cache tmux bash
       elif [ -f /etc/fedora-release ]; then
         printf "${GREEN}Fedora detected${RESET}\n"
         $SUDO dnf install -y tmux
