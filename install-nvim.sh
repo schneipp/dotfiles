@@ -27,7 +27,39 @@ else
 fi
 
 # ============================================================
-# Step 1: Install Neovim
+# Step 1: Install Node.js via nvm (required for many LSPs)
+# ============================================================
+printf "${MAGENTA}===========================================${RESET}\n"
+printf "${CYAN}Installing Node.js via nvm${RESET}\n"
+printf "${MAGENTA}===========================================${RESET}\n\n"
+
+if command -v node >/dev/null 2>&1; then
+  NODE_VER=$(node --version 2>/dev/null)
+  printf "${GREEN}[OK] Node.js already installed: $NODE_VER${RESET}\n\n"
+elif [ -d "$HOME/.nvm" ]; then
+  printf "${GREEN}[OK] nvm already installed${RESET}\n"
+  # Source nvm and install node
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  if ! command -v node >/dev/null 2>&1; then
+    printf "${YELLOW}Installing latest Node.js LTS...${RESET}\n"
+    nvm install --lts 2>/dev/null || true
+  fi
+  NODE_VER=$(node --version 2>/dev/null || echo "unknown")
+  printf "${GREEN}[OK] Node.js: $NODE_VER${RESET}\n\n"
+else
+  printf "${YELLOW}Installing nvm...${RESET}\n"
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | sh 2>/dev/null
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  printf "${YELLOW}Installing latest Node.js LTS...${RESET}\n"
+  nvm install --lts 2>/dev/null || true
+  NODE_VER=$(node --version 2>/dev/null || echo "unknown")
+  printf "${GREEN}[OK] nvm + Node.js installed: $NODE_VER${RESET}\n\n"
+fi
+
+# ============================================================
+# Step 2: Install Neovim
 # ============================================================
 printf "${MAGENTA}===========================================${RESET}\n"
 printf "${CYAN}Installing Neovim${RESET}\n"
@@ -142,7 +174,7 @@ install_neovim() {
 install_neovim
 
 # ============================================================
-# Step 2: Add to PATH (if installed to ~/apps/nvim)
+# Step 3: Add to PATH (if installed to ~/apps/nvim)
 # ============================================================
 if [ -d "$NVIM_DIR/bin" ]; then
   case ":$PATH:" in
@@ -209,7 +241,7 @@ if [ -d "$NVIM_DIR/bin" ]; then
 fi
 
 # ============================================================
-# Step 3: Install LazyVim config
+# Step 4: Install LazyVim config
 # ============================================================
 printf "${MAGENTA}===========================================${RESET}\n"
 printf "${CYAN}LazyVim Configuration${RESET}\n"
@@ -266,7 +298,7 @@ case "$REPLY" in
 esac
 
 # ============================================================
-# Step 4: Verify installation
+# Step 5: Verify installation
 # ============================================================
 printf "${MAGENTA}===========================================${RESET}\n"
 printf "${CYAN}Verification${RESET}\n"
@@ -289,7 +321,7 @@ else
 fi
 
 # ============================================================
-# Step 5: Offer tmux setup
+# Step 6: Offer tmux setup
 # ============================================================
 printf "${MAGENTA}===========================================${RESET}\n"
 printf "${CYAN}Tmux Configuration${RESET}\n"
