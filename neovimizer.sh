@@ -56,14 +56,22 @@ case "$OS_TYPE" in
   Darwin)
     printf "${GREEN}macOS detected${RESET}\n\n"
 
+    # Detect architecture
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "arm64" ]; then
+      MACOS_ASSET="nvim-macos-arm64.tar.gz"
+    else
+      MACOS_ASSET="nvim-macos-x86_64.tar.gz"
+    fi
+
     # Download macOS binary
     printf "${YELLOW}Downloading...${RESET}\n"
-    if ! curl -fL "https://github.com/neovim/neovim/releases/download/${VERSION}/nvim-macos-x86_64.tar.gz" -o /tmp/nvim.tar.gz; then
+    if ! curl -fL "https://github.com/neovim/neovim/releases/download/${VERSION}/${MACOS_ASSET}" -o /tmp/nvim.tar.gz; then
       printf "${RED}Failed to download Neovim${RESET}\n"
       exit 1
     fi
 
-    # Extract (strip the nvim-macos-x86_64 wrapper directory)
+    # Extract
     printf "${YELLOW}Extracting...${RESET}\n"
     tar -xzf /tmp/nvim.tar.gz -C "$NVIM_DIR" --strip-components=1
     rm /tmp/nvim.tar.gz
@@ -91,12 +99,16 @@ case "$OS_TYPE" in
       $SUDO apt install -y curl
 
       printf "${YELLOW}Downloading...${RESET}\n"
-      if ! curl -fL "https://github.com/neovim/neovim/releases/download/${VERSION}/nvim-linux64.tar.gz" -o /tmp/nvim.tar.gz; then
-        printf "${RED}Failed to download Neovim${RESET}\n"
-        exit 1
+      # Try new naming convention first, fall back to old
+      if ! curl -fL "https://github.com/neovim/neovim/releases/download/${VERSION}/nvim-linux-x86_64.tar.gz" -o /tmp/nvim.tar.gz; then
+        # Try old naming convention (pre-0.10)
+        if ! curl -fL "https://github.com/neovim/neovim/releases/download/${VERSION}/nvim-linux64.tar.gz" -o /tmp/nvim.tar.gz; then
+          printf "${RED}Failed to download Neovim${RESET}\n"
+          exit 1
+        fi
       fi
 
-      # Extract (strip the nvim-linux64 wrapper directory)
+      # Extract
       printf "${YELLOW}Extracting...${RESET}\n"
       tar -xzf /tmp/nvim.tar.gz -C "$NVIM_DIR" --strip-components=1
       rm /tmp/nvim.tar.gz
