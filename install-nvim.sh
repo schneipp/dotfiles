@@ -251,8 +251,13 @@ case "$REPLY" in
     fi
 
     if [ -n "$NVIM_CMD" ]; then
+      # Install plugins
       "$NVIM_CMD" --headless "+Lazy! sync" +qa 2>/dev/null || true
-      printf "${GREEN}[OK] LazyVim plugins installed${RESET}\n\n"
+      printf "${GREEN}[OK] LazyVim plugins installed${RESET}\n"
+      # Install treesitter parsers
+      printf "${YELLOW}Installing Treesitter parsers...${RESET}\n"
+      "$NVIM_CMD" --headless "+TSUpdateSync" +qa 2>/dev/null || true
+      printf "${GREEN}[OK] Treesitter parsers installed${RESET}\n\n"
     fi
     ;;
   *)
