@@ -33,29 +33,47 @@ printf "${MAGENTA}===========================================${RESET}\n"
 printf "${CYAN}Installing Node.js via nvm${RESET}\n"
 printf "${MAGENTA}===========================================${RESET}\n\n"
 
+export NVM_DIR="$HOME/.nvm"
+
 if command -v node >/dev/null 2>&1; then
   NODE_VER=$(node --version 2>/dev/null)
   printf "${GREEN}[OK] Node.js already installed: $NODE_VER${RESET}\n\n"
-elif [ -d "$HOME/.nvm" ]; then
+elif [ -s "$NVM_DIR/nvm.sh" ]; then
   printf "${GREEN}[OK] nvm already installed${RESET}\n"
-  # Source nvm and install node
-  export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  . "$NVM_DIR/nvm.sh"
   if ! command -v node >/dev/null 2>&1; then
     printf "${YELLOW}Installing latest Node.js LTS...${RESET}\n"
-    nvm install --lts 2>/dev/null || true
+    nvm install --lts >/dev/null 2>&1 || true
   fi
   NODE_VER=$(node --version 2>/dev/null || echo "unknown")
   printf "${GREEN}[OK] Node.js: $NODE_VER${RESET}\n\n"
 else
   printf "${YELLOW}Installing nvm...${RESET}\n"
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | sh 2>/dev/null
-  export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  # Install nvm manually without running the full install script
+  mkdir -p "$NVM_DIR"
+  curl -sSL "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/nvm.sh" -o "$NVM_DIR/nvm.sh"
+  . "$NVM_DIR/nvm.sh"
   printf "${YELLOW}Installing latest Node.js LTS...${RESET}\n"
-  nvm install --lts 2>/dev/null || true
+  nvm install --lts >/dev/null 2>&1 || true
   NODE_VER=$(node --version 2>/dev/null || echo "unknown")
   printf "${GREEN}[OK] nvm + Node.js installed: $NODE_VER${RESET}\n\n"
+
+  # Add nvm to shell config
+  SHELL_RC=""
+  case "$SHELL" in
+    *zsh)  SHELL_RC="$HOME/.zshrc" ;;
+    *bash) SHELL_RC="$HOME/.bashrc" ;;
+    *)
+      if [ -f "$HOME/.bashrc" ]; then
+        SHELL_RC="$HOME/.bashrc"
+      elif [ -f "$HOME/.profile" ]; then
+        SHELL_RC="$HOME/.profile"
+      fi
+      ;;
+  esac
+  if [ -n "$SHELL_RC" ] && ! grep -q "NVM_DIR" "$SHELL_RC" 2>/dev/null; then
+    printf "\n# nvm\nexport NVM_DIR=\"\$HOME/.nvm\"\n[ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\"\n" >> "$SHELL_RC"
+  fi
 fi
 
 # ============================================================
