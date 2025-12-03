@@ -17,21 +17,20 @@ RESET='\033[0m'
 # ASCII Art
 clear
 cat << "EOF"
-   ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗
-   ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║
-   ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║
-   ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║
-   ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║
-   ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
+   _   _                 _
+  | \ | | ___  _____   _(_)_ __ ___
+  |  \| |/ _ \/ _ \ \ / / | '_ ` _ \
+  | |\  |  __/ (_) \ V /| | | | | | |
+  |_| \_|\___|\___/ \_/ |_|_| |_| |_|
 
 EOF
-printf "${CYAN}${BOLD}    ✨ schneipp's Neovim Installation Script ✨${RESET}\n"
-printf "${MAGENTA}    ═══════════════════════════════════════════${RESET}\n\n"
+printf "${CYAN}${BOLD}    schneipp's Neovim Installation Script${RESET}\n"
+printf "${MAGENTA}    ==========================================${RESET}\n\n"
 
 NVIM_DIR="$HOME/apps/nvim"
 VERSION="v0.10.4"
 
-printf "${BLUE}📦 Installing Neovim ${BOLD}$VERSION${RESET}${BLUE}...${RESET}\n\n"
+printf "${BLUE}Installing Neovim ${BOLD}$VERSION${RESET}${BLUE}...${RESET}\n\n"
 
 # Create directory if needed
 mkdir -p "$NVIM_DIR"
@@ -40,64 +39,64 @@ mkdir -p "$NVIM_DIR"
 OS_TYPE=$(uname -s)
 case "$OS_TYPE" in
   Darwin)
-    printf "${GREEN}🍎 macOS detected${RESET}\n\n"
+    printf "${GREEN}macOS detected${RESET}\n\n"
 
     # Download macOS binary
-    printf "${YELLOW}⬇️  Downloading...${RESET}\n"
+    printf "${YELLOW}Downloading...${RESET}\n"
     if ! curl -fL "https://github.com/neovim/neovim/releases/download/${VERSION}/nvim-macos-x86_64.tar.gz" -o /tmp/nvim.tar.gz; then
-      printf "${RED}❌ Failed to download Neovim${RESET}\n"
+      printf "${RED}Failed to download Neovim${RESET}\n"
       exit 1
     fi
 
     # Extract (strip the nvim-macos-x86_64 wrapper directory)
-    printf "${YELLOW}📂 Extracting...${RESET}\n"
+    printf "${YELLOW}Extracting...${RESET}\n"
     tar -xzf /tmp/nvim.tar.gz -C "$NVIM_DIR" --strip-components=1
     rm /tmp/nvim.tar.gz
 
-    printf "${GREEN}✓ Neovim installed to ${BOLD}$NVIM_DIR${RESET}\n"
-    printf "${GREEN}✓ Binary location: ${BOLD}$NVIM_DIR/bin/nvim${RESET}\n\n"
+    printf "${GREEN}[OK] Neovim installed to ${BOLD}$NVIM_DIR${RESET}\n"
+    printf "${GREEN}[OK] Binary location: ${BOLD}$NVIM_DIR/bin/nvim${RESET}\n\n"
     ;;
 
   Linux)
     # Detect Linux distribution
     if [ -f /etc/alpine-release ]; then
-      printf "${GREEN}🏔️  Alpine Linux detected${RESET}\n\n"
+      printf "${GREEN}Alpine Linux detected${RESET}\n\n"
 
       # Alpine uses apk
       apk add --no-cache neovim
 
     elif [ -f /etc/fedora-release ]; then
-      printf "${GREEN}🎩 Fedora detected${RESET}\n\n"
+      printf "${GREEN}Fedora detected${RESET}\n\n"
       sudo dnf install -y neovim
 
     elif [ -f /etc/apt/sources.list ]; then
-      printf "${GREEN}🐧 Debian-based system detected${RESET}\n\n"
+      printf "${GREEN}Debian-based system detected${RESET}\n\n"
 
       sudo apt update
       sudo apt install -y curl
 
-      printf "${YELLOW}⬇️  Downloading...${RESET}\n"
+      printf "${YELLOW}Downloading...${RESET}\n"
       if ! curl -fL "https://github.com/neovim/neovim/releases/download/${VERSION}/nvim-linux64.tar.gz" -o /tmp/nvim.tar.gz; then
-        printf "${RED}❌ Failed to download Neovim${RESET}\n"
+        printf "${RED}Failed to download Neovim${RESET}\n"
         exit 1
       fi
 
       # Extract (strip the nvim-linux64 wrapper directory)
-      printf "${YELLOW}📂 Extracting...${RESET}\n"
+      printf "${YELLOW}Extracting...${RESET}\n"
       tar -xzf /tmp/nvim.tar.gz -C "$NVIM_DIR" --strip-components=1
       rm /tmp/nvim.tar.gz
 
-      printf "${GREEN}✓ Neovim installed to ${BOLD}$NVIM_DIR${RESET}\n"
-      printf "${GREEN}✓ Binary location: ${BOLD}$NVIM_DIR/bin/nvim${RESET}\n\n"
+      printf "${GREEN}[OK] Neovim installed to ${BOLD}$NVIM_DIR${RESET}\n"
+      printf "${GREEN}[OK] Binary location: ${BOLD}$NVIM_DIR/bin/nvim${RESET}\n\n"
 
     else
-      printf "${RED}❌ Unsupported Linux distribution${RESET}\n"
+      printf "${RED}Unsupported Linux distribution${RESET}\n"
       exit 1
     fi
     ;;
 
   *)
-    printf "${RED}❌ Unsupported OS: $OS_TYPE${RESET}\n"
+    printf "${RED}Unsupported OS: $OS_TYPE${RESET}\n"
     exit 1
     ;;
 esac
@@ -109,9 +108,9 @@ case ":$PATH:" in
     ;;
   *)
     if [ -d "$NVIM_DIR/bin" ]; then
-      printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n"
-      printf "${CYAN}🛤️  PATH Configuration${RESET}\n"
-      printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n\n"
+      printf "${MAGENTA}===========================================${RESET}\n"
+      printf "${CYAN}PATH Configuration${RESET}\n"
+      printf "${MAGENTA}===========================================${RESET}\n\n"
 
       printf "${YELLOW}Add Neovim to your shell PATH automatically? (y/n): ${RESET}"
       read -r REPLY
@@ -132,7 +131,7 @@ case ":$PATH:" in
               SHELL_RC="$HOME/.profile"
               ;;
             *)
-              printf "${RED}⚠️  Unknown shell: $SHELL${RESET}\n"
+              printf "${RED}Unknown shell: $SHELL${RESET}\n"
               printf "${BLUE}Manually add to your shell config:${RESET}\n"
               printf "${BOLD}  export PATH=\"%s/bin:\$PATH\"${RESET}\n\n" "$NVIM_DIR"
               ;;
@@ -142,11 +141,11 @@ case ":$PATH:" in
             # Check if already in config
             PATH_EXPORT="export PATH=\"$NVIM_DIR/bin:\$PATH\""
             if grep -q "$PATH_EXPORT" "$SHELL_RC" 2>/dev/null; then
-              printf "${GREEN}✓ PATH already configured in ${BOLD}$SHELL_RC${RESET}\n\n"
+              printf "${GREEN}[OK] PATH already configured in ${BOLD}$SHELL_RC${RESET}\n\n"
             else
               printf "\n# Neovim\n%s\n" "$PATH_EXPORT" >> "$SHELL_RC"
-              printf "${GREEN}✓ Added to ${BOLD}$SHELL_RC${RESET}\n"
-              printf "${CYAN}💡 Run: ${BOLD}source $SHELL_RC${RESET}${CYAN} (or restart your terminal)${RESET}\n\n"
+              printf "${GREEN}[OK] Added to ${BOLD}$SHELL_RC${RESET}\n"
+              printf "${CYAN}Run: ${BOLD}source $SHELL_RC${RESET}${CYAN} (or restart your terminal)${RESET}\n\n"
             fi
           fi
           ;;
@@ -160,9 +159,9 @@ case ":$PATH:" in
 esac
 
 # Offer to install schneipp's neovim config
-printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n"
-printf "${CYAN}⚙️  Configuration Setup${RESET}\n"
-printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n\n"
+printf "${MAGENTA}===========================================${RESET}\n"
+printf "${CYAN}Configuration Setup${RESET}\n"
+printf "${MAGENTA}===========================================${RESET}\n\n"
 
 # Detect script directory (only works when run from file, not from curl | sh)
 if [ -n "$0" ] && [ "$0" != "sh" ] && [ "$0" != "bash" ] && [ "$0" != "-sh" ] && [ "$0" != "-bash" ]; then
@@ -183,7 +182,7 @@ case "$REPLY" in
     # Backup existing config if present
     if [ -d "$NVIM_CONFIG" ] || [ -L "$NVIM_CONFIG" ]; then
       BACKUP="$NVIM_CONFIG.backup.$(date +%s)"
-      printf "${YELLOW}📦 Backing up existing config to ${BOLD}$BACKUP${RESET}\n"
+      printf "${YELLOW}Backing up existing config to ${BOLD}$BACKUP${RESET}\n"
       mv "$NVIM_CONFIG" "$BACKUP"
     fi
 
@@ -193,46 +192,46 @@ case "$REPLY" in
 
     if [ -d "$NVIM_SHARE" ]; then
       SHARE_BACKUP="$NVIM_SHARE.backup.$(date +%s)"
-      printf "${YELLOW}📦 Backing up ${BOLD}$NVIM_SHARE${RESET}${YELLOW} to ${BOLD}$SHARE_BACKUP${RESET}\n"
+      printf "${YELLOW}Backing up ${BOLD}$NVIM_SHARE${RESET}${YELLOW} to ${BOLD}$SHARE_BACKUP${RESET}\n"
       mv "$NVIM_SHARE" "$SHARE_BACKUP"
     fi
 
     if [ -d "$NVIM_STATE" ]; then
       STATE_BACKUP="$NVIM_STATE.backup.$(date +%s)"
-      printf "${YELLOW}📦 Backing up ${BOLD}$NVIM_STATE${RESET}${YELLOW} to ${BOLD}$STATE_BACKUP${RESET}\n"
+      printf "${YELLOW}Backing up ${BOLD}$NVIM_STATE${RESET}${YELLOW} to ${BOLD}$STATE_BACKUP${RESET}\n"
       mv "$NVIM_STATE" "$STATE_BACKUP"
     fi
 
     # Check if running locally with lazynvim folder
     if [ -n "$SCRIPT_DIR" ] && [ -d "$SCRIPT_DIR/lazynvim" ]; then
       # Running locally - symlink from script directory
-      printf "${YELLOW}🔗 Creating symlink from ${BOLD}$SCRIPT_DIR/lazynvim${RESET}\n"
+      printf "${YELLOW}Creating symlink from ${BOLD}$SCRIPT_DIR/lazynvim${RESET}\n"
       ln -s "$SCRIPT_DIR/lazynvim" "$NVIM_CONFIG"
-      printf "${GREEN}✓ LazyVim config symlinked to ${BOLD}$NVIM_CONFIG${RESET}\n\n"
+      printf "${GREEN}[OK] LazyVim config symlinked to ${BOLD}$NVIM_CONFIG${RESET}\n\n"
     else
       # Running remotely or no local config - clone dotfiles
       if [ -d "$DOTFILES_DIR" ]; then
-        printf "${YELLOW}📂 Dotfiles directory already exists at ${BOLD}$DOTFILES_DIR${RESET}\n"
+        printf "${YELLOW}Dotfiles directory already exists at ${BOLD}$DOTFILES_DIR${RESET}\n"
         printf "${YELLOW}   Pulling latest changes...${RESET}\n"
         cd "$DOTFILES_DIR" && git pull
       else
-        printf "${YELLOW}📥 Cloning dotfiles repository...${RESET}\n"
+        printf "${YELLOW}Cloning dotfiles repository...${RESET}\n"
         if ! git clone https://github.com/schneipp/dotfiles.git "$DOTFILES_DIR"; then
-          printf "${RED}❌ Failed to clone dotfiles repository${RESET}\n"
+          printf "${RED}Failed to clone dotfiles repository${RESET}\n"
           printf "${BLUE}You can manually clone it later:${RESET}\n"
           printf "${BOLD}   git clone https://github.com/schneipp/dotfiles.git${RESET}\n\n"
         else
-          printf "${GREEN}✓ Dotfiles cloned to ${BOLD}$DOTFILES_DIR${RESET}\n"
+          printf "${GREEN}[OK] Dotfiles cloned to ${BOLD}$DOTFILES_DIR${RESET}\n"
         fi
       fi
 
       # Create symlink if clone succeeded
       if [ -d "$DOTFILES_DIR/lazynvim" ]; then
-        printf "${YELLOW}🔗 Creating symlink...${RESET}\n"
+        printf "${YELLOW}Creating symlink...${RESET}\n"
         ln -s "$DOTFILES_DIR/lazynvim" "$NVIM_CONFIG"
-        printf "${GREEN}✓ LazyVim config symlinked to ${BOLD}$NVIM_CONFIG${RESET}\n\n"
+        printf "${GREEN}[OK] LazyVim config symlinked to ${BOLD}$NVIM_CONFIG${RESET}\n\n"
       else
-        printf "${RED}❌ LazyVim config not found in dotfiles${RESET}\n\n"
+        printf "${RED}LazyVim config not found in dotfiles${RESET}\n\n"
       fi
     fi
     ;;
@@ -242,37 +241,37 @@ case "$REPLY" in
 esac
 
 # Verify installation
-printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n"
-printf "${CYAN}🔍 Verification${RESET}\n"
-printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n\n"
+printf "${MAGENTA}===========================================${RESET}\n"
+printf "${CYAN}Verification${RESET}\n"
+printf "${MAGENTA}===========================================${RESET}\n\n"
 
 if [ -x "$NVIM_DIR/bin/nvim" ]; then
   NVIM_VERSION=$("$NVIM_DIR/bin/nvim" --version 2>/dev/null | head -n1)
-  printf "${GREEN}${BOLD}✓ Installation successful!${RESET}\n"
-  printf "${CYAN}📍 Version: ${BOLD}$NVIM_VERSION${RESET}\n\n"
+  printf "${GREEN}${BOLD}[OK] Installation successful!${RESET}\n"
+  printf "${CYAN}Version: ${BOLD}$NVIM_VERSION${RESET}\n\n"
 
-  printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n"
-  printf "${GREEN}${BOLD}   🎉 All done! Happy coding! 🎉${RESET}\n"
-  printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n\n"
+  printf "${MAGENTA}===========================================${RESET}\n"
+  printf "${GREEN}${BOLD}   All done! Happy coding!${RESET}\n"
+  printf "${MAGENTA}===========================================${RESET}\n\n"
 
 elif command -v nvim >/dev/null 2>&1; then
   NVIM_VERSION=$(nvim --version 2>/dev/null | head -n1)
-  printf "${GREEN}${BOLD}✓ Installation successful!${RESET}\n"
-  printf "${CYAN}📍 Version: ${BOLD}$NVIM_VERSION${RESET}\n\n"
+  printf "${GREEN}${BOLD}[OK] Installation successful!${RESET}\n"
+  printf "${CYAN}Version: ${BOLD}$NVIM_VERSION${RESET}\n\n"
 
-  printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n"
-  printf "${GREEN}${BOLD}   🎉 All done! Happy coding! 🎉${RESET}\n"
-  printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n\n"
+  printf "${MAGENTA}===========================================${RESET}\n"
+  printf "${GREEN}${BOLD}   All done! Happy coding!${RESET}\n"
+  printf "${MAGENTA}===========================================${RESET}\n\n"
 
 else
-  printf "${RED}${BOLD}❌ Installation may have failed - nvim not found${RESET}\n\n"
+  printf "${RED}${BOLD}Installation may have failed - nvim not found${RESET}\n\n"
   exit 1
 fi
 
 # Offer to configure tmux
-printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n"
-printf "${CYAN}🖥️  Tmux Configuration${RESET}\n"
-printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n\n"
+printf "${MAGENTA}===========================================${RESET}\n"
+printf "${CYAN}Tmux Configuration${RESET}\n"
+printf "${MAGENTA}===========================================${RESET}\n\n"
 
 printf "${YELLOW}Would you also like to set up tmux with schneipp's config? (y/n): ${RESET}"
 read -r REPLY
@@ -290,7 +289,7 @@ case "$REPLY" in
     ;;
   *)
     printf "${BLUE}Skipped tmux configuration${RESET}\n"
-    printf "${CYAN}💡 You can run it later with:${RESET}\n"
+    printf "${CYAN}You can run it later with:${RESET}\n"
     printf "${BOLD}   curl -sSL https://raw.githubusercontent.com/schneipp/dotfiles/master/tmuxizer.sh | sh${RESET}\n\n"
     ;;
 esac
