@@ -180,6 +180,14 @@ if [ -d "$NVIM_DIR/bin" ]; then
               printf "${GREEN}[OK] Added to $SHELL_RC${RESET}\n"
               printf "${CYAN}Run: source $SHELL_RC${RESET}\n\n"
             fi
+
+            # Add UTF-8 locale if not set (needed for Nerd Fonts in Docker, etc.)
+            if [ -z "$LANG" ] || [ -z "$LC_ALL" ]; then
+              if ! grep -q "LC_ALL" "$SHELL_RC" 2>/dev/null; then
+                printf "\n# UTF-8 locale for proper glyph rendering\nexport LANG=C.UTF-8\nexport LC_ALL=C.UTF-8\n" >> "$SHELL_RC"
+                printf "${GREEN}[OK] Added UTF-8 locale settings to $SHELL_RC${RESET}\n\n"
+              fi
+            fi
           fi
           ;;
         *)

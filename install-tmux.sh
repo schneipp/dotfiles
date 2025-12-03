@@ -172,6 +172,38 @@ else
 fi
 
 # ============================================================
+# Step 6: Ensure UTF-8 locale (for Nerd Font glyphs)
+# ============================================================
+if [ -z "$LANG" ] || [ -z "$LC_ALL" ]; then
+  printf "${MAGENTA}===========================================${RESET}\n"
+  printf "${CYAN}Configuring UTF-8 Locale${RESET}\n"
+  printf "${MAGENTA}===========================================${RESET}\n\n"
+
+  # Detect shell config file
+  SHELL_RC=""
+  case "$SHELL" in
+    *zsh)  SHELL_RC="$HOME/.zshrc" ;;
+    *bash) SHELL_RC="$HOME/.bashrc" ;;
+    *ash)  SHELL_RC="$HOME/.profile" ;;
+    *ksh)  SHELL_RC="$HOME/.kshrc" ;;
+    *)
+      if [ -f "$HOME/.bashrc" ] || command -v bash >/dev/null 2>&1; then
+        SHELL_RC="$HOME/.bashrc"
+      elif [ -f "$HOME/.profile" ]; then
+        SHELL_RC="$HOME/.profile"
+      fi
+      ;;
+  esac
+
+  if [ -n "$SHELL_RC" ]; then
+    if ! grep -q "LC_ALL" "$SHELL_RC" 2>/dev/null; then
+      printf "\n# UTF-8 locale for proper glyph rendering\nexport LANG=C.UTF-8\nexport LC_ALL=C.UTF-8\n" >> "$SHELL_RC"
+      printf "${GREEN}[OK] Added UTF-8 locale settings to $SHELL_RC${RESET}\n\n"
+    fi
+  fi
+fi
+
+# ============================================================
 # Verification
 # ============================================================
 printf "${MAGENTA}===========================================${RESET}\n"
