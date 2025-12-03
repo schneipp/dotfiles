@@ -150,14 +150,24 @@ if [ -d "$NVIM_DIR/bin" ]; then
       case "$REPLY" in
         [Yy]*)
           SHELL_RC=""
+          # Try $SHELL first, then fall back to detecting available shells
           case "$SHELL" in
             *zsh)  SHELL_RC="$HOME/.zshrc" ;;
             *bash) SHELL_RC="$HOME/.bashrc" ;;
             *ash)  SHELL_RC="$HOME/.profile" ;;
             *ksh)  SHELL_RC="$HOME/.kshrc" ;;
             *)
-              printf "${YELLOW}Unknown shell: $SHELL${RESET}\n"
-              printf "${BLUE}Manually add: export PATH=\"$NVIM_DIR/bin:\$PATH\"${RESET}\n\n"
+              # $SHELL not set or is /bin/sh - detect what's available
+              if [ -f "$HOME/.bashrc" ] || command -v bash >/dev/null 2>&1; then
+                SHELL_RC="$HOME/.bashrc"
+              elif [ -f "$HOME/.zshrc" ] || command -v zsh >/dev/null 2>&1; then
+                SHELL_RC="$HOME/.zshrc"
+              elif [ -f "$HOME/.profile" ]; then
+                SHELL_RC="$HOME/.profile"
+              else
+                printf "${YELLOW}Could not detect shell config${RESET}\n"
+                printf "${BLUE}Manually add: export PATH=\"$NVIM_DIR/bin:\$PATH\"${RESET}\n\n"
+              fi
               ;;
           esac
 
