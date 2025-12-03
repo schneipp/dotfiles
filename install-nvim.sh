@@ -307,11 +307,7 @@ case "$REPLY" in
       # Install treesitter parsers
       printf "${YELLOW}Installing Treesitter parsers...${RESET}\n"
       "$NVIM_CMD" --headless "+TSUpdateSync" +qa 2>/dev/null || true
-      printf "${GREEN}[OK] Treesitter parsers installed${RESET}\n"
-      # Install Mason LSPs/tools
-      printf "${YELLOW}Installing Mason LSPs and tools...${RESET}\n"
-      "$NVIM_CMD" --headless "+MasonInstallAll" +qa 2>/dev/null || true
-      printf "${GREEN}[OK] Mason tools installed${RESET}\n\n"
+      printf "${GREEN}[OK] Treesitter parsers installed${RESET}\n\n"
     fi
     ;;
   *)
