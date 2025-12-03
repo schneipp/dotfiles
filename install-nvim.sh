@@ -240,6 +240,20 @@ case "$REPLY" in
     mkdir -p "$(dirname "$NVIM_CONFIG")"
     ln -s "$SCRIPT_DIR/lazynvim" "$NVIM_CONFIG"
     printf "${GREEN}[OK] LazyVim config symlinked to $NVIM_CONFIG${RESET}\n\n"
+
+    # Install Lazy plugins headlessly
+    printf "${YELLOW}Installing LazyVim plugins (this may take a moment)...${RESET}\n"
+    NVIM_CMD=""
+    if [ -x "$NVIM_DIR/bin/nvim" ]; then
+      NVIM_CMD="$NVIM_DIR/bin/nvim"
+    elif command -v nvim >/dev/null 2>&1; then
+      NVIM_CMD="nvim"
+    fi
+
+    if [ -n "$NVIM_CMD" ]; then
+      "$NVIM_CMD" --headless "+Lazy! sync" +qa 2>/dev/null || true
+      printf "${GREEN}[OK] LazyVim plugins installed${RESET}\n\n"
+    fi
     ;;
   *)
     printf "${BLUE}Skipped config installation${RESET}\n\n"
