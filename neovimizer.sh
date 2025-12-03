@@ -1,6 +1,6 @@
 #!/bin/sh
 # POSIX-compliant script - works with bash, ash, sh
-# Install with: curl -sSL https://raw.githubusercontent.com/schneipp/dotfiles/master/getnv.sh | sh
+# Install with: curl -sSL https://raw.githubusercontent.com/schneipp/dotfiles/master/neovimizer.sh | sh
 
 set -e  # Exit on error
 
@@ -187,6 +187,22 @@ case "$REPLY" in
       mv "$NVIM_CONFIG" "$BACKUP"
     fi
 
+    # Backup nvim data directories (share and state)
+    NVIM_SHARE="$HOME/.local/share/nvim"
+    NVIM_STATE="$HOME/.local/state/nvim"
+
+    if [ -d "$NVIM_SHARE" ]; then
+      SHARE_BACKUP="$NVIM_SHARE.backup.$(date +%s)"
+      printf "${YELLOW}📦 Backing up ${BOLD}$NVIM_SHARE${RESET}${YELLOW} to ${BOLD}$SHARE_BACKUP${RESET}\n"
+      mv "$NVIM_SHARE" "$SHARE_BACKUP"
+    fi
+
+    if [ -d "$NVIM_STATE" ]; then
+      STATE_BACKUP="$NVIM_STATE.backup.$(date +%s)"
+      printf "${YELLOW}📦 Backing up ${BOLD}$NVIM_STATE${RESET}${YELLOW} to ${BOLD}$STATE_BACKUP${RESET}\n"
+      mv "$NVIM_STATE" "$STATE_BACKUP"
+    fi
+
     # Check if running locally with lazynvim folder
     if [ -n "$SCRIPT_DIR" ] && [ -d "$SCRIPT_DIR/lazynvim" ]; then
       # Running locally - symlink from script directory
@@ -252,3 +268,29 @@ else
   printf "${RED}${BOLD}❌ Installation may have failed - nvim not found${RESET}\n\n"
   exit 1
 fi
+
+# Offer to configure tmux
+printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n"
+printf "${CYAN}🖥️  Tmux Configuration${RESET}\n"
+printf "${MAGENTA}═══════════════════════════════════════════${RESET}\n\n"
+
+printf "${YELLOW}Would you also like to set up tmux with schneipp's config? (y/n): ${RESET}"
+read -r REPLY
+
+case "$REPLY" in
+  [Yy]*)
+    printf "${CYAN}Launching tmuxizer...${RESET}\n\n"
+    # Check if running locally
+    if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/tmuxizer.sh" ]; then
+      sh "$SCRIPT_DIR/tmuxizer.sh"
+    else
+      # Running remotely - fetch and run tmuxizer
+      curl -sSL https://raw.githubusercontent.com/schneipp/dotfiles/master/tmuxizer.sh | sh
+    fi
+    ;;
+  *)
+    printf "${BLUE}Skipped tmux configuration${RESET}\n"
+    printf "${CYAN}💡 You can run it later with:${RESET}\n"
+    printf "${BOLD}   curl -sSL https://raw.githubusercontent.com/schneipp/dotfiles/master/tmuxizer.sh | sh${RESET}\n\n"
+    ;;
+esac
