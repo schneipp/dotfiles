@@ -1,8 +1,6 @@
 # dotfiles
 
-Personal dotfiles for Neovim, tmux, Hyprland, and more.
-
-## One-Line Install
+## One-Line Neovim+Tmux Install for OpenBSD/Debian/macOS/FreeBSD/OpenBSD/RHEL/Fedora/Arch/Alpine
 
 **Get a fully configured Neovim + tmux setup on any system:**
 
@@ -12,14 +10,15 @@ curl -sSL https://raw.githubusercontent.com/schneipp/dotfiles/master/neovimizer.
 
 That's it! The script handles everything automatically.
 
-### What happens:
+### What happens
+
 1. Installs `git` and `curl` (if missing)
 2. Clones this dotfiles repo to `~/dotfiles`
 3. Installs the **latest Neovim** (fetched from GitHub releases)
-4. Symlinks LazyVim config to `~/.config/nvim`
+4. Symlinks LazyVim config to `~/.config/nvim` (if requested)
 5. Backs up any existing configs automatically
 6. Configures UTF-8 locale and PATH
-7. Optionally sets up **tmux** with Tokyo Night theme
+7. Optionally sets up **tmux** with Cattpucin theme with Ctrl+j/k for quick pane navigation
 
 ### Tmux Only
 
@@ -30,6 +29,7 @@ curl -sSL https://raw.githubusercontent.com/schneipp/dotfiles/master/tmuxizer.sh
 ```
 
 ### Supported Platforms
+
 - macOS (Homebrew)
 - Debian/Ubuntu (apt)
 - Fedora/RHEL (dnf)
@@ -45,9 +45,11 @@ Works in Docker containers, SSH sessions, and minimal environments.
 My LazyVim config extends the base distribution with the following modifications:
 
 ### Disabled Defaults
+
 - **Bufferline** - No buffer tabs at top of screen
 
 ### Added Plugins
+
 | Plugin | Description |
 |--------|-------------|
 | `toggleterm.nvim` | Floating terminal (`<C-t>` to toggle) |
@@ -60,9 +62,11 @@ My LazyVim config extends the base distribution with the following modifications
 | OSC52 clipboard | SSH/tmux-friendly clipboard via OSC52 protocol |
 
 ### Theme Options
+
 TokyoNight (default), plus Monokai Pro, Nightfox, OneDark, and Rose Pine installed.
 
 ### Custom Keybindings
+
 | Key | Mode | Action |
 |-----|------|--------|
 | `<C-t>` | n | Toggle floating terminal |
@@ -74,9 +78,11 @@ TokyoNight (default), plus Monokai Pro, Nightfox, OneDark, and Rose Pine install
 | `<C-n>` | n/v | Add cursor at next match |
 
 ### Language Support (via LazyVim extras)
+
 Rust, Go, Python, TypeScript, Vue, Angular, PHP, Elixir, Docker, SQL, JSON, YAML, TOML, Markdown
 
 ### Code Style
+
 - 2-space indentation
 - 120 character line width (stylua)
 
