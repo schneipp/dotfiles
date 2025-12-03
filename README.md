@@ -1,63 +1,44 @@
 # dotfiles
-My Dotfiles..
-nvim tweaked for rust
-awesomewm, slightly tweaked
-i3 & polybar setup
-and things i dont remember, but notice if they are missing
 
-## Quick Install
+Personal dotfiles for Neovim, tmux, Hyprland, and more.
 
-### Neovim + LazyVim
+## One-Line Install
 
-Get the latest Neovim + LazyVim config with one command:
+**Get a fully configured Neovim + tmux setup on any system:**
 
 ```bash
-# Using curl (recommended)
 curl -sSL https://raw.githubusercontent.com/schneipp/dotfiles/master/neovimizer.sh | sh
-
-# Or using wget
-wget -qO- https://raw.githubusercontent.com/schneipp/dotfiles/master/neovimizer.sh | sh
-
-# Or clone and run locally
-git clone https://github.com/schneipp/dotfiles.git
-cd dotfiles
-sh neovimizer.sh
 ```
 
-**What it does:**
-- Installs Neovim v0.10.4 to `~/apps/nvim`
-- Optionally adds to your shell PATH (bash/zsh/ash)
-- Optionally clones this dotfiles repo and symlinks LazyVim config to `~/.config/nvim`
-- Backs up existing Neovim config, data (`~/.local/share/nvim`), and state (`~/.local/state/nvim`)
-- Offers to set up tmux configuration afterwards
+That's it! The script handles everything automatically.
 
-### Tmux
+### What happens:
+1. Installs `git` and `curl` (if missing)
+2. Clones this dotfiles repo to `~/dotfiles`
+3. Installs the **latest Neovim** (fetched from GitHub releases)
+4. Symlinks LazyVim config to `~/.config/nvim`
+5. Backs up any existing configs automatically
+6. Configures UTF-8 locale and PATH
+7. Optionally sets up **tmux** with Tokyo Night theme
 
-Set up tmux with Tokyo Night theme and TPM:
+### Tmux Only
+
+If you just want tmux:
 
 ```bash
-# Using curl
 curl -sSL https://raw.githubusercontent.com/schneipp/dotfiles/master/tmuxizer.sh | sh
-
-# Or clone and run locally
-git clone https://github.com/schneipp/dotfiles.git
-cd dotfiles
-sh tmuxizer.sh
 ```
 
-**What it does:**
-- Installs tmux via your system package manager
-- Installs TPM (Tmux Plugin Manager) to `~/.tmux/plugins/tpm`
-- Symlinks config to `~/.config/tmux`
-- Backs up and removes conflicting configs (`~/.tmux.conf`, `~/.tmux/tmux.conf`, etc.)
-- Pre-installs tmux plugins
-
-### Supported platforms
+### Supported Platforms
 - macOS (Homebrew)
-- Alpine Linux (apk)
-- Arch Linux (pacman)
 - Debian/Ubuntu (apt)
 - Fedora/RHEL (dnf)
+- Arch Linux (pacman)
+- Alpine Linux (apk)
+- OpenBSD (pkg_add)
+- FreeBSD (pkg)
+
+Works in Docker containers, SSH sessions, and minimal environments.
 
 ## LazyVim Customizations
 
