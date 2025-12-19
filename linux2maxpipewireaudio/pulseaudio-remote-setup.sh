@@ -112,6 +112,51 @@ SELECTED_DESC="${SINK_DESCS[$((selection - 1))]}"
 
 echo -e "${GREEN}✓ Selected: $SELECTED_DESC${NC}"
 
+# Get list of sources (microphones)
+echo ""
+echo -e "${BOLD}Available audio inputs (microphones):${NC}"
+echo ""
+
+declare -a SOURCE_NAMES
+declare -a SOURCE_DESCS
+
+i=1
+while IFS= read -r line; do
+  if [[ "$line" =~ ^[[:space:]]*Name:\ (.+)$ ]]; then
+    current_name="${BASH_REMATCH[1]}"
+  elif [[ "$line" =~ ^[[:space:]]*Description:\ (.+)$ ]]; then
+    current_desc="${BASH_REMATCH[1]}"
+    # Skip monitor sources (they capture output, not mic input)
+    if [[ ! "$current_name" =~ \.monitor$ ]]; then
+      SOURCE_NAMES+=("$current_name")
+      SOURCE_DESCS+=("$current_desc")
+      echo -e "  ${BOLD}$i)${NC} $current_desc"
+      echo -e "     ${YELLOW}($current_name)${NC}"
+      ((i++))
+    fi
+  fi
+done < <("${PACTL_PATH}" list sources 2>/dev/null)
+
+SELECTED_SOURCE=""
+SELECTED_SOURCE_DESC=""
+
+if [[ ${#SOURCE_NAMES[@]} -eq 0 ]]; then
+  echo -e "${YELLOW}No microphone sources found. Skipping mic setup.${NC}"
+else
+  echo ""
+  echo -e "${BOLD}Select default audio input (or 0 to skip):${NC}"
+  echo -n "Enter number (0-${#SOURCE_NAMES[@]}): "
+  read -r mic_selection
+
+  if [[ "$mic_selection" =~ ^[0-9]+$ ]] && [[ "$mic_selection" -ge 1 ]] && [[ "$mic_selection" -le ${#SOURCE_NAMES[@]} ]]; then
+    SELECTED_SOURCE="${SOURCE_NAMES[$((mic_selection - 1))]}"
+    SELECTED_SOURCE_DESC="${SOURCE_DESCS[$((mic_selection - 1))]}"
+    echo -e "${GREEN}✓ Selected: $SELECTED_SOURCE_DESC${NC}"
+  else
+    echo -e "${YELLOW}Skipping microphone setup${NC}"
+  fi
+fi
+
 # Stop PulseAudio for now
 "${PA_PATH}" --kill 2>/dev/null || true
 
@@ -139,6 +184,7 @@ sleep 3
 # Load TCP module and set default sink
 "${PACTL_PATH}" load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1
 "${PACTL_PATH}" set-default-sink "${SELECTED_SINK}"
+$(if [[ -n "$SELECTED_SOURCE" ]]; then echo "\"${PACTL_PATH}\" set-default-source \"${SELECTED_SOURCE}\""; fi)
 
 # Wait for PulseAudio to exit
 wait \$PA_PID
@@ -219,7 +265,10 @@ echo -e "${BOLD}╚════════════════════�
 echo ""
 echo -e "${BOLD}Client-side (this Mac):${NC}"
 echo -e "  • PulseAudio installed at: ${PA_PATH}"
-echo -e "  • Default sink: ${SELECTED_DESC}"
+echo -e "  • Default speaker: ${SELECTED_DESC}"
+if [[ -n "$SELECTED_SOURCE" ]]; then
+  echo -e "  • Default microphone: ${SELECTED_SOURCE_DESC}"
+fi
 echo -e "  • LaunchAgent: auto-starts on login"
 echo -e "  • TCP listener: port 4713"
 echo ""
@@ -240,7 +289,12 @@ echo "   export PULSE_SERVER=tcp:localhost:24713"
 echo ""
 echo -e "${YELLOW}3. Test audio (after connecting via SSH with tunnel):${NC}"
 echo ""
+echo "   # Test speakers"
 echo "   PULSE_SERVER=tcp:localhost:24713 paplay /usr/share/sounds/freedesktop/stereo/bell.ogg"
+echo ""
+echo "   # Test microphone (record 3 seconds, then playback)"
+echo "   PULSE_SERVER=tcp:localhost:24713 parecord --channels=1 test.wav & sleep 3; kill \$!"
+echo "   PULSE_SERVER=tcp:localhost:24713 paplay test.wav"
 echo ""
 echo -e "${BOLD}════════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}Happy remote audio! 🎵${NC}"
