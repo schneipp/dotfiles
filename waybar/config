@@ -8,7 +8,8 @@
     "margin-right": 3,
 
     "modules-left": [
-        "hyprland/workspaces"
+        "hyprland/workspaces",
+        "niri/workspaces"
     ],
     "modules-center": [
         "pulseaudio",
@@ -18,6 +19,7 @@
         "custom/cava",
         "mpris",
         "bluetooth",
+        "custom/vpn",
         "network",
         "cpu",
         "memory",
@@ -26,21 +28,13 @@
     ],
 
     "hyprland/workspaces": {
-        "format": "{icon}",
-        "format-icons": {
-            "1": "1",
-            "2": "2",
-            "3": "3",
-            "4": "4",
-            "5": "5",
-            "6": "6",
-            "7": "7",
-            "8": "8",
-            "9": "9",
-            "10": "10"
-        },
-        "on-click": "activate",
-        "sort-by-number": true
+        "format": "{id}",
+        "on-click": "activate"
+    },
+
+    "niri/workspaces": {
+        "format": "{index}",
+        "on-click": "activate"
     },
 
     "pulseaudio": {
@@ -102,6 +96,15 @@
         "tooltip-format-ethernet": "{ifname}\n{ipaddr}/{cidr}",
         "tooltip-format-disconnected": "Disconnected",
         "max-length": 50,
+        "on-click": "nm-connection-editor"
+    },
+
+    "custom/vpn": {
+        "exec": "nmcli -t -f NAME,TYPE connection show --active | grep vpn | cut -d: -f1 | head -1",
+        "interval": 5,
+        "format": "󰦝 {}",
+        "return-type": "",
+        "exec-if": "nmcli -t -f TYPE connection show --active | grep -q vpn",
         "on-click": "nm-connection-editor"
     },
 
