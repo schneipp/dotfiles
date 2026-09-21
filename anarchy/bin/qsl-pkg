@@ -1,0 +1,194 @@
+#!/usr/bin/env bash
+# qsl-pkg — package backend for the Quickshell launcher (qsl).
+#
+# The launcher calls the query subcommands directly and hands the
+# mutating ones (install/remove) to a floating terminal, because those
+# need sudo and want to show pacman's progress output.
+
+set -uo pipefail
+
+AUR=""
+for h in paru yay; do
+  if command -v "$h" >/dev/null 2>&1; then AUR="$h"; break; fi
+done
+
+APP_DIRS=(
+  "$HOME/.local/share/applications"
+  /usr/local/share/applications
+  /usr/share/applications
+)
+
+die() { printf '%s\n' "$*" >&2; exit 1; }
+
+# Wait for a keypress so the floating terminal doesn't vanish before it's read.
+# Braces around the redirect so a missing controlling terminal is silent too —
+# bash reports redirection failures itself, before the command runs.
+pause() {
+  printf '\n\033[2mPress any key to close…\033[0m'
+  { read -rsn1 </dev/tty; } 2>/dev/null || true
+  echo
+}
+
+# Read a y/N answer. Defaults to "no" if there's no terminal to ask on.
+ask() {
+  local reply=""
+  printf '\n\033[1m%s [y/N]\033[0m ' "$1"
+  { read -r reply </dev/tty; } 2>/dev/null || return 1
+  [[ $reply =~ ^[Yy]$ ]]
+}
+
+# ---------------------------------------------------------------- queries
+
+# managers -> one "id<TAB>label<TAB>description" per line
+cmd_managers() {
+  printf 'pacman\tOfficial repos\tArch + CachyOS packages via pacman\n'
+  if [[ -n $AUR ]]; then
+    printf 'aur\tAUR\tArch User Repository via %s\n' "$AUR"
+  fi
+}
+
+# owner <desktop-id> -> "pkg<TAB>name" | "file<TAB>path" | "none"
+cmd_owner() {
+  local id="${1:-}" f pkg
+  [[ -n $id ]] || die "usage: qsl-pkg owner <desktop-id>"
+  for d in "${APP_DIRS[@]}"; do
+    f="$d/$id.desktop"
+    [[ -f $f ]] || continue
+    if pkg=$(pacman -Qoq "$f" 2>/dev/null) && [[ -n $pkg ]]; then
+      printf 'pkg\t%s\n' "$pkg"
+    else
+      printf 'file\t%s\n' "$f"
+    fi
+    return 0
+  done
+  printf 'none\n'
+}
+
+# list pacman -> every package name in the configured repos
+cmd_list() {
+  case "${1:-pacman}" in
+    pacman) pacman -Slq ;;
+    aur)    [[ -n $AUR ]] || die "no AUR helper installed"; "$AUR" -Slq aur 2>/dev/null ;;
+    *)      die "unknown manager: $1" ;;
+  esac | awk 'NF && !seen[$0]++'
+}
+
+# installed -> explicitly-installed package names (removal candidates)
+cmd_installed() {
+  pacman -Qqe
+}
+
+# search <manager> <query> -> matching package names
+cmd_search() {
+  local mgr="${1:-pacman}" q="${2:-}"
+  [[ -n $q ]] || return 0
+  # CachyOS mirrors several Arch repos, so the same name comes back more
+  # than once. Keep first-seen order but drop repeats.
+  case "$mgr" in
+    pacman) pacman -Ssq -- "$q" 2>/dev/null ;;
+    aur)    [[ -n $AUR ]] || die "no AUR helper installed"
+            "$AUR" -Ssqa -- "$q" 2>/dev/null ;;
+    *)      die "unknown manager: $mgr" ;;
+  esac | awk 'NF && !seen[$0]++'
+}
+
+# info <manager> <pkg> -> human-readable details for the preview pane
+cmd_info() {
+  local mgr="${1:-pacman}" pkg="${2:-}"
+  [[ -n $pkg ]] || return 0
+  case "$mgr" in
+    pacman) pacman -Si -- "$pkg" 2>/dev/null || pacman -Qi -- "$pkg" 2>/dev/null ;;
+    aur)    [[ -n $AUR ]] && "$AUR" -Si -- "$pkg" 2>/dev/null ;;
+  esac
+}
+
+# ---------------------------------------------------------------- mutations
+
+cmd_install() {
+  local mgr="${1:-}" pkg="${2:-}"
+  [[ -n $mgr && -n $pkg ]] || die "usage: qsl-pkg install <pacman|aur> <pkg>"
+
+  printf '\033[1;35m::\033[0m Installing \033[1m%s\033[0m from %s\n\n' "$pkg" "$mgr"
+  case "$mgr" in
+    pacman) sudo pacman -S --needed -- "$pkg" ;;
+    aur)    [[ -n $AUR ]] || die "no AUR helper installed"
+            "$AUR" -S --needed -- "$pkg" ;;
+    *)      die "unknown manager: $mgr" ;;
+  esac
+  local rc=$?
+
+  if (( rc == 0 )); then
+    printf '\n\033[1;32m✓\033[0m %s installed.\n' "$pkg"
+  else
+    printf '\n\033[1;31m✗\033[0m Install of %s failed (exit %d).\n' "$pkg" "$rc"
+  fi
+  pause
+}
+
+cmd_remove() {
+  local pkg="${1:-}"
+  [[ -n $pkg ]] || die "usage: qsl-pkg remove <pkg>"
+
+  printf '\033[1;31m::\033[0m Uninstalling \033[1m%s\033[0m\n\n' "$pkg"
+
+  # Show the full blast radius before touching anything.
+  # NOTE: -Rns implies --nosave, which pacman refuses to combine with --print,
+  # so the dry run uses -Rs and only the real removal uses -Rns.
+  local deps err
+  err=$(pacman -Rs --print --print-format '%n' -- "$pkg" 2>&1 >/dev/null)
+  deps=$(pacman -Rs --print --print-format '%n' -- "$pkg" 2>/dev/null)
+  if [[ -z $deps ]]; then
+    printf '\033[1;31m✗\033[0m Cannot remove %s:\n\n%s\n' "$pkg" "${err:-not installed}"
+    pause
+    return 1
+  fi
+
+  local count
+  count=$(printf '%s\n' "$deps" | wc -l)
+  printf 'The following %s package(s) will be removed:\n\n' "$count"
+  printf '%s\n' "$deps" | column -c "${COLUMNS:-80}" 2>/dev/null || printf '%s\n' "$deps"
+
+  if ! ask "Proceed?"; then
+    printf '\nCancelled. Nothing was removed.\n'
+    pause
+    return 0
+  fi
+
+  echo
+  sudo pacman -Rns -- "$pkg"
+  local rc=$?
+  if (( rc == 0 )); then
+    printf '\n\033[1;32m✓\033[0m %s removed.\n' "$pkg"
+  else
+    printf '\n\033[1;31m✗\033[0m Removal failed (exit %d).\n' "$rc"
+  fi
+  pause
+}
+
+# Delete a .desktop file that no package owns (hand-made or webapp shortcuts).
+cmd_forget() {
+  local f="${1:-}"
+  [[ -n $f && -f $f ]] || die "usage: qsl-pkg forget <desktop-file>"
+  printf 'This entry belongs to no package. Delete the launcher file?\n\n  %s\n' "$f"
+  if ask "Delete?"; then
+    rm -f -- "$f" && printf '\n\033[1;32m✓\033[0m Removed %s\n' "$f"
+  else
+    printf '\nCancelled.\n'
+  fi
+  pause
+}
+
+# ---------------------------------------------------------------- dispatch
+
+case "${1:-}" in
+  managers) shift; cmd_managers "$@" ;;
+  owner)    shift; cmd_owner    "$@" ;;
+  list)     shift; cmd_list     "$@" ;;
+  installed) shift; cmd_installed "$@" ;;
+  search)   shift; cmd_search   "$@" ;;
+  info)     shift; cmd_info     "$@" ;;
+  install)  shift; cmd_install  "$@" ;;
+  remove)   shift; cmd_remove   "$@" ;;
+  forget)   shift; cmd_forget   "$@" ;;
+  *) die "usage: qsl-pkg {managers|owner|list|installed|search|info|install|remove|forget} [args]" ;;
+esac

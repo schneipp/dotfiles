@@ -1,5 +1,32 @@
 # dotfiles
 
+## anarchy — Hyprland desktop for Arch/CachyOS
+
+A complete Hyprland setup: a Material 3 topbar, a menu-launcher that installs and
+uninstalls packages, vim-style window management, and screen capture with audio.
+
+```bash
+git clone https://github.com/schneipp/dotfiles ~/dotfiles
+cd ~/dotfiles/anarchy
+./install.sh
+```
+
+Preview it first with `./install.sh --dry-run`, or run a single part with
+`./install.sh hyprland`. Every step is idempotent and backs up whatever it
+replaces.
+
+| | |
+|---|---|
+| `Super+Space` | The anarchy menu — apps, capture, install, remove, style, setup, update, system |
+| `Super+h/j/k/l` | Focus windows (`+Shift` moves them, `+Ctrl` switches monitor) |
+| `Print` | Select an area → clipboard |
+| `Super+Shift+R` | Record a region with audio |
+
+Requires Hyprland 0.56+ (Lua config format) and `pacman`.
+**Full documentation and the complete keymap: [anarchy/README.md](anarchy/README.md)**
+
+---
+
 ## One-Line Neovim+Tmux Install for OpenBSD/Debian/macOS/FreeBSD/OpenBSD/RHEL/Fedora/Arch/Alpine
 
 **Get a fully configured Neovim + tmux setup on any system:**

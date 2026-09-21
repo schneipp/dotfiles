@@ -1,0 +1,254 @@
+#!/usr/bin/env bash
+# qsl-capture — screenshots and screen recording for the Quickshell launcher.
+#
+# Ported from omarchy's capture scripts, trimmed to the parts that matter:
+# hyprpicker freezes the screen while slurp selects, a bare click snaps to the
+# window or monitor under the cursor, and recordings go through
+# gpu-screen-recorder (or wf-recorder as a fallback) with optional desktop
+# and microphone audio.
+#
+#   qsl-capture menu            tab-separated action list for the launcher
+#   qsl-capture <action>        run one of those actions
+#   qsl-capture record-status   "recording" or "idle"
+
+set -uo pipefail
+
+[[ -f ~/.config/user-dirs.dirs ]] && source ~/.config/user-dirs.dirs
+PIC_DIR="${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots"
+VID_DIR="${XDG_VIDEOS_DIR:-$HOME/Videos}/Recordings"
+STATE=/tmp/qsl-recording-filename
+
+note()  { command -v notify-send >/dev/null && notify-send "$@" || true; }
+die()   { printf '%s\n' "$*" >&2; note "Capture failed" "$*" -u critical; exit 1; }
+
+# ------------------------------------------------------------------ selection
+
+# Monitor + window rectangles on the focused workspace, in slurp's "X,Y WxH".
+rectangles() {
+  local ws
+  ws=$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .activeWorkspace.id')
+  hyprctl monitors -j | jq -r --arg ws "$ws" '
+    .[] | select(.activeWorkspace.id == ($ws|tonumber)) |
+    .x as $x | .y as $y |
+    (.width / .scale | floor) as $w | (.height / .scale | floor) as $h |
+    if .transform == 1 or .transform == 3
+    then "\($x),\($y) \($h)x\($w)"
+    else "\($x),\($y) \($w)x\($h)" end'
+  hyprctl clients -j | jq -r --arg ws "$ws" '
+    .[] | select(.workspace.id == ($ws|tonumber)) |
+    "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'
+}
+
+FREEZE_PID=""
+freeze()   { command -v hyprpicker >/dev/null || return 0
+             hyprpicker -r -z >/dev/null 2>&1 & FREEZE_PID=$!; sleep .1; }
+unfreeze() { [[ -n $FREEZE_PID ]] && kill "$FREEZE_PID" 2>/dev/null; FREEZE_PID=""; }
+trap unfreeze EXIT
+
+# Region picker. A bare click (<20px²) snaps to the window/monitor underneath,
+# so you don't end up with an accidental 2-pixel capture.
+pick_region() {
+  local rects sel
+  rects=$(rectangles)
+  freeze
+  sel=$(printf '%s\n' "$rects" | slurp 2>/dev/null)
+  unfreeze
+  [[ -n $sel ]] || return 1
+
+  if [[ $sel =~ ^(-?[0-9]+),(-?[0-9]+)[[:space:]]([0-9]+)x([0-9]+)$ ]]; then
+    local sx=${BASH_REMATCH[1]} sy=${BASH_REMATCH[2]}
+    local sw=${BASH_REMATCH[3]} sh=${BASH_REMATCH[4]}
+    if ((sw * sh < 20)); then
+      while IFS= read -r r; do
+        [[ $r =~ ^(-?[0-9]+),(-?[0-9]+)[[:space:]]([0-9]+)x([0-9]+)$ ]] || continue
+        local rx=${BASH_REMATCH[1]} ry=${BASH_REMATCH[2]}
+        local rw=${BASH_REMATCH[3]} rh=${BASH_REMATCH[4]}
+        if ((sx >= rx && sx < rx + rw && sy >= ry && sy < ry + rh)); then
+          sel="$rx,$ry ${rw}x${rh}"; break
+        fi
+      done <<<"$rects"
+    fi
+  fi
+  printf '%s' "$sel"
+}
+
+pick_window() {
+  local sel
+  freeze
+  sel=$(rectangles | slurp -r 2>/dev/null)
+  unfreeze
+  [[ -n $sel ]] && printf '%s' "$sel"
+}
+
+focused_monitor_geo() {
+  hyprctl monitors -j | jq -r '
+    .[] | select(.focused) |
+    .x as $x | .y as $y |
+    (.width / .scale | floor) as $w | (.height / .scale | floor) as $h |
+    if .transform == 1 or .transform == 3
+    then "\($x),\($y) \($h)x\($w)"
+    else "\($x),\($y) \($w)x\($h)" end'
+}
+
+focused_monitor_name() {
+  hyprctl monitors -j | jq -r '.[] | select(.focused) | .name'
+}
+
+# ---------------------------------------------------------------- screenshots
+
+# shoot <geometry> <copy|save|both>
+shoot() {
+  local geo=$1 how=${2:-both}
+  [[ -n $geo ]] || exit 0
+
+  if [[ $how == copy ]]; then
+    grim -g "$geo" - | wl-copy || die "grim failed"
+    note "Screenshot copied" "Region copied to the clipboard" -t 2000
+    return
+  fi
+
+  mkdir -p "$PIC_DIR"
+  local file="$PIC_DIR/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png"
+  grim -g "$geo" "$file" || die "grim failed"
+  [[ $how == both ]] && wl-copy <"$file"
+  printf '%s\n' "$file"
+
+  if command -v satty >/dev/null; then
+    (
+      action=$(notify-send "Screenshot saved" "$(basename "$file") — click to annotate" \
+               -t 8000 -i "$file" -A "edit=Annotate")
+      [[ $action == edit ]] && satty --filename "$file" --output-filename "$file" \
+          --actions-on-enter save-to-clipboard --save-after-copy --copy-command wl-copy
+    ) >/dev/null 2>&1 &
+  else
+    note "Screenshot saved" "$(basename "$file")" -t 3000 -i "$file"
+  fi
+}
+
+# ------------------------------------------------------------------ recording
+
+recorder_running() {
+  pgrep -f '^gpu-screen-recorder' >/dev/null 2>&1 || pgrep -x wf-recorder >/dev/null 2>&1
+}
+
+# record <region|screen> <none|desktop|mic|both>
+record_start() {
+  local what=$1 audio=$2
+  recorder_running && { record_stop; return; }
+
+  mkdir -p "$VID_DIR"
+  local file="$VID_DIR/recording-$(date +'%Y-%m-%d_%H-%M-%S').mp4"
+
+  if command -v gpu-screen-recorder >/dev/null; then
+    local capture=()
+    if [[ $what == screen ]]; then
+      capture=(-w "$(focused_monitor_name)")
+    else
+      local geo; geo=$(pick_region) || return 1
+      [[ $geo =~ ^(-?[0-9]+),(-?[0-9]+)[[:space:]]([0-9]+)x([0-9]+)$ ]] || return 1
+      capture=(-w "${BASH_REMATCH[3]}x${BASH_REMATCH[4]}+${BASH_REMATCH[1]}+${BASH_REMATCH[2]}")
+    fi
+
+    local devs=""
+    [[ $audio == desktop || $audio == both ]] && devs="default_output"
+    if [[ $audio == mic || $audio == both ]]; then
+      [[ -n $devs ]] && devs+="|"      # merged into one track; separate tracks
+      devs+="default_input"            # only play one at a time in most players
+    fi
+    local aargs=(); [[ -n $devs ]] && aargs=(-a "$devs" -ac aac)
+
+    gpu-screen-recorder "${capture[@]}" -k auto -f 60 -fm cfr \
+      -fallback-cpu-encoding yes -o "$file" "${aargs[@]}" >/dev/null 2>&1 &
+
+  elif command -v wf-recorder >/dev/null; then
+    local gargs=()
+    if [[ $what == region ]]; then
+      local geo; geo=$(pick_region) || return 1
+      gargs=(-g "$geo")
+    else
+      gargs=(-o "$(focused_monitor_name)")
+    fi
+    local aargs=()
+    case $audio in
+      desktop) aargs=(--audio) ;;
+      mic|both) aargs=(--audio) ;;   # wf-recorder takes a single device
+    esac
+    wf-recorder "${gargs[@]}" "${aargs[@]}" -f "$file" >/dev/null 2>&1 &
+
+  else
+    die "Install gpu-screen-recorder (or wf-recorder) to record the screen."
+  fi
+
+  local pid=$!
+  # Wait for the file to appear so we don't report success on an instant failure.
+  local n=0
+  while kill -0 $pid 2>/dev/null && [[ ! -f $file ]] && ((n < 50)); do sleep 0.2; n=$((n+1)); done
+  if kill -0 $pid 2>/dev/null; then
+    printf '%s\n' "$file" >"$STATE"
+    note "Recording started" "$([[ $audio == none ]] && echo 'No audio' || echo "Audio: $audio")" -t 2000
+  else
+    die "Recorder exited immediately — check that your GPU encoder is available."
+  fi
+}
+
+record_stop() {
+  recorder_running || { note "Not recording" "" -t 1500; return; }
+
+  # SIGINT so the container is finalised properly.
+  pkill -SIGINT -f '^gpu-screen-recorder' 2>/dev/null
+  pkill -SIGINT -x wf-recorder 2>/dev/null
+
+  local n=0
+  while recorder_running && ((n < 50)); do sleep 0.1; n=$((n+1)); done
+  if recorder_running; then
+    pkill -9 -f '^gpu-screen-recorder' 2>/dev/null
+    pkill -9 -x wf-recorder 2>/dev/null
+    note "Recording error" "Had to force-kill the recorder; the file may be damaged." -u critical
+    return 1
+  fi
+
+  local file; file=$(cat "$STATE" 2>/dev/null)
+  rm -f "$STATE"
+  [[ -f $file ]] || { note "Recording stopped" "" -t 2000; return; }
+
+  (
+    action=$(notify-send "Recording saved" "$(basename "$file")" -t 8000 -A "open=Play")
+    [[ $action == open ]] && command -v mpv >/dev/null && mpv "$file"
+  ) >/dev/null 2>&1 &
+  printf '%s\n' "$file"
+}
+
+# ---------------------------------------------------------------------- menu
+
+menu() {
+  if recorder_running; then
+    printf 'record-stop\t\tStop recording\tFinish and save the current recording\n'
+  fi
+  printf 'screenshot-region\t\tScreenshot region\tSelect an area — copied and saved\n'
+  printf 'screenshot-region-copy\t\tScreenshot to clipboard\tSelect an area — clipboard only\n'
+  printf 'screenshot-window\t\tScreenshot window\tPick a window from the current workspace\n'
+  printf 'screenshot-screen\t\tScreenshot screen\tThe whole focused monitor\n'
+  if ! recorder_running; then
+    printf 'record-region\t\tRecord region\tNo audio\n'
+    printf 'record-region-audio\t\tRecord region + desktop audio\tSystem sound only\n'
+    printf 'record-region-both\t\tRecord region + desktop & mic\tSystem sound and microphone\n'
+    printf 'record-screen-audio\t\tRecord screen + desktop audio\tWhole monitor, system sound\n'
+  fi
+}
+
+# ------------------------------------------------------------------ dispatch
+
+case "${1:-menu}" in
+  menu)                   menu ;;
+  screenshot-region)      shoot "$(pick_region)"        both ;;
+  screenshot-region-copy) shoot "$(pick_region)"        copy ;;
+  screenshot-window)      shoot "$(pick_window)"        both ;;
+  screenshot-screen)      shoot "$(focused_monitor_geo)" both ;;
+  record-region)          record_start region none ;;
+  record-region-audio)    record_start region desktop ;;
+  record-region-both)     record_start region both ;;
+  record-screen-audio)    record_start screen  desktop ;;
+  record-stop)            record_stop ;;
+  record-status)          recorder_running && echo recording || echo idle ;;
+  *) die "unknown action: $1 (try: qsl-capture menu)" ;;
+esac
