@@ -86,20 +86,45 @@ cmd_installed() {
   pacman -Qqe
 }
 
-# search <manager> <query> -> matching package names
+# search <manager> <query> -> matching package names, best match first.
+#
+# The words go to pacman/paru as separate terms, which they AND together — as a
+# single argument "signal desktop" is one regex that no package name contains.
+# The raw order is repo order and buries the obvious hit under packages that
+# merely mention the word in their description ("signal" put signal-desktop at
+# 43rd), so results are re-ranked by how well the *name* matches.
 cmd_search() {
-  local mgr="${1:-pacman}" q="${2:-}"
-  [[ -n $q ]] || return 0
-  # CachyOS mirrors several Arch repos, so the same name comes back more
-  # than once. Keep first-seen order but drop repeats.
+  local mgr="${1:-pacman}"; shift
+  local q="$*"
+  read -ra words <<<"$q"
+  (( ${#words[@]} )) || return 0
+
   case "$mgr" in
     all)    [[ -n $AUR ]] || die "no AUR helper installed"
-            "$AUR" -Ssq -- "$q" 2>/dev/null ;;
-    pacman) pacman -Ssq -- "$q" 2>/dev/null ;;
+            "$AUR" -Ssq -- "${words[@]}" 2>/dev/null ;;
+    pacman) pacman -Ssq -- "${words[@]}" 2>/dev/null ;;
     aur)    [[ -n $AUR ]] || die "no AUR helper installed"
-            "$AUR" -Ssqa -- "$q" 2>/dev/null ;;
+            "$AUR" -Ssqa -- "${words[@]}" 2>/dev/null ;;
     *)      die "unknown manager: $mgr" ;;
-  esac | awk 'NF && !seen[$0]++'
+  esac | awk -v q="${words[*]}" '
+    BEGIN {
+      q = tolower(q); n = split(q, w, " ")
+      joined = w[1]; for (i = 2; i <= n; i++) joined = joined "-" w[i]
+    }
+    # CachyOS mirrors several Arch repos, so the same name comes back twice.
+    NF && !seen[$0]++ {
+      name = tolower($0)
+      if (name == joined || name == w[1])            tier = 0
+      else if (index(name, joined) == 1)              tier = 1
+      else if (index(name, w[1]) == 1)                tier = 2
+      else {
+        all = 1
+        for (i = 1; i <= n; i++) if (!index(name, w[i])) all = 0
+        tier = all ? 3 : 4
+      }
+      # stable within a tier: keep the package manager own order
+      printf "%d\t%06d\t%s\n", tier, NR, $0
+    }' | sort -t$'\t' -k1,1n -k2,2n | cut -f3
 }
 
 # info <manager> <pkg> -> human-readable details for the preview pane
