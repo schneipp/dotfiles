@@ -74,8 +74,15 @@ if (( DRY_RUN )); then
   printf '%s*** DRY RUN — nothing will be changed ***%s\n' "$C_YELLOW$C_BOLD" "$C_RESET"
 fi
 
-# Ask for sudo up front so the packages step doesn't stall mid-run.
-if (( ! DRY_RUN )) && ! sudo -n true 2>/dev/null; then
+# Only the packages step needs root, so only ask when it's actually going to run.
+needs_sudo=0
+if ((${#WANTED[@]} == 0)); then
+  needs_sudo=1
+else
+  for w in "${WANTED[@]}"; do [[ $w == packages ]] && needs_sudo=1; done
+fi
+
+if (( ! DRY_RUN && needs_sudo )) && ! sudo -n true 2>/dev/null; then
   info "the packages step needs sudo; asking now so it doesn't stall later"
   sudo -v || die "sudo is required"
 fi
