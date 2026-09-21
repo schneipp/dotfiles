@@ -1,0 +1,12 @@
+
+singleton Style  1.0 Style.qml
+singleton Color  1.0 Color.qml
+singleton Border 1.0 Border.qml
+
+Panel              1.0 Panel.qml
+PopupCard          1.0 PopupCard.qml
+Button             1.0 Button.qml
+PanelSlider        1.0 PanelSlider.qml
+PanelSeparator     1.0 PanelSeparator.qml
+PanelSectionHeader 1.0 PanelSectionHeader.qml
+BorderSurface      1.0 BorderSurface.qml

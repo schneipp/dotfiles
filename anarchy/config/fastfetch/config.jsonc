@@ -68,7 +68,8 @@
     {
       "type": "os",
       "key": "\uf17c OS",
-      "keyColor": "blue"
+      "keyColor": "blue",
+      "format": "Anarchy OS {arch}"
     },
     {
       "type": "kernel",

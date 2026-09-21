@@ -58,7 +58,7 @@ Scope {
     readonly property string termClass: "qsl-term"
 
     readonly property bool showsInfoPane: mode === "search" || mode === "wallpaper"
-    readonly property bool searchable: ["apps", "search", "remove", "wallpaper"].indexOf(mode) >= 0
+    readonly property bool searchable: ["root", "apps", "search", "remove", "wallpaper"].indexOf(mode) >= 0
 
     // ------------------------------------------------------------ lifecycle
 
@@ -323,32 +323,37 @@ Scope {
         return 0;
     }
 
+    // Applications matching `q`, best first. Shared by the Apps screen and by
+    // the root menu, which searches itself and the app list together.
+    function appRows(q: string): var {
+        const scored = [];
+        for (const e of DesktopEntries.applications.values) {
+            if (e.noDisplay) continue;
+            let s = score(e.name, q);
+            if (s === 0 && q) {
+                if ((e.comment ?? "").toLowerCase().includes(q)) s = 300;
+                else for (const kw of e.keywords ?? [])
+                    if (kw.toLowerCase().includes(q)) { s = 250; break; }
+            }
+            if (s > 0) scored.push({ s: s, e: e });
+        }
+        scored.sort((a, b) => b.s - a.s || a.e.name.localeCompare(b.e.name));
+        return scored.map(x => ({
+            icon: "", iconSource: x.e.icon
+                ? Quickshell.iconPath(x.e.icon, "application-x-executable") : "",
+            label: x.e.name, desc: x.e.comment ?? "",
+            kind: "app", payload: x.e,
+        }));
+    }
+
     // Every screen produces the same item shape, so one delegate covers all of
     // them: { icon, iconSource, label, desc, kind, payload }
     readonly property var rows: {
         const q = query.trim().toLowerCase();
 
         switch (mode) {
-        case "apps": {
-            const scored = [];
-            for (const e of DesktopEntries.applications.values) {
-                if (e.noDisplay) continue;
-                let s = score(e.name, q);
-                if (s === 0 && q) {
-                    if ((e.comment ?? "").toLowerCase().includes(q)) s = 300;
-                    else for (const kw of e.keywords ?? [])
-                        if (kw.toLowerCase().includes(q)) { s = 250; break; }
-                }
-                if (s > 0) scored.push({ s: s, e: e });
-            }
-            scored.sort((a, b) => b.s - a.s || a.e.name.localeCompare(b.e.name));
-            return scored.map(x => ({
-                icon: "", iconSource: x.e.icon
-                    ? Quickshell.iconPath(x.e.icon, "application-x-executable") : "",
-                label: x.e.name, desc: x.e.comment ?? "",
-                kind: "app", payload: x.e,
-            }));
-        }
+        case "apps":
+            return appRows(q);
 
         case "capture":
             return captureActions.map(a => ({
@@ -406,11 +411,21 @@ Scope {
         }
 
         default: {
-            const entries = Menus.forMode(mode);
-            return entries.map(m => ({
+            const entries = Menus.forMode(mode).map(m => ({
                 icon: m.icon, iconSource: "", label: m.label, desc: m.desc,
                 kind: "menu", payload: m,
             }));
+
+            if (!q)
+                return entries;
+
+            // Typing at the root searches the menu and the applications at
+            // once, so you never have to step into Apps first. Menu entries
+            // match on their description too, and stay above the apps.
+            const menuHits = entries.filter(e =>
+                score(e.label, q) > 0 || (e.desc ?? "").toLowerCase().includes(q));
+
+            return mode === "root" ? menuHits.concat(appRows(q)) : menuHits;
         }
         }
     }

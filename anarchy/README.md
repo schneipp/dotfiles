@@ -198,7 +198,11 @@ anarchy/
 │   ├── 50-kitty.sh             theme include and font-size keys
 │   ├── 60-theme.sh             force dark Qt/KDE palettes
 │   ├── 70-shell.sh             bash aliases and functions
-│   └── 80-webapps.sh           standalone browser windows
+│   ├── 80-webapps.sh           standalone browser windows
+│   └── 90-plugins.sh           DankMaterialShell plugins
+├── plugins/                    DankMaterialShell plugins (see their READMEs)
+│   └── spotmarchy/             Spotify + time-synced lyrics, ported from Omarchy
+├── themes/                     colour schemes
 ├── config/                     symlinked into ~/.config
 │   ├── hypr/custom.lua         everything Hyprland
 │   ├── quickshell/launcher/    the launcher itself (QML)
