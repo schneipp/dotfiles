@@ -5,6 +5,8 @@
 A complete Hyprland setup: a Material 3 topbar, a menu-launcher that installs and
 uninstalls packages, vim-style window management, and screen capture with audio.
 
+<p align="center"><img src="anarchy/docs/launcher.gif" width="640" alt="The anarchy launcher"></p>
+
 ```bash
 git clone https://github.com/schneipp/dotfiles ~/dotfiles
 cd ~/dotfiles/anarchy

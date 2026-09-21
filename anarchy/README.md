@@ -1,13 +1,80 @@
-# anarchy
+<p align="center">
+  <img src="docs/logo.png" width="300" alt="anarchy">
+</p>
 
-A Hyprland desktop for Arch / CachyOS: a Material 3 topbar, a menu-launcher that
-installs and uninstalls packages, vim-style window management, and screen capture
-with audio — set up by one idempotent script.
+<p align="center">
+  <b>A Hyprland desktop for Arch and CachyOS that gets out of your way.</b><br>
+  Vim keys everywhere. A launcher that finds, installs, removes — and vets — your software.<br>
+  Screenshots and screen recording with audio. One theme switch that reaches every app.
+</p>
 
-Built on [DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell) and
-[Quickshell](https://quickshell.org/), with the conveniences of
-[Omarchy](https://omarchy.org/) ported across so nothing depends on Omarchy being
-installed.
+<p align="center">
+  <a href="#install">Install</a> ·
+  <a href="#keybindings">Keys</a> ·
+  <a href="#the-launcher">Launcher</a> ·
+  <a href="#aur-trust-check">AUR trust check</a> ·
+  <a href="#layout">Layout</a>
+</p>
+
+```bash
+git clone https://github.com/schneipp/dotfiles ~/dotfiles && ~/dotfiles/anarchy/install.sh
+```
+
+---
+
+## Tour
+
+### One key for everything
+
+`Super+Space` opens straight into search. Type and the menu and your apps are
+searched together — `fire` finds Firefox, `shut` finds the power menu. Every
+screen is a keystroke away: apps, capture, install, remove, style, setup,
+update, system.
+
+<p align="center"><img src="docs/launcher.gif" width="760" alt="The anarchy launcher: searching apps and menus, browsing wallpapers with a live preview, the capture menu"></p>
+
+The wallpaper picker previews as you move. And yes, the capture menu at the end
+really does show **● REC**: it noticed that this GIF was being recorded, and
+offers to stop it.
+
+### Install anything, and see what you're installing
+
+Search the official repos and the AUR at once. Every result says where it comes
+from, and AUR results show their votes. Highlight one to see its description,
+size, licence and dependencies.
+
+<p align="center"><img src="docs/install.gif" width="760" alt="Installing: searching 'signal desktop', source and vote labels, a green AUR trust check, then a red one"></p>
+
+AUR packages get a **trust check** — green, amber or red, with the reasons.
+`signal-desktop-beta-bin` is green: 8 years old, 44 votes, one maintainer
+throughout, downloads only from signal.org. The last package is red for a
+different reason: it was submitted *today* and nobody has voted for it yet.
+That isn't an accusation, just a reason to read it before you run it.
+[What it checks →](#aur-trust-check)
+
+### Tiling with vim keys
+
+`h j k l` move focus, add `Shift` to move the window, `Alt` to resize, `Ctrl` to
+hop between monitors. Push a window past the edge of a screen and it lands on
+the next one.
+
+<p align="center"><img src="docs/windows.gif" width="900" alt="Window management: focus, move, resize, fullscreen and close with Super and h/j/k/l"></p>
+
+### One switch, every app
+
+Light or dark reaches the whole desktop in one go: the bar, foot, kitty, GTK
+apps, and KDE apps like Dolphin. No restarts. It works through a
+small watcher that picks up every theme change DankMaterialShell makes and
+passes it on to the apps DMS doesn't theme itself.
+
+<p align="center"><img src="docs/theme.gif" width="900" alt="Switching light and dark: the bar, a foot terminal and Dolphin all follow"></p>
+
+### A logo in every terminal
+
+The actual artwork as braille text art, 96 dots across in the logo's own
+colours. It's plain text, so it shows in foot, kitty, a TTY or over SSH.
+
+<p align="center"><img src="docs/fastfetch.png" width="760" alt="fastfetch with the anarchy logo"></p>
 
 ---
 
@@ -155,7 +222,10 @@ where it comes from, and AUR results also show their vote count — `0 votes` in
 red.
 
 Highlighting an AUR package runs `qsl-aur-audit` and shows a green, amber or red
-verdict with its reasons. It checks for the three shapes real AUR malware has
+verdict with its reasons.
+
+<p align="center"><img src="docs/aur-trust.png" width="640" alt="An AUR trust check flagging a package submitted today with no votes"></p>
+ It checks for the three shapes real AUR malware has
 taken:
 
 - **Nobody has vouched for it.** Brand new with almost no votes, or no votes at
@@ -279,6 +349,7 @@ anarchy/
 ├── plugins/                    DankMaterialShell plugins (see their READMEs)
 │   └── spotmarchy/             Spotify + time-synced lyrics, ported from Omarchy
 ├── themes/                     colour schemes
+├── docs/                       the images in this README
 ├── config/                     symlinked into ~/.config
 │   ├── hypr/custom.lua         everything Hyprland
 │   ├── quickshell/launcher/    the launcher itself (QML)
