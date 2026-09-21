@@ -39,11 +39,18 @@ ask() {
 
 # ---------------------------------------------------------------- queries
 
-# managers -> one "id<TAB>label<TAB>description" per line
+# managers -> one "id<TAB>label<TAB>description" per line, best default first.
+#
+# An AUR helper searches the official repos as well, so when one is present it
+# is listed first and covers both. The narrower sources stay available for when
+# you want to be sure where something is coming from.
 cmd_managers() {
-  printf 'pacman\tOfficial repos\tArch + CachyOS packages via pacman\n'
   if [[ -n $AUR ]]; then
-    printf 'aur\tAUR\tArch User Repository via %s\n' "$AUR"
+    printf 'all\tEverything\tOfficial repos and the AUR, via %s\n' "$AUR"
+  fi
+  printf 'pacman\tOfficial repos only\tArch + CachyOS packages via pacman\n'
+  if [[ -n $AUR ]]; then
+    printf 'aur\tAUR only\tArch User Repository via %s\n' "$AUR"
   fi
 }
 
@@ -67,6 +74,7 @@ cmd_owner() {
 # list pacman -> every package name in the configured repos
 cmd_list() {
   case "${1:-pacman}" in
+    all)    [[ -n $AUR ]] || die "no AUR helper installed"; "$AUR" -Slq 2>/dev/null ;;
     pacman) pacman -Slq ;;
     aur)    [[ -n $AUR ]] || die "no AUR helper installed"; "$AUR" -Slq aur 2>/dev/null ;;
     *)      die "unknown manager: $1" ;;
@@ -85,6 +93,8 @@ cmd_search() {
   # CachyOS mirrors several Arch repos, so the same name comes back more
   # than once. Keep first-seen order but drop repeats.
   case "$mgr" in
+    all)    [[ -n $AUR ]] || die "no AUR helper installed"
+            "$AUR" -Ssq -- "$q" 2>/dev/null ;;
     pacman) pacman -Ssq -- "$q" 2>/dev/null ;;
     aur)    [[ -n $AUR ]] || die "no AUR helper installed"
             "$AUR" -Ssqa -- "$q" 2>/dev/null ;;
@@ -97,6 +107,7 @@ cmd_info() {
   local mgr="${1:-pacman}" pkg="${2:-}"
   [[ -n $pkg ]] || return 0
   case "$mgr" in
+    all)    [[ -n $AUR ]] && "$AUR" -Si -- "$pkg" 2>/dev/null ;;
     pacman) pacman -Si -- "$pkg" 2>/dev/null || pacman -Qi -- "$pkg" 2>/dev/null ;;
     aur)    [[ -n $AUR ]] && "$AUR" -Si -- "$pkg" 2>/dev/null ;;
   esac
@@ -110,6 +121,8 @@ cmd_install() {
 
   printf '\033[1;35m::\033[0m Installing \033[1m%s\033[0m from %s\n\n' "$pkg" "$mgr"
   case "$mgr" in
+    all)    [[ -n $AUR ]] || die "no AUR helper installed"
+            "$AUR" -S --needed -- "$pkg" ;;
     pacman) sudo pacman -S --needed -- "$pkg" ;;
     aur)    [[ -n $AUR ]] || die "no AUR helper installed"
             "$AUR" -S --needed -- "$pkg" ;;

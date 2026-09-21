@@ -93,6 +93,19 @@ Scope {
         }
     }
 
+    // Install goes straight to searching with the first source qsl-pkg offers —
+    // paru when it is installed, which covers the repos and the AUR at once.
+    // The picker is pushed onto the history first, so Esc still reveals it when
+    // you want to narrow the source.
+    function startInstall(): void {
+        if (!managers.length) { goTo("managers"); return; }
+        goTo("managers");
+        manager = managers[0].id;
+        managerLabel = managers[0].label;
+        mode = "search";
+        query = "";
+    }
+
     function goBack(): void {
         if (history.length === 0) { close(); return; }
         const prev = history[history.length - 1];
@@ -108,12 +121,15 @@ Scope {
         function open(): void { root.open(); }
         function close(): void { root.close(); }
 
-        function install(): void { root.open(); root.goTo("managers"); }
+        function install(): void { root.open(); root.startInstall(); }
         function capture(): void { root.open(); root.goTo("capture"); }
         function wallpaper(): void { root.open(); root.goTo("wallpaper"); }
 
         // Open any screen directly, e.g. `qs -c launcher ipc call launcher go system`.
         function go(mode: string): void { root.open(); root.goTo(mode); }
+
+        // Open at the root with a query already typed.
+        function search(text: string): void { root.open(); root.query = text; }
 
         function installSearch(mgr: string, q: string): void {
             root.open();
@@ -447,7 +463,8 @@ Scope {
         switch (item.kind) {
         case "menu": {
             const m = item.payload;
-            if (m.go)        goTo(m.go);
+            if (m.go === "managers") startInstall();
+            else if (m.go)   goTo(m.go);
             else if (m.run)  runDetached(m.run);
             else if (m.term) runInTerminal(m.term);
             break;
@@ -577,11 +594,21 @@ Scope {
 
                 MouseArea { anchors.fill: parent }
 
+                // The search field must own the keyboard the moment the window
+                // exists. Opening at the root is not a mode *change*, so relying
+                // on onModeChanged alone left the card focused and swallowed
+                // every keystroke until you navigated somewhere.
+                Component.onCompleted: input.forceActiveFocus()
+
                 Connections {
                     target: root
                     function onModeChanged(): void {
                         if (root.mode === "confirm") card.forceActiveFocus();
                         else input.forceActiveFocus();
+                    }
+                    function onActiveChanged(): void {
+                        if (root.active && root.mode !== "confirm")
+                            input.forceActiveFocus();
                     }
                 }
 

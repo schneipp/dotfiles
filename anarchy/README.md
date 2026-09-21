@@ -132,6 +132,7 @@ qs -c launcher ipc call launcher go wallpaper
 
 | Key | Action |
 |-----|--------|
+| any key | Search — at the root this matches the menu *and* your applications |
 | `Enter` | Activate |
 | `Esc` | Back one screen, then close |
 | `Backspace` | Back one screen, when the search box is empty |
@@ -140,8 +141,9 @@ qs -c launcher ipc call launcher go wallpaper
 
 ### Installing
 
-**Install** asks which source (official repos, or the AUR when `paru` or `yay` is
-present), then searches as you type. The highlighted package's description,
+**Install** searches as you type. With `paru` or `yay` installed it searches the
+official repos and the AUR together by default — `Esc` steps back to the source
+picker if you want to narrow it to one or the other. The highlighted package's description,
 version, size, licence, URL and dependencies appear in a pane beside the list.
 `Enter` hands the install to a floating terminal so pacman can ask for your
 password and show its own progress.
