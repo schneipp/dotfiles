@@ -292,7 +292,7 @@ anarchy/
     ├── qsl-capture             screenshots and recording
     ├── qsl-wall                wallpaper discovery
     ├── anarchy-theme-apply     push a theme into apps DMS does not reach
-    ├── anarchy-logo-ansi       render a PNG to ANSI art for fastfetch
+    ├── anarchy-logo-braille    turn the artwork into braille text art for fastfetch
     ├── launch-webapp           standalone browser windows
     └── transcode               ffmpeg wrapper for sharing video and images
 ```

@@ -74,7 +74,7 @@ fi
 # is what makes a theme switch reach everything the way Omarchy's did.
 
 link bin/anarchy-theme-apply "$HOME/.local/bin/anarchy-theme-apply"
-link bin/anarchy-logo-ansi   "$HOME/.local/bin/anarchy-logo-ansi"
+link bin/anarchy-logo-braille "$HOME/.local/bin/anarchy-logo-braille"
 
 link config/systemd/anarchy-theme.service "$HOME/.config/systemd/user/anarchy-theme.service"
 link config/systemd/anarchy-theme.path    "$HOME/.config/systemd/user/anarchy-theme.path"

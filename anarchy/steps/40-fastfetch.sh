@@ -13,11 +13,9 @@ if ! need_cmd fastfetch; then
 fi
 
 link config/fastfetch/config.jsonc "$HOME/.config/fastfetch/config.jsonc"
-link config/fastfetch/anarchy.png  "$HOME/.config/fastfetch/anarchy.png"
+link config/fastfetch/anarchy.txt  "$HOME/.config/fastfetch/anarchy.txt"
 
-# The logo is sixel, which foot and kitty both render. Everywhere else
-# fastfetch still prints the text panels.
-case "${TERM:-}" in
-  foot|xterm-kitty|*kitty*) ok "$TERM renders sixel — the logo will show" ;;
-  *) skip "logo needs a sixel-capable terminal; text output works anywhere" ;;
-esac
+# The logo is braille text art in 24-bit colour (see bin/anarchy-logo-braille),
+# so it renders in any terminal with truecolour and a braille-capable font —
+# foot, kitty, a TTY emulator, over SSH. No image protocol needed.
+ok "logo: braille text art, works in any truecolour terminal"
