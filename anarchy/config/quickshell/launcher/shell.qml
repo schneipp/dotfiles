@@ -141,6 +141,12 @@ Scope {
         // Open at the root with a query already typed.
         function search(text: string): void { root.open(); root.query = text; }
 
+        // Drive whatever screen is open, as if typed — for scripts and demos.
+        function type(text: string): void { root.query = text; }
+        function select(delta: int): void { root.move(delta); }
+        function activate(): void { root.activate(); }
+        function back(): void { root.goBack(); }
+
         function installSearch(mgr: string, q: string): void {
             root.open();
             root.manager = mgr;
