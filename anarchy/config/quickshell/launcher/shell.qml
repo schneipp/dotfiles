@@ -134,7 +134,8 @@ Scope {
         function installSearch(mgr: string, q: string): void {
             root.open();
             root.manager = mgr;
-            root.managerLabel = mgr === "aur" ? "AUR" : "Official repos";
+            const m = root.managers.find(x => x.id === mgr);
+            root.managerLabel = m ? m.label : mgr;
             root.goTo("search");
             root.query = q;
         }
@@ -719,8 +720,20 @@ Scope {
                                 selectedTextColor: Theme.bg
                                 clip: true
 
-                                text: root.query
+                                // Not `text: root.query` — typing into a TextInput
+                                // silently destroys that binding, so once you had
+                                // typed at the root, clearing the query on the next
+                                // screen left the old text in the box and every
+                                // search went out with it glued on the front.
+                                // Sync both ways by hand instead.
                                 onTextChanged: if (text !== root.query) root.query = text
+
+                                Connections {
+                                    target: root
+                                    function onQueryChanged(): void {
+                                        if (input.text !== root.query) input.text = root.query;
+                                    }
+                                }
 
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
