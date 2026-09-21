@@ -86,7 +86,9 @@ cmd_installed() {
   pacman -Qqe
 }
 
-# search <manager> <query> -> matching package names, best match first.
+# search <manager> <query> -> "name<TAB>repo<TAB>installed" per line, best
+# match first. repo is where it comes from (extra, cachyos, aur, …) and installed
+# is 1 when the package is already on the system.
 #
 # The words go to pacman/paru as separate terms, which they AND together — as a
 # single argument "signal desktop" is one regex that no package name contains.
@@ -99,21 +101,27 @@ cmd_search() {
   read -ra words <<<"$q"
   (( ${#words[@]} )) || return 0
 
+  # Full -Ss output rather than -Ssq: the header lines read
+  # "repo/name version [...] [installed]", which is where the source label and
+  # the installed marker come from. Description lines are indented; skip them.
   case "$mgr" in
     all)    [[ -n $AUR ]] || die "no AUR helper installed"
-            "$AUR" -Ssq -- "${words[@]}" 2>/dev/null ;;
-    pacman) pacman -Ssq -- "${words[@]}" 2>/dev/null ;;
+            "$AUR" -Ss -- "${words[@]}" 2>/dev/null ;;
+    pacman) pacman -Ss -- "${words[@]}" 2>/dev/null ;;
     aur)    [[ -n $AUR ]] || die "no AUR helper installed"
-            "$AUR" -Ssqa -- "${words[@]}" 2>/dev/null ;;
+            "$AUR" -Ssa -- "${words[@]}" 2>/dev/null ;;
     *)      die "unknown manager: $mgr" ;;
-  esac | awk -v q="${words[*]}" '
+  esac | awk '/^[^[:space:]]+\/[^[:space:]]+ / {
+      split($1, rn, "/")
+      printf "%s\t%s\t%d\n", rn[2], rn[1], (tolower($0) ~ /\[installed/)
+    }' | awk -F'\t' -v q="${words[*]}" '
     BEGIN {
       q = tolower(q); n = split(q, w, " ")
       joined = w[1]; for (i = 2; i <= n; i++) joined = joined "-" w[i]
     }
     # CachyOS mirrors several Arch repos, so the same name comes back twice.
-    NF && !seen[$0]++ {
-      name = tolower($0)
+    NF && !seen[$1]++ {
+      name = tolower($1)
       if (name == joined || name == w[1])            tier = 0
       else if (index(name, joined) == 1)              tier = 1
       else if (index(name, w[1]) == 1)                tier = 2
@@ -124,7 +132,7 @@ cmd_search() {
       }
       # stable within a tier: keep the package manager own order
       printf "%d\t%06d\t%s\n", tier, NR, $0
-    }' | sort -t$'\t' -k1,1n -k2,2n | cut -f3
+    }' | sort -t$'\t' -k1,1n -k2,2n | cut -f3-
 }
 
 # info <manager> <pkg> -> human-readable details for the preview pane

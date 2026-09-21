@@ -135,7 +135,10 @@ Scope {
             root.open();
             root.manager = mgr;
             const m = root.managers.find(x => x.id === mgr);
-            root.managerLabel = m ? m.label : mgr;
+            // The source list loads asynchronously on open, so fall back to the
+            // same names qsl-pkg uses when it has not arrived yet.
+            const names = { all: "Everything", pacman: "Official repos only", aur: "AUR only" };
+            root.managerLabel = m ? m.label : (names[mgr] ?? mgr);
             root.goTo("search");
             root.query = q;
         }
@@ -223,8 +226,13 @@ Scope {
         id: searchProc
         stdout: StdioCollector {
             onStreamFinished: {
+                // qsl-pkg search: "name<TAB>repo<TAB>installed" per line
                 const out = [];
-                for (const line of text.trim().split("\n")) if (line) out.push(line);
+                for (const line of text.trim().split("\n")) {
+                    if (!line) continue;
+                    const f = line.split("\t");
+                    out.push({ name: f[0], repo: f[1] ?? "", installed: f[2] === "1" });
+                }
                 root.searchResults = out.slice(0, 200);
                 root.searching = false;
             }
@@ -368,6 +376,14 @@ Scope {
         }));
     }
 
+    // Source label for a package. CachyOS splits its repos by CPU level
+    // (cachyos-extra-v3, cachyos-core-v4, …); the level is noise in a label.
+    function sourceBadge(repo: string): string {
+        if (!repo) return "";
+        if (repo === "aur") return "AUR";
+        return repo.replace(/-v[234]$/, "").replace(/^cachyos-/, "cachyos ");
+    }
+
     // Every screen produces the same item shape, so one delegate covers all of
     // them: { icon, iconSource, label, desc, kind, payload }
     readonly property var rows: {
@@ -392,8 +408,9 @@ Scope {
 
         case "search":
             return searchResults.map(p => ({
-                icon: "\uf187", iconSource: "", label: p, desc: "",
-                kind: "pkg", payload: p,
+                icon: "\uf187", iconSource: "", label: p.name, desc: "",
+                kind: "pkg", payload: p.name,
+                badges: [sourceBadge(p.repo)].concat(p.installed ? ["installed"] : []),
             }));
 
         case "wallpaper": {
@@ -840,13 +857,61 @@ Scope {
                                 width: parent.width - 60
                                 spacing: 1
 
-                                Text {
+                                Row {
                                     width: parent.width
-                                    elide: Text.ElideRight
-                                    font.family: Theme.fontFamily
-                                    font.pixelSize: 14
-                                    color: index === list.currentIndex ? Theme.bg : Theme.fg
-                                    text: modelData.label
+                                    spacing: 8
+
+                                    Text {
+                                        id: rowLabel
+                                        width: Math.min(implicitWidth, parent.width - badgeRow.width - 8)
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        elide: Text.ElideRight
+                                        font.family: Theme.fontFamily
+                                        font.pixelSize: 14
+                                        color: index === list.currentIndex ? Theme.bg : Theme.fg
+                                        text: modelData.label
+                                    }
+
+                                    // Small pills beside the name: where a package comes
+                                    // from, and whether it is already installed.
+                                    Row {
+                                        id: badgeRow
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        spacing: 4
+                                        // the *row's* selection, captured here so the pills
+                                        // below cannot confuse it with their own index
+                                        readonly property bool rowSelected: index === list.currentIndex
+
+                                        Repeater {
+                                            model: (modelData.badges ?? []).filter(b => b)
+
+                                            Rectangle {
+                                                required property string modelData
+                                                readonly property bool selected: badgeRow.rowSelected
+                                                readonly property color tone:
+                                                    modelData === "AUR"       ? "#f0a35e"
+                                                  : modelData === "installed" ? Theme.ok
+                                                  :                             Theme.accent
+
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                height: 16
+                                                width: badgeText.implicitWidth + 10
+                                                radius: 4
+                                                color: selected ? Qt.rgba(0, 0, 0, 0.18)
+                                                                : Qt.rgba(tone.r, tone.g, tone.b, 0.16)
+
+                                                Text {
+                                                    id: badgeText
+                                                    anchors.centerIn: parent
+                                                    font.family: Theme.fontFamily
+                                                    font.pixelSize: 10
+                                                    font.bold: true
+                                                    color: parent.selected ? Theme.bg : parent.tone
+                                                    text: parent.modelData
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
 
                                 Text {
