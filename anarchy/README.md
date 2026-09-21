@@ -148,6 +148,38 @@ version, size, licence, URL and dependencies appear in a pane beside the list.
 `Enter` hands the install to a floating terminal so pacman can ask for your
 password and show its own progress.
 
+### AUR trust check
+
+The AUR is user-submitted and nobody reviews it. Every result is labelled with
+where it comes from, and AUR results also show their vote count — `0 votes` in
+red.
+
+Highlighting an AUR package runs `qsl-aur-audit` and shows a green, amber or red
+verdict with its reasons. It checks for the three shapes real AUR malware has
+taken:
+
+- **Nobody has vouched for it.** Brand new with almost no votes, or no votes at
+  all.
+- **It changed hands.** It's orphaned, or the maintainer is no longer the
+  original submitter. A handover followed by a fresh upload is how several
+  genuine AUR compromises happened.
+- **The build does something it shouldn't.** The PKGBUILD and any `.install`
+  script are scanned for downloads piped into a shell, decoded base64 blobs,
+  bare-IP or paste-site URLs, setuid bits, writes to your shell startup files,
+  and skipped checksums. The offending lines are shown.
+
+It also compares the name with the official repos, so a one-letter look-alike
+such as `firefx` for `firefox` is flagged as a possible typosquat. It lists every
+domain the package downloads from, so you can see where the binary really comes
+from.
+
+The same report prints in the terminal before an AUR install. A high-risk
+package needs an explicit `y` to go ahead.
+
+These are warning signs, not proof. A clean report doesn't make a package safe,
+and a new one isn't necessarily malicious. Read the PKGBUILD when it matters;
+paru offers it before every build.
+
 ### Uninstalling
 
 Two routes, both ending at the same confirmation:
@@ -256,6 +288,7 @@ anarchy/
 │   └── bash/                   aliases, functions, shell setup
 └── bin/                        symlinked into ~/.local/bin
     ├── qsl-pkg                 package queries, install and removal
+    ├── qsl-aur-audit           trust check for AUR packages
     ├── qsl-capture             screenshots and recording
     ├── qsl-wall                wallpaper discovery
     ├── anarchy-theme-apply     push a theme into apps DMS does not reach

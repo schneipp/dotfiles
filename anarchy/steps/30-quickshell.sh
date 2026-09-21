@@ -8,7 +8,7 @@ step "Quickshell launcher (qsl)"
 
 link config/quickshell/launcher "$HOME/.config/quickshell/launcher"
 
-for b in qsl-pkg qsl-capture qsl-wall launch-webapp webapp-handler-zoom webapp-handler-hey transcode; do
+for b in qsl-pkg qsl-aur-audit qsl-capture qsl-wall launch-webapp webapp-handler-zoom webapp-handler-hey transcode; do
   link "bin/$b" "$HOME/.local/bin/$b"
 done
 

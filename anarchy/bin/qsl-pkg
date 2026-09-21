@@ -86,9 +86,10 @@ cmd_installed() {
   pacman -Qqe
 }
 
-# search <manager> <query> -> "name<TAB>repo<TAB>installed" per line, best
-# match first. repo is where it comes from (extra, cachyos, aur, …) and installed
-# is 1 when the package is already on the system.
+# search <manager> <query> -> "name<TAB>repo<TAB>installed<TAB>votes" per line,
+# best match first. repo is where it comes from (extra, cachyos, aur, …),
+# installed is 1 when the package is already on the system, and votes is the
+# AUR vote count (empty for repo packages).
 #
 # The words go to pacman/paru as separate terms, which they AND together — as a
 # single argument "signal desktop" is one regex that no package name contains.
@@ -113,7 +114,10 @@ cmd_search() {
     *)      die "unknown manager: $mgr" ;;
   esac | awk '/^[^[:space:]]+\/[^[:space:]]+ / {
       split($1, rn, "/")
-      printf "%s\t%s\t%d\n", rn[2], rn[1], (tolower($0) ~ /\[installed/)
+      # AUR results carry "[+votes ~popularity]"; repo results have no votes.
+      votes = ""
+      if (match($0, /\[\+[0-9]+ /)) votes = substr($0, RSTART + 2, RLENGTH - 3)
+      printf "%s\t%s\t%d\t%s\n", rn[2], rn[1], (tolower($0) ~ /\[installed/), votes
     }' | awk -F'\t' -v q="${words[*]}" '
     BEGIN {
       q = tolower(q); n = split(q, w, " ")
@@ -153,6 +157,22 @@ cmd_install() {
   [[ -n $mgr && -n $pkg ]] || die "usage: qsl-pkg install <pacman|aur> <pkg>"
 
   printf '\033[1;35m::\033[0m Installing \033[1m%s\033[0m from %s\n\n' "$pkg" "$mgr"
+
+  # An AUR package is whatever its submitter uploaded; nobody reviews it. Show
+  # the trust report first, and make a high-risk one an explicit decision.
+  if [[ $mgr != pacman ]] && ! pacman -Si -- "$pkg" >/dev/null 2>&1 \
+     && command -v qsl-aur-audit >/dev/null 2>&1; then
+    qsl-aur-audit --text "$pkg"
+    if [[ $(qsl-aur-audit "$pkg" 2>/dev/null | awk -F'\t' '$1=="risk"{print $2}') == high ]]; then
+      if ! ask "This package looks risky. Install it anyway?"; then
+        printf '\nCancelled. Nothing was installed.\n'
+        pause
+        return 0
+      fi
+      echo
+    fi
+  fi
+
   case "$mgr" in
     all)    [[ -n $AUR ]] || die "no AUR helper installed"
             "$AUR" -S --needed -- "$pkg" ;;
@@ -231,10 +251,11 @@ case "${1:-}" in
   owner)    shift; cmd_owner    "$@" ;;
   list)     shift; cmd_list     "$@" ;;
   installed) shift; cmd_installed "$@" ;;
+  audit)    shift; exec qsl-aur-audit "$@" ;;
   search)   shift; cmd_search   "$@" ;;
   info)     shift; cmd_info     "$@" ;;
   install)  shift; cmd_install  "$@" ;;
   remove)   shift; cmd_remove   "$@" ;;
   forget)   shift; cmd_forget   "$@" ;;
-  *) die "usage: qsl-pkg {managers|owner|list|installed|search|info|install|remove|forget} [args]" ;;
+  *) die "usage: qsl-pkg {managers|owner|list|installed|search|info|audit|install|remove|forget} [args]" ;;
 esac

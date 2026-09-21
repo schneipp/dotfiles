@@ -44,6 +44,15 @@ Scope {
     property var infoFields: ({})
     property bool infoLoading: false
 
+    // AUR trust check for the highlighted package (qsl-aur-audit)
+    property string auditPkg: ""
+    property bool auditLoading: false
+    property string auditRisk: ""
+    property var auditFlags: []      // [{ sev, msg }]
+    property var auditFacts: []      // [{ label, value }]
+    property var auditSources: []
+    property var auditLines: []      // [{ where, line }]
+
     // uninstall flow
     property string targetApp: ""
     property string targetKind: ""   // pkg | file | none
@@ -69,6 +78,7 @@ Scope {
         manager = ""; managerLabel = "";
         searchResults = []; searching = false;
         infoPkg = ""; infoFields = ({}); infoLoading = false;
+        auditPkg = ""; auditRisk = ""; auditLoading = false;
         targetApp = ""; targetKind = ""; targetValue = "";
         wallpapers = [];
     }
@@ -231,10 +241,37 @@ Scope {
                 for (const line of text.trim().split("\n")) {
                     if (!line) continue;
                     const f = line.split("\t");
-                    out.push({ name: f[0], repo: f[1] ?? "", installed: f[2] === "1" });
+                    out.push({ name: f[0], repo: f[1] ?? "", installed: f[2] === "1",
+                               votes: f[3] ?? "" });
                 }
                 root.searchResults = out.slice(0, 200);
                 root.searching = false;
+            }
+        }
+    }
+
+    Process {
+        id: auditProc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const flags = [], facts = [], sources = [], lines = [];
+                let risk = "";
+                for (const line of text.trim().split("\n")) {
+                    const f = line.split("\t");
+                    switch (f[0]) {
+                    case "risk":   risk = f[1]; break;
+                    case "flag":   flags.push({ sev: f[1], msg: f[2] }); break;
+                    case "fact":   facts.push({ label: f[1], value: f[2] }); break;
+                    case "source": sources.push(f[1]); break;
+                    case "line":   lines.push({ where: f[1], line: f[2] }); break;
+                    }
+                }
+                root.auditRisk = risk;
+                root.auditFlags = flags;
+                root.auditFacts = facts;
+                root.auditSources = sources;
+                root.auditLines = lines;
+                root.auditLoading = false;
             }
         }
     }
@@ -297,6 +334,21 @@ Scope {
             infoProc.running = false;
             infoProc.command = ["qsl-pkg", "info", root.manager, item.label];
             infoProc.running = true;
+
+            // Only AUR packages are unreviewed; repo packages skip the check.
+            auditProc.running = false;
+            if (item.repo === "aur") {
+                root.auditPkg = item.label;
+                root.auditRisk = "";
+                root.auditFlags = []; root.auditFacts = [];
+                root.auditSources = []; root.auditLines = [];
+                root.auditLoading = true;
+                auditProc.command = ["qsl-aur-audit", item.label];
+                auditProc.running = true;
+            } else {
+                root.auditPkg = "";
+                root.auditLoading = false;
+            }
         }
     }
 
@@ -409,8 +461,10 @@ Scope {
         case "search":
             return searchResults.map(p => ({
                 icon: "\uf187", iconSource: "", label: p.name, desc: "",
-                kind: "pkg", payload: p.name,
-                badges: [sourceBadge(p.repo)].concat(p.installed ? ["installed"] : []),
+                kind: "pkg", payload: p.name, repo: p.repo,
+                badges: [sourceBadge(p.repo)]
+                    .concat(p.votes !== "" ? [p.votes === "1" ? "1 vote" : p.votes + " votes"] : [])
+                    .concat(p.installed ? ["installed"] : []),
             }));
 
         case "wallpaper": {
@@ -889,7 +943,10 @@ Scope {
                                                 required property string modelData
                                                 readonly property bool selected: badgeRow.rowSelected
                                                 readonly property color tone:
-                                                    modelData === "AUR"       ? "#f0a35e"
+                                                    modelData === "0 votes"   ? Theme.danger
+                                                  : modelData.endsWith("vote") || modelData.endsWith("votes")
+                                                                              ? Theme.fgDim
+                                                  : modelData === "AUR"       ? "#f0a35e"
                                                   : modelData === "installed" ? Theme.ok
                                                   :                             Theme.accent
 
@@ -1085,6 +1142,99 @@ Scope {
                                 lineHeight: 1.25
                                 color: Theme.fg
                                 text: root.infoFields["Description"] ?? "No description available."
+                            }
+
+                            // ---- AUR trust check
+                            Rectangle {
+                                id: trust
+                                visible: root.auditPkg !== "" && root.auditPkg === root.infoPkg
+                                width: parent.width
+                                height: visible ? trustCol.implicitHeight + 20 : 0
+                                radius: 8
+                                readonly property color tone:
+                                    root.auditRisk === "high"   ? Theme.danger
+                                  : root.auditRisk === "medium" ? "#f0a35e"
+                                  : root.auditRisk === "low"    ? Theme.ok
+                                  :                               Theme.fgDim
+                                color: Qt.rgba(tone.r, tone.g, tone.b, 0.10)
+                                border.width: 1
+                                border.color: Qt.rgba(tone.r, tone.g, tone.b, 0.45)
+
+                                Column {
+                                    id: trustCol
+                                    x: 10; y: 10
+                                    width: parent.width - 20
+                                    spacing: 6
+
+                                    Text {
+                                        font.family: Theme.fontFamily
+                                        font.pixelSize: 12
+                                        font.bold: true
+                                        color: trust.tone
+                                        text: root.auditLoading ? "Checking this AUR package…"
+                                            : root.auditRisk === "high"   ? "\uf071  High risk — read before installing"
+                                            : root.auditRisk === "medium" ? "\uf071  Some warning signs"
+                                            : root.auditRisk === "low"    ? "\uf00c  No warning signs found"
+                                            :                               "Could not check this package"
+                                    }
+
+                                    Repeater {
+                                        model: root.auditLoading ? [] : root.auditFlags
+                                        Text {
+                                            required property var modelData
+                                            width: trustCol.width
+                                            wrapMode: Text.Wrap
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: 11
+                                            color: modelData.sev === "high" ? Theme.danger
+                                                 : modelData.sev === "warn" ? "#f0a35e" : Theme.fgDim
+                                            text: (modelData.sev === "high" ? "\u2717  "
+                                                 : modelData.sev === "warn" ? "!  " : "\u00b7  ") + modelData.msg
+                                        }
+                                    }
+
+                                    Grid {
+                                        visible: !root.auditLoading && root.auditFacts.length > 0
+                                        columns: 2
+                                        columnSpacing: 10
+                                        rowSpacing: 2
+                                        Repeater {
+                                            // label, value, label, value… for the two-column grid.
+                                            // (No flatMap: QML's JS engine does not have it.)
+                                            model: {
+                                                if (root.auditLoading) return [];
+                                                const facts = root.auditFacts.concat(root.auditSources.length
+                                                    ? [{ label: "Downloads from", value: root.auditSources.join(", ") }] : []);
+                                                const cells = [];
+                                                for (const f of facts) cells.push(f.label, f.value);
+                                                return cells;
+                                            }
+                                            Text {
+                                                required property var modelData
+                                                required property int index
+                                                width: index % 2 === 0 ? 96 : trustCol.width - 106
+                                                wrapMode: Text.Wrap
+                                                font.family: Theme.fontFamily
+                                                font.pixelSize: 11
+                                                color: index % 2 === 0 ? Theme.fgDim : Theme.fg
+                                                text: modelData
+                                            }
+                                        }
+                                    }
+
+                                    Repeater {
+                                        model: root.auditLoading ? [] : root.auditLines
+                                        Text {
+                                            required property var modelData
+                                            width: trustCol.width
+                                            elide: Text.ElideRight
+                                            font.family: Theme.monoFamily
+                                            font.pixelSize: 10
+                                            color: Theme.danger
+                                            text: modelData.where + "  " + modelData.line
+                                        }
+                                    }
+                                }
                             }
 
                             Rectangle { width: parent.width; height: 1; color: Theme.border }
