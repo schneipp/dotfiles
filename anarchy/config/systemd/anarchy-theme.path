@@ -1,0 +1,10 @@
+[Unit]
+Description=Watch for DankMaterialShell theme changes
+
+[Path]
+# DMS rewrites this on every theme, wallpaper and light/dark change.
+PathModified=%h/.cache/DankMaterialShell/dms-colors.json
+Unit=anarchy-theme.service
+
+[Install]
+WantedBy=default.target

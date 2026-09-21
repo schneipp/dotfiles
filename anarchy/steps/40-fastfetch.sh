@@ -15,9 +15,9 @@ fi
 link config/fastfetch/config.jsonc "$HOME/.config/fastfetch/config.jsonc"
 link config/fastfetch/anarchy.png  "$HOME/.config/fastfetch/anarchy.png"
 
-# kitty-direct only draws in a terminal that speaks the kitty graphics
-# protocol. Everywhere else fastfetch still prints the text panels.
+# The logo is sixel, which foot and kitty both render. Everywhere else
+# fastfetch still prints the text panels.
 case "${TERM:-}" in
-  xterm-kitty|*kitty*) ok "kitty detected — the logo will render" ;;
-  *) skip "logo needs a kitty-protocol terminal; text output works anywhere" ;;
+  foot|xterm-kitty|*kitty*) ok "$TERM renders sixel — the logo will show" ;;
+  *) skip "logo needs a sixel-capable terminal; text output works anywhere" ;;
 esac

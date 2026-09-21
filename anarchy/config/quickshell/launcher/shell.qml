@@ -54,7 +54,7 @@ Scope {
     property var installedPkgs: []
     property var wallpapers: []
 
-    readonly property string terminal: "kitty"
+    readonly property string terminal: "foot"
     readonly property string termClass: "qsl-term"
 
     readonly property bool showsInfoPane: mode === "search" || mode === "wallpaper"
@@ -282,8 +282,13 @@ Scope {
         root.close();
     }
 
+    // foot takes the command straight after its options; kitty needs -e. The
+    // app-id is what the Hyprland rule floats on.
     function runInTerminal(args: list<string>): void {
-        runDetached([root.terminal, "--class", root.termClass, "-e"].concat(args));
+        const head = root.terminal === "foot"
+            ? [root.terminal, "--app-id=" + root.termClass]
+            : [root.terminal, "--class", root.termClass, "-e"];
+        runDetached(head.concat(args));
     }
 
     function askUninstall(entry): void {

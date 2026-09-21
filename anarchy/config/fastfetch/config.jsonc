@@ -1,12 +1,11 @@
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   // The anarchy logo, alpha-keyed so it blends with the terminal background.
-  // kitty-direct hands the path to the terminal instead of streaming the pixels.
+  // Pre-rendered ANSI art: fastfetch here has no sixel/chafa/magick backend,
+  // and foot does not speak the kitty protocol. Regenerate with anarchy-logo-ansi.
   "logo": {
-    "type": "kitty-direct",
-    "source": "~/.config/fastfetch/anarchy.png",
-    "width": 34,
-    "height": 17,
+    "type": "file-raw",
+    "source": "~/.config/fastfetch/anarchy.txt",
     "padding": {
       "top": 2,
       "right": 5,

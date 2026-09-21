@@ -1,0 +1,7 @@
+[Unit]
+Description=Push the DankMaterialShell palette into apps it does not theme
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/anarchy-theme-apply --quiet

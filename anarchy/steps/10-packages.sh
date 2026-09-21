@@ -7,8 +7,8 @@ require_arch
 # Desktop shell (DankMaterialShell) — pulls in quickshell + qt6-wayland.
 pac_install dms-shell-hyprland
 
-# The terminal the package and editor flows open in.
-pac_install kitty
+# Terminals: foot is the default; kitty stays for its graphics protocol.
+pac_install foot kitty
 
 # Bar widgets and DMS optional deps: media keys, brightness, visualiser,
 # wallpaper theming, network and power-profile control, sound effects.

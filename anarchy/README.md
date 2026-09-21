@@ -79,7 +79,7 @@ line to it rather than replacing it.
 |-----|--------|
 | `Super+Space` | The anarchy menu |
 | `Super+Tab` | Window overview |
-| `Super+Return` | Terminal |
+| `Super+Return` | Terminal (foot) |
 | `Super+Shift+F` | File manager |
 | `Super+Shift+B` | Browser |
 | `Super+Shift+O` | Obsidian |
@@ -158,6 +158,14 @@ Two routes, both ending at the same confirmation:
 Nothing is removed without two confirmations: one in the launcher, then pacman's
 own after it prints the full list of packages that would go.
 
+### Terminal
+
+foot is the default, and what `xdg-terminal-exec` resolves to. `Ctrl+Up` and
+`Ctrl+Down` change the font size, `Ctrl+0` resets it — the same keys kitty gets.
+
+kitty is still installed: it is the only terminal here that speaks its own
+graphics protocol, which some TUIs want.
+
 ### Style
 
 **Wallpaper** lists everything under `~/Pictures/wallpapers`,
@@ -169,6 +177,39 @@ you start filtering. Point it elsewhere with `ANARCHY_WALLPAPER_DIR`.
 **Light / dark** flips the whole desktop palette — the shell, GTK apps and Qt/KDE
 apps together. **Colours** opens DMS's accent-colour settings, and **Toggle bar**
 hides or shows the topbar.
+
+#### Making a theme reach everything
+
+DankMaterialShell templates a fixed list of apps and stops there. Two things it
+leaves undone are what made Omarchy's theme switching feel complete: the KDE
+colour scheme that KDE apps actually read, and reloading programs that are
+already running.
+
+`anarchy-theme-apply` closes both. It writes foot's palette, applies the KDE
+scheme with `plasma-apply-colorscheme`, nudges the GTK colour-scheme preference
+so libadwaita apps repaint, and sends `SIGUSR1` to foot, kitty, mako and btop.
+
+`anarchy-theme.path` watches `~/.cache/DankMaterialShell/dms-colors.json` — which
+DMS rewrites on every theme, wallpaper and light/dark change — and runs it. So a
+theme change propagates on its own, with nothing to remember.
+
+foot's colours are generated rather than included from DMS: foot rejects an
+unknown section in an included file and then refuses to start at all, so the
+format is worth owning. The script validates with `foot --check-config` and
+rolls back if what it wrote would not parse.
+
+#### Colour schemes
+
+`themes/osaka-jade.json` carries Omarchy's Osaka Jade across as a full Material
+role set, dark and light. Point DMS at one:
+
+```bash
+dms ipc call settings set customThemeFile ~/dotfiles/anarchy/themes/osaka-jade.json
+dms ipc call settings set currentThemeName custom
+```
+
+DMS takes the source colours from the file and derives the rest through matugen,
+so the palette stays internally consistent rather than being applied literally.
 
 ### Capture
 
@@ -195,8 +236,9 @@ anarchy/
 │   ├── 20-hyprland.sh          keybindings, input, autostart, window rules
 │   ├── 30-quickshell.sh        the launcher and its backend scripts
 │   ├── 40-fastfetch.sh         system summary with the anarchy logo
+│   ├── 45-foot.sh              the default terminal
 │   ├── 50-kitty.sh             theme include and font-size keys
-│   ├── 60-theme.sh             force dark Qt/KDE palettes
+│   ├── 60-theme.sh             dark Qt/KDE palettes + theme propagation
 │   ├── 70-shell.sh             bash aliases and functions
 │   ├── 80-webapps.sh           standalone browser windows
 │   └── 90-plugins.sh           DankMaterialShell plugins
@@ -207,11 +249,15 @@ anarchy/
 │   ├── hypr/custom.lua         everything Hyprland
 │   ├── quickshell/launcher/    the launcher itself (QML)
 │   ├── fastfetch/              system summary with the anarchy logo
+│   ├── foot/                   terminal config
+│   ├── systemd/                the theme-change watcher
 │   └── bash/                   aliases, functions, shell setup
 └── bin/                        symlinked into ~/.local/bin
     ├── qsl-pkg                 package queries, install and removal
     ├── qsl-capture             screenshots and recording
     ├── qsl-wall                wallpaper discovery
+    ├── anarchy-theme-apply     push a theme into apps DMS does not reach
+    ├── anarchy-logo-ansi       render a PNG to ANSI art for fastfetch
     ├── launch-webapp           standalone browser windows
     └── transcode               ffmpeg wrapper for sharing video and images
 ```

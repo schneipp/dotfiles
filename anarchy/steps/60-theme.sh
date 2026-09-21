@@ -65,3 +65,31 @@ if need_cmd plasma-apply-colorscheme; then
 else
   warn "plasma-apply-colorscheme not found (package: plasma-workspace) — KDE apps may stay light"
 fi
+
+# ------------------------------------------------------------- propagation
+#
+# DMS templates a fixed set of apps and stops there. anarchy-theme-apply picks
+# up the rest — the KDE colour scheme, foot's palette, a GTK nudge — and
+# reloads what is running. The path unit runs it on every theme change, which
+# is what makes a theme switch reach everything the way Omarchy's did.
+
+link bin/anarchy-theme-apply "$HOME/.local/bin/anarchy-theme-apply"
+link bin/anarchy-logo-ansi   "$HOME/.local/bin/anarchy-logo-ansi"
+
+link config/systemd/anarchy-theme.service "$HOME/.config/systemd/user/anarchy-theme.service"
+link config/systemd/anarchy-theme.path    "$HOME/.config/systemd/user/anarchy-theme.path"
+
+if (( ! DRY_RUN )); then
+  systemctl --user daemon-reload
+  if systemctl --user enable --now anarchy-theme.path >/dev/null 2>&1; then
+    ok "theme changes now propagate automatically"
+  else
+    warn "could not enable anarchy-theme.path"
+  fi
+  "$HOME/.local/bin/anarchy-theme-apply" --quiet && ok "current theme pushed out"
+fi
+
+# Colour schemes shipped with anarchy. Point DMS at one with:
+#   dms ipc call settings set customThemeFile ~/dotfiles/anarchy/themes/osaka-jade.json
+#   dms ipc call settings set currentThemeName custom
+info "themes available: $(cd "$ANARCHY_DIR/themes" && ls *.json | sed 's/\.json//' | paste -sd' ')"

@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# anarchy-logo-ansi — render a PNG to ANSI half-block art for fastfetch.
+#
+# fastfetch on Arch is built without sixel, chafa or imagemagick, so its only
+# image backends are the kitty protocol ones — and foot does not speak kitty.
+# A pre-rendered text logo works in foot, kitty, a bare TTY and over SSH alike,
+# which is what Omarchy shipped too.
+#
+#   anarchy-logo-ansi <image> [columns] > logo.txt
+
+set -euo pipefail
+
+src=${1:?usage: anarchy-logo-ansi <image> [columns]}
+cols=${2:-40}
+rows=$((cols))           # two pixel rows per character cell, so this many lines/2
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+# Scale to the target grid and hand over raw RGBA.
+ffmpeg -y -i "$src" -vf "scale=${cols}:${rows}:flags=lanczos,format=rgba" \
+    -f rawvideo -pix_fmt rgba "$tmp/raw" -loglevel error
+
+python3 - "$tmp/raw" "$cols" "$rows" <<'PY'
+import sys
+
+raw, cols, rows = open(sys.argv[1], 'rb').read(), int(sys.argv[2]), int(sys.argv[3])
+
+def px(x, y):
+    i = (y * cols + x) * 4
+    r, g, b, a = raw[i], raw[i+1], raw[i+2], raw[i+3]
+    return (r, g, b, a)
+
+out = []
+# One character per two vertical pixels: ▀ with a foreground for the top half
+# and a background for the bottom. Fully transparent pixels get no colour at
+# all, so the terminal background shows through.
+for y in range(0, rows - 1, 2):
+    line = []
+    for x in range(cols):
+        tr, tg, tb, ta = px(x, y)
+        br, bg, bb, ba = px(x, y + 1)
+        top, bot = ta > 40, ba > 40
+        if not top and not bot:
+            line.append("\x1b[0m ")
+        elif top and bot:
+            line.append(f"\x1b[38;2;{tr};{tg};{tb}m\x1b[48;2;{br};{bg};{bb}m▀")
+        elif top:
+            line.append(f"\x1b[0m\x1b[38;2;{tr};{tg};{tb}m▀")
+        else:
+            line.append(f"\x1b[0m\x1b[38;2;{br};{bg};{bb}m▄")
+    out.append("".join(line) + "\x1b[0m")
+
+# Trim blank rows top and bottom so the logo sits tight against the text.
+while out and out[0].replace("\x1b[0m", "").strip() == "":
+    out.pop(0)
+while out and out[-1].replace("\x1b[0m", "").strip() == "":
+    out.pop()
+
+sys.stdout.write("\n".join(out) + "\n")
+PY

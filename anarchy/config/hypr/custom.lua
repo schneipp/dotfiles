@@ -60,7 +60,7 @@ hl.config({
 ---- APPS -----
 ----------------
 
-local terminal     = "kitty"
+local terminal     = "foot"
 local fileManager  = "dolphin"
 local browser      = "firefox"
 
