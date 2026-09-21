@@ -15,6 +15,10 @@ pac_install foot kitty
 pac_install playerctl brightnessctl cava matugen networkmanager \
             power-profiles-daemon qt6-multimedia qt6ct
 
+# The KDE Qt platform theme: lets Dolphin and other Qt/KDE apps follow the
+# light/dark switch (QT_QPA_PLATFORMTHEME=kde in custom.lua).
+pac_install plasma-integration
+
 # Capture: region select, screenshot, clipboard, recording, annotation.
 pac_install grim slurp wl-clipboard hyprpicker jq libnotify ffmpeg fastfetch
 pac_install gpu-screen-recorder satty

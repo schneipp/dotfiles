@@ -28,6 +28,17 @@ hl.on("hyprland.start", function()
 end)
 
 
+---------------------
+---- ENVIRONMENT ----
+---------------------
+
+-- Qt apps pick their colours from the platform theme. With none set, KDE apps
+-- such as Dolphin ignore ~/.config/kdeglobals and open white whatever the
+-- theme. The KDE platform theme reads it, and follows changes live, which is
+-- what lets a light/dark switch reach them (see anarchy-theme-apply).
+hl.env("QT_QPA_PLATFORMTHEME", "kde")
+
+
 ---------------
 ---- INPUT ----
 ---------------
