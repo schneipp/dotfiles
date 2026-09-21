@@ -52,12 +52,13 @@ Scope {
     // dynamic lists
     property var captureActions: []
     property var installedPkgs: []
+    property var wallpapers: []
 
     readonly property string terminal: "kitty"
     readonly property string termClass: "qsl-term"
 
-    readonly property bool showsInfoPane: mode === "search"
-    readonly property bool searchable: ["apps", "search", "remove"].indexOf(mode) >= 0
+    readonly property bool showsInfoPane: mode === "search" || mode === "wallpaper"
+    readonly property bool searchable: ["apps", "search", "remove", "wallpaper"].indexOf(mode) >= 0
 
     // ------------------------------------------------------------ lifecycle
 
@@ -69,6 +70,7 @@ Scope {
         searchResults = []; searching = false;
         infoPkg = ""; infoFields = ({}); infoLoading = false;
         targetApp = ""; targetKind = ""; targetValue = "";
+        wallpapers = [];
     }
 
     function open(): void {
@@ -86,6 +88,9 @@ Scope {
 
         if (next === "capture") { captureProc.running = false; captureProc.running = true; }
         if (next === "remove")  { installedProc.running = false; installedProc.running = true; }
+        if (next === "wallpaper" && wallpapers.length === 0) {
+            wallProc.running = false; wallProc.running = true;
+        }
     }
 
     function goBack(): void {
@@ -105,6 +110,10 @@ Scope {
 
         function install(): void { root.open(); root.goTo("managers"); }
         function capture(): void { root.open(); root.goTo("capture"); }
+        function wallpaper(): void { root.open(); root.goTo("wallpaper"); }
+
+        // Open any screen directly, e.g. `qs -c launcher ipc call launcher go system`.
+        function go(mode: string): void { root.open(); root.goTo(mode); }
 
         function installSearch(mgr: string, q: string): void {
             root.open();
@@ -165,6 +174,18 @@ Scope {
                 const out = [];
                 for (const line of text.trim().split("\n")) if (line) out.push(line);
                 root.installedPkgs = out;
+            }
+        }
+    }
+
+    Process {
+        id: wallProc
+        command: ["qsl-wall", "list"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const out = [];
+                for (const line of text.trim().split("\n")) if (line) out.push(line);
+                root.wallpapers = out;
             }
         }
     }
@@ -348,6 +369,30 @@ Scope {
                 kind: "pkg", payload: p,
             }));
 
+        case "wallpaper": {
+            const actions = Menus.wallpaperActions.map(m => ({
+                icon: m.icon, iconSource: "", label: m.label, desc: m.desc,
+                kind: "menu", payload: m,
+            }));
+            const hits = [];
+            for (const w of wallpapers) {
+                const base = w.slice(w.lastIndexOf("/") + 1);
+                if (score(base, q) > 0) hits.push(w);
+            }
+            const files = hits.slice(0, 400).map(w => {
+                const base = w.slice(w.lastIndexOf("/") + 1);
+                const dir = w.slice(0, w.lastIndexOf("/"));
+                return {
+                    icon: "\uf03e", iconSource: "",
+                    label: base.replace(/\.[^.]+$/, ""),
+                    desc: dir.replace(/^\/home\/[^/]+/, "~"),
+                    kind: "wallpaper", payload: w,
+                };
+            });
+            // Hide the next/prev/clear actions once you start filtering.
+            return q ? files : actions.concat(files);
+        }
+
         case "remove": {
             const hits = [];
             for (const p of installedPkgs) {
@@ -405,6 +450,9 @@ Scope {
             break;
         case "installed":
             askRemovePackage(item.payload);
+            break;
+        case "wallpaper":
+            runDetached(["dms", "ipc", "call", "wallpaper", "set", item.payload]);
             break;
         }
     }
@@ -529,29 +577,14 @@ Scope {
                         width: parent.width
                         height: 40
 
-                        Row {
+                        Image {
                             anchors.centerIn: parent
-                            spacing: 9
-
-                            Image {
-                                anchors.verticalCenter: parent.verticalCenter
-                                source: Qt.resolvedUrl("assets/anarchy-mark.png")
-                                height: 34
-                                width: height * (sourceSize.width / Math.max(1, sourceSize.height))
-                                fillMode: Image.PreserveAspectFit
-                                smooth: true
-                                mipmap: true
-                            }
-
-                            Image {
-                                anchors.verticalCenter: parent.verticalCenter
-                                source: Qt.resolvedUrl("assets/anarchy-word.png")
-                                height: 22
-                                width: height * (sourceSize.width / Math.max(1, sourceSize.height))
-                                fillMode: Image.PreserveAspectFit
-                                smooth: true
-                                mipmap: true
-                            }
+                            source: Qt.resolvedUrl("assets/anarchy-word.png")
+                            height: 30
+                            width: height * (sourceSize.width / Math.max(1, sourceSize.height))
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
+                            mipmap: true
                         }
 
                         // Breadcrumb sits on the same line, left-aligned.
@@ -807,7 +840,7 @@ Scope {
                         width: parent.width - 32
                         horizontalAlignment: Text.AlignHCenter
                         wrapMode: Text.Wrap
-                        visible: root.infoPkg === "" && !root.infoLoading
+                        visible: root.mode === "search" && root.infoPkg === "" && !root.infoLoading
                         font.family: Theme.fontFamily
                         font.pixelSize: 12
                         color: Theme.fgDim
@@ -816,17 +849,78 @@ Scope {
 
                     Text {
                         anchors.centerIn: parent
-                        visible: root.infoLoading
+                        visible: root.mode === "search" && root.infoLoading
                         font.family: Theme.fontFamily
                         font.pixelSize: 12
                         color: Theme.fgDim
                         text: "Loading…"
                     }
 
+                    // ---- wallpaper preview
+                    Item {
+                        anchors.fill: parent
+                        anchors.margins: 12
+                        visible: root.mode === "wallpaper"
+
+                        Image {
+                            id: wallPreview
+                            anchors { top: parent.top; left: parent.left; right: parent.right
+                                      bottom: wallCaption.top; bottomMargin: 10 }
+                            fillMode: Image.PreserveAspectFit
+                            asynchronous: true
+                            cache: false
+                            // Decode at display size; these are full-resolution photos.
+                            sourceSize.width: 520
+                            source: {
+                                const lv = root.listRef;
+                                if (!lv || lv.count === 0) return "";
+                                const item = lv.model[lv.currentIndex];
+                                if (!item || item.kind !== "wallpaper") return "";
+                                return "file://" + item.payload;
+                            }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            visible: wallPreview.source === ""
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 12
+                            color: Theme.fgDim
+                            text: "Highlight a wallpaper to preview it"
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            visible: wallPreview.source !== ""
+                                     && wallPreview.status === Image.Loading
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 12
+                            color: Theme.fgDim
+                            text: "Loading…"
+                        }
+
+                        Text {
+                            id: wallCaption
+                            anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
+                            horizontalAlignment: Text.AlignHCenter
+                            elide: Text.ElideMiddle
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 11
+                            color: Theme.fgDim
+                            text: {
+                                const lv = root.listRef;
+                                if (!lv || lv.count === 0) return "";
+                                const item = lv.model[lv.currentIndex];
+                                if (!item || item.kind !== "wallpaper") return "";
+                                return item.payload.replace(/^\/home\/[^/]+/, "~");
+                            }
+                        }
+                    }
+
                     Flickable {
                         anchors.fill: parent
                         anchors.margins: 16
-                        visible: root.infoPkg !== "" && !root.infoLoading
+                        visible: root.mode === "search" && root.infoPkg !== "" && !root.infoLoading
                         contentHeight: infoCol.implicitHeight
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds

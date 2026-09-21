@@ -65,6 +65,9 @@ local fileManager  = "dolphin"
 local browser      = "firefox"
 
 hl.bind(mainMod .. " + W",          hl.dsp.window.close(),        { description = "Close window" })
+hl.bind(mainMod .. " + F",          hl.dsp.window.fullscreen(),   { description = "Fullscreen" })
+hl.bind(mainMod .. " + SHIFT + Return", hl.dsp.window.fullscreen({ mode = 1 }),
+    { description = "Maximize (keeps bar and gaps)" })
 hl.bind(mainMod .. " + Return",     hl.dsp.exec_cmd(terminal),    { description = "Terminal"     })
 hl.bind(mainMod .. " + SHIFT + F",  hl.dsp.exec_cmd(fileManager), { description = "File manager" })
 hl.bind(mainMod .. " + SHIFT + B",  hl.dsp.exec_cmd(browser),     { description = "Browser"      })
@@ -93,6 +96,12 @@ hl.bind(mainMod .. " + SHIFT + I", hl.dsp.exec_cmd("qs -c launcher ipc call laun
     { description = "Install a package" })
 hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("qs -c launcher ipc call launcher capture"),
     { description = "Capture menu" })
+hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd("qs -c launcher ipc call launcher wallpaper"),
+    { description = "Wallpaper picker" })
+-- `go <screen>` opens any menu directly: root, apps, capture, managers, remove,
+-- style, theme, wallpaper, setup, update, system.
+hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("qs -c launcher ipc call launcher go system"),
+    { description = "Power menu" })
 
 -- Window switcher: DankMaterialShell's overview.
 hl.bind(mainMod .. " + Tab", hl.dsp.exec_cmd("dms ipc call hypr toggleOverview"),

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# qsl-wall — wallpaper listing for the anarchy launcher.
+#
+# Setting is done by the shell itself (dms ipc call wallpaper set …); this
+# only finds the candidates, so the launcher has something to show.
+#
+#   qsl-wall list     one absolute path per line, sorted by filename
+#   qsl-wall dirs     the directories being searched
+#   qsl-wall current  the wallpaper in use, if any
+
+set -uo pipefail
+
+[[ -f ~/.config/user-dirs.dirs ]] && source ~/.config/user-dirs.dirs
+PICTURES="${XDG_PICTURES_DIR:-$HOME/Pictures}"
+
+# First existing directory wins for `dirs`; `list` searches all of them.
+CANDIDATES=(
+  "${ANARCHY_WALLPAPER_DIR:-}"
+  "$PICTURES/wallpapers"
+  "$PICTURES/Wallpapers"
+  "$HOME/.local/share/wallpapers"
+  "/usr/share/backgrounds"
+)
+
+dirs() {
+  for d in "${CANDIDATES[@]}"; do
+    [[ -n $d && -d $d ]] && printf '%s\n' "$d"
+  done
+}
+
+list() {
+  local found=0
+  while IFS= read -r d; do
+    found=1
+    find "$d" -maxdepth 3 -type f \
+      \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \
+         -o -iname '*.webp' -o -iname '*.bmp' \) 2>/dev/null
+  done < <(dirs) | LC_ALL=C sort -f -t/ -k99
+  (( found )) || return 0
+}
+
+case "${1:-list}" in
+  list)    list ;;
+  dirs)    dirs ;;
+  current) dms ipc call wallpaper get 2>/dev/null ;;
+  *) printf 'usage: qsl-wall {list|dirs|current}\n' >&2; exit 1 ;;
+esac

@@ -25,14 +25,36 @@ Singleton {
     ]
 
     readonly property var style: [
-        { icon: "\uf03e", label: "Wallpaper",       desc: "Pick a background",
-          run: ["dms", "ipc", "call", "settings", "openWith", "wallpaper"] },
-        { icon: "\uf1fc", label: "Theme & colours", desc: "Accent colour and light/dark",
+        { icon: "\uf03e", label: "Wallpaper",       desc: "Browse and apply a background",
+          go: "wallpaper" },
+        { icon: "\uf042", label: "Light / dark",    desc: "Switch the whole desktop palette",
+          go: "theme" },
+        { icon: "\uf1fc", label: "Colours",         desc: "Accent colour and theme settings",
           run: ["dms", "ipc", "call", "settings", "openWith", "theme"] },
         { icon: "\uf186", label: "Night mode",      desc: "Toggle the blue-light filter",
           run: ["dms", "ipc", "call", "night", "toggle"] },
+        // The bar IPC needs a selector; "id default" is the stock single bar.
         { icon: "\uf0ca", label: "Toggle bar",      desc: "Show or hide the topbar",
-          run: ["dms", "ipc", "call", "bar", "toggle"] },
+          run: ["dms", "ipc", "call", "bar", "toggle", "id", "default"] },
+    ]
+
+    readonly property var theme: [
+        { icon: "\uf186", label: "Dark",   desc: "Dark palette everywhere",
+          run: ["dms", "ipc", "call", "theme", "dark"] },
+        { icon: "\uf185", label: "Light",  desc: "Light palette everywhere",
+          run: ["dms", "ipc", "call", "theme", "light"] },
+        { icon: "\uf042", label: "Toggle", desc: "Flip to whichever it isn't",
+          run: ["dms", "ipc", "call", "theme", "toggle"] },
+    ]
+
+    // Shown above the wallpaper list.
+    readonly property var wallpaperActions: [
+        { icon: "\uf061", label: "Next wallpaper",     desc: "Advance to the next one",
+          run: ["dms", "ipc", "call", "wallpaper", "next"] },
+        { icon: "\uf060", label: "Previous wallpaper", desc: "Go back one",
+          run: ["dms", "ipc", "call", "wallpaper", "prev"] },
+        { icon: "\uf014", label: "Clear wallpaper",    desc: "Remove the background",
+          run: ["dms", "ipc", "call", "wallpaper", "clear"] },
     ]
 
     readonly property var setup: [
@@ -72,6 +94,7 @@ Singleton {
         case "setup":  return setup;
         case "update": return update;
         case "system": return system;
+        case "theme":  return theme;
         default:       return [];
         }
     }
@@ -87,5 +110,7 @@ Singleton {
         "setup":    "Setup",
         "update":   "Update",
         "system":   "System",
+        "theme":     "Light / dark",
+        "wallpaper": "Wallpaper",
     })
 }

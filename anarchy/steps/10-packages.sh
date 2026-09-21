@@ -16,7 +16,7 @@ pac_install playerctl brightnessctl cava matugen networkmanager \
             power-profiles-daemon qt6-multimedia qt6ct
 
 # Capture: region select, screenshot, clipboard, recording, annotation.
-pac_install grim slurp wl-clipboard hyprpicker jq libnotify ffmpeg
+pac_install grim slurp wl-clipboard hyprpicker jq libnotify ffmpeg fastfetch
 pac_install gpu-screen-recorder satty
 
 # AUR helpers — the launcher's install flow offers an AUR source when present.

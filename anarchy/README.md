@@ -67,6 +67,8 @@ line to it rather than replacing it.
 | `Super+Ctrl+Shift` + `h/l` | Send the window to the previous / next monitor |
 | `Super+Alt` + `h/j/k/l` | Resize |
 | `Super+W` | Close the window |
+| `Super+F` | Fullscreen |
+| `Super+Shift+Return` | Maximize, keeping the bar and gaps |
 | `Super+V` | Toggle floating |
 | `Super+T` | Toggle split direction (dwindle) |
 | `Super` + `1…0` | Switch workspace (`+Shift` moves the window there) |
@@ -83,6 +85,15 @@ line to it rather than replacing it.
 | `Super+Shift+O` | Obsidian |
 | `Super+Shift+I` | Jump straight to the package installer |
 | `Super+Shift+C` | Jump straight to the capture menu |
+| `Super+Shift+W` | Jump straight to the wallpaper picker |
+| `Super+Shift+P` | Jump straight to the power menu |
+
+Any screen can be opened directly:
+
+```bash
+qs -c launcher ipc call launcher go wallpaper
+# root apps capture managers remove style theme wallpaper setup update system
+```
 
 ### Capture
 
@@ -147,6 +158,18 @@ Two routes, both ending at the same confirmation:
 Nothing is removed without two confirmations: one in the launcher, then pacman's
 own after it prints the full list of packages that would go.
 
+### Style
+
+**Wallpaper** lists everything under `~/Pictures/wallpapers`,
+`~/.local/share/wallpapers` and `/usr/share/backgrounds`, with a live preview of
+the highlighted image beside the list. Type to filter by filename; `Enter`
+applies it. Next / previous / clear sit at the top of the list and disappear once
+you start filtering. Point it elsewhere with `ANARCHY_WALLPAPER_DIR`.
+
+**Light / dark** flips the whole desktop palette — the shell, GTK apps and Qt/KDE
+apps together. **Colours** opens DMS's accent-colour settings, and **Toggle bar**
+hides or shows the topbar.
+
 ### Capture
 
 Screenshots freeze the screen with `hyprpicker` while you select, so nothing
@@ -171,6 +194,7 @@ anarchy/
 │   ├── 10-packages.sh
 │   ├── 20-hyprland.sh          keybindings, input, autostart, window rules
 │   ├── 30-quickshell.sh        the launcher and its backend scripts
+│   ├── 40-fastfetch.sh         system summary with the anarchy logo
 │   ├── 50-kitty.sh             theme include and font-size keys
 │   ├── 60-theme.sh             force dark Qt/KDE palettes
 │   ├── 70-shell.sh             bash aliases and functions
@@ -178,10 +202,12 @@ anarchy/
 ├── config/                     symlinked into ~/.config
 │   ├── hypr/custom.lua         everything Hyprland
 │   ├── quickshell/launcher/    the launcher itself (QML)
+│   ├── fastfetch/              system summary with the anarchy logo
 │   └── bash/                   aliases, functions, shell setup
 └── bin/                        symlinked into ~/.local/bin
     ├── qsl-pkg                 package queries, install and removal
     ├── qsl-capture             screenshots and recording
+    ├── qsl-wall                wallpaper discovery
     ├── launch-webapp           standalone browser windows
     └── transcode               ffmpeg wrapper for sharing video and images
 ```
