@@ -52,6 +52,15 @@ log()  { printf '[anarchy-rdp] %s\n' "$*" >&2; }
 need_hyprland() {
   [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] || die "not inside a Hyprland session (HYPRLAND_INSTANCE_SIGNATURE unset)"
   command -v hyprctl >/dev/null || die "hyprctl not found"
+  # hypr-rdp talks Wayland, not just hyprctl. Started over ssh or from a unit
+  # there may be no WAYLAND_DISPLAY; Hyprland knows its own socket name.
+  if [[ -z ${WAYLAND_DISPLAY:-} ]]; then
+    WAYLAND_DISPLAY=$(hyprctl instances -j 2>/dev/null |
+      jq -r --arg s "$HYPRLAND_INSTANCE_SIGNATURE" '.[] | select(.instance == $s) | .wl_socket' | head -1)
+    [[ -n $WAYLAND_DISPLAY ]] || die "could not work out WAYLAND_DISPLAY for this Hyprland instance"
+    export WAYLAND_DISPLAY
+    log "WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
+  fi
 }
 
 output_name() { printf '%s-%d' "$PREFIX" "$1"; }
