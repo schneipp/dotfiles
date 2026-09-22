@@ -72,7 +72,8 @@ elif [[ -z $current_dm || $current_dm == . ]] ||
     warn "could not enable greetd.service"
   fi
 else
-  warn "kept ${current_dm%.service}: someone has to log in on the machine before RDP works"
+  warn "kept ${current_dm%.service}: RDP only works once someone logs into Hyprland on the machine"
+  [[ -t 0 ]] || warn "(no terminal to ask on — rerun with --yes to switch to greetd)"
 fi
 
 # -------------------------------------------------------------------- sleep

@@ -10,7 +10,15 @@ step "Hyprland"
 HYPR_DIR=$HOME/.config/hypr
 MAIN=$HYPR_DIR/hyprland.lua
 
-if [[ ! -f $MAIN ]]; then
+# Hyprland copies its default config in on first start. A machine that has
+# never run it (a headless box, say) has none yet, so seed it the same way.
+DEFAULT_MAIN=/usr/share/hypr/hyprland.lua
+if [[ ! -f $MAIN && -f $DEFAULT_MAIN ]]; then
+  run mkdir -p "$HYPR_DIR"
+  run cp "$DEFAULT_MAIN" "$MAIN"
+  ok "$(tilde "$MAIN") created from Hyprland's default"
+fi
+if [[ ! -f $MAIN ]] && (( ! DRY_RUN )); then
   warn "$(tilde "$MAIN") not found — start Hyprland once so it writes a default config, then re-run."
   return 0 2>/dev/null || exit 0
 fi

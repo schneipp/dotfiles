@@ -90,5 +90,10 @@ cat <<EOF
   anarchy-rdp status | restart | password     manage it
   ~/.config/anarchy/rdp.conf                   monitor sizes and ports
 
-  Reboot to come up headless: greetd logs in and the servers start with Hyprland.
 EOF
+if [[ $(systemctl is-enabled greetd.service 2>/dev/null) == enabled ]]; then
+  echo "  Reboot to come up headless: greetd logs in and the servers start with Hyprland."
+else
+  printf '  %sgreetd is not enabled%s: nothing starts Hyprland at boot, so nothing listens\n' "$C_YELLOW" "$C_RESET"
+  echo "  on the RDP ports until someone logs into Hyprland. Rerun with --yes to switch."
+fi
