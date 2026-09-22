@@ -17,6 +17,9 @@ Preview it first with `./install.sh --dry-run`, or run a single part with
 `./install.sh hyprland`. Every step is idempotent and backs up whatever it
 replaces.
 
+No screen attached? `./installer-headless-rdp.sh` installs the same desktop
+and serves it over RDP, with one virtual monitor per screen on the client.
+
 | | |
 |---|---|
 | `Super+Space` | The anarchy menu — apps, capture, install, remove, style, setup, update, system |

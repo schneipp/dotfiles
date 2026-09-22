@@ -110,6 +110,54 @@ Every step is safe to run twice. Existing real files are moved aside as
 `<name>.pre-anarchy.<timestamp>` before anything is linked over them, and files
 already pointing at this repo are left alone.
 
+### Headless, over RDP
+
+For a machine with no screen: a server, a VM, the box under the desk.
+
+```bash
+./installer-headless-rdp.sh                                 # two 1920x1080 monitors
+./installer-headless-rdp.sh --monitors "2560x1440 1920x1080"
+./installer-headless-rdp.sh --rdp-only                      # desktop already installed
+./installer-headless-rdp.sh --dry-run
+```
+
+It runs `install.sh`, then adds:
+
+- **[hypr-rdp](https://github.com/MuNeNICK/hypr-rdp)**: an RDP server that talks
+  to Hyprland directly, with H.264 (VA-API when there is a GPU), audio,
+  clipboard and file copy.
+- **One virtual monitor per remote screen**: `anarchy-rdp` creates a headless
+  Hyprland output for each entry in `~/.config/anarchy/rdp.conf`, lays them out
+  side by side, and serves each on its own port (3389, 3390, …).
+- **Autologin**: greetd starts Hyprland at boot, so there is a desktop to
+  connect to. The installer asks before it replaces your display manager.
+- **No sleep**: it asks before masking suspend and hibernate. It also opens
+  the ports in ufw or firewalld when one of them is running.
+
+Hyprland sees the virtual monitors as real ones. Each gets its own workspaces
+and bar, and `Super+Ctrl+h/l` and the window-move keys work across them as on a
+desk. On the client, open one connection per monitor and make each full screen
+on its own display:
+
+```bash
+xfreerdp3 /v:host:3389 /u:$USER /cert:tofu /f /monitors:0 /dynamic-resolution:off
+xfreerdp3 /v:host:3390 /u:$USER /cert:tofu /f /monitors:1 /dynamic-resolution:off
+```
+
+On Windows, open one `mstsc` per port and put each one full screen on its own
+display. `anarchy-rdp status` prints these commands filled in for your machine.
+
+```bash
+anarchy-rdp status      # outputs, ports, connect commands
+anarchy-rdp restart     # after editing rdp.conf
+anarchy-rdp password    # the RDP password (separate from your Linux one)
+```
+
+Hyprland's portal has no RemoteDesktop interface, so the usual servers can't be
+used here: krdp and gnome-remote-desktop need that interface, and xrdp serves
+only X11. That leaves hypr-rdp. It is young and it comes from the AUR, and the
+installer shows you its trust report before building it.
+
 ### Requirements
 
 Arch or an Arch derivative (CachyOS is what this was built on) with `pacman`, and
@@ -334,6 +382,7 @@ While a recording is running the capture menu shows a **● REC** badge and offe
 ```
 anarchy/
 ├── install.sh                  entry point
+├── installer-headless-rdp.sh   install.sh + RDP, autologin, no sleep
 ├── lib/common.sh               logging, backup, symlink and pacman helpers
 ├── steps/                      one file per concern, run in filename order
 │   ├── 10-packages.sh
@@ -345,7 +394,10 @@ anarchy/
 │   ├── 60-theme.sh             dark Qt/KDE palettes + theme propagation
 │   ├── 70-shell.sh             bash aliases and functions
 │   ├── 80-webapps.sh           standalone browser windows
-│   └── 90-plugins.sh           DankMaterialShell plugins
+│   ├── 90-plugins.sh           DankMaterialShell plugins
+│   └── headless/               only run by installer-headless-rdp.sh
+│       ├── 10-rdp.sh           hypr-rdp, anarchy-rdp, password, firewall
+│       └── 20-session.sh       greetd autologin, sleep targets
 ├── plugins/                    DankMaterialShell plugins (see their READMEs)
 │   └── spotmarchy/             Spotify + time-synced lyrics, ported from Omarchy
 ├── themes/                     colour schemes
@@ -356,12 +408,14 @@ anarchy/
 │   ├── fastfetch/              system summary with the anarchy logo
 │   ├── foot/                   terminal config
 │   ├── systemd/                the theme-change watcher
+│   ├── rdp/                    anarchy-rdp and hypr-rdp config templates
 │   └── bash/                   aliases, functions, shell setup
 └── bin/                        symlinked into ~/.local/bin
     ├── qsl-pkg                 package queries, install and removal
     ├── qsl-aur-audit           trust check for AUR packages
     ├── qsl-capture             screenshots and recording
     ├── qsl-wall                wallpaper discovery
+    ├── anarchy-rdp             virtual monitors + one RDP server each
     ├── anarchy-theme-apply     push a theme into apps DMS does not reach
     ├── anarchy-logo-braille    turn the artwork into braille text art for fastfetch
     ├── launch-webapp           standalone browser windows

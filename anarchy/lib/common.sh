@@ -116,3 +116,34 @@ pac_install() {
   info "installing: ${missing[*]}"
   run sudo pacman -S --needed --noconfirm "${missing[@]}"
 }
+
+# aur_install <pkg...> — install from the AUR with paru, showing the anarchy
+# trust report first so a low-vote package is a visible choice, not a surprise.
+aur_install() {
+  local missing=()
+  for p in "$@"; do
+    pacman -Qq "$p" &>/dev/null || missing+=("$p")
+  done
+  if ((${#missing[@]} == 0)); then
+    skip "already installed: $*"
+    return 0
+  fi
+  need_cmd paru || die "paru is needed for the AUR (run the packages step first)"
+  local audit=$ANARCHY_DIR/bin/qsl-aur-audit
+  for p in "${missing[@]}"; do
+    [[ -x $audit ]] && "$audit" --text "$p" 2>/dev/null | sed 's/^/    │ /'
+  done
+  info "installing from the AUR: ${missing[*]}"
+  run paru -S --needed --noconfirm --skipreview "${missing[@]}"
+}
+
+# confirm <question> — yes/no prompt. ASSUME_YES=1 answers yes; with no
+# terminal to ask on, the answer is no.
+confirm() {
+  (( ASSUME_YES )) && return 0
+  [[ -t 0 ]] || return 1
+  local reply
+  read -rp "    $1 [y/N] " reply
+  [[ $reply == [yY]* ]]
+}
+ASSUME_YES=${ASSUME_YES:-0}

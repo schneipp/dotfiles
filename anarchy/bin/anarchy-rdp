@@ -1,0 +1,214 @@
+#!/usr/bin/env bash
+#
+# anarchy-rdp — headless multi-monitor RDP for Hyprland.
+#
+# hypr-rdp serves exactly one output per process. For several monitors this
+# creates one headless Hyprland output per monitor, lays them out side by
+# side, and runs one hypr-rdp per output on consecutive ports. Hyprland sees
+# real monitors: every one gets its own workspaces and bar, and Super+Ctrl+h/l
+# and the window-move keys hop between them like on a desk.
+#
+# On the client, open one connection per monitor and make each full screen on
+# its own display (see `anarchy-rdp status` for the exact commands).
+#
+#   anarchy-rdp run        supervise the outputs and servers (Hyprland autostart)
+#   anarchy-rdp start      same, detached
+#   anarchy-rdp stop       stop the servers and remove the outputs
+#   anarchy-rdp restart    stop, then start — after editing the config
+#   anarchy-rdp status     outputs, ports and how to connect
+#   anarchy-rdp password   set a new RDP password
+#
+# Config: ~/.config/anarchy/rdp.conf (monitor sizes, port, bind address)
+#         ~/.config/hypr-rdp/config.toml (credentials, codec, fps — shared by
+#         every instance)
+set -uo pipefail
+
+CONF=${ANARCHY_RDP_CONF:-$HOME/.config/anarchy/rdp.conf}
+HYPR_RDP_DIR=$HOME/.config/hypr-rdp
+PASSWORD_FILE=$HYPR_RDP_DIR/password
+RUNTIME=${XDG_RUNTIME_DIR:-/tmp}/anarchy-rdp
+PREFIX=ANARCHY-RDP
+HYPR_RDP=${HYPR_RDP:-hypr-rdp}
+
+# Defaults, overridden by the config file.
+MONITORS=(1920x1080 1920x1080)
+PORT=3389
+BIND=0.0.0.0
+SCALE=1
+REFRESH=60
+# shellcheck disable=SC1090
+[[ -f $CONF ]] && source "$CONF"
+
+die()  { printf 'anarchy-rdp: %s\n' "$*" >&2; exit 1; }
+log()  { printf '[anarchy-rdp] %s\n' "$*" >&2; }
+
+need_hyprland() {
+  [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] || die "not inside a Hyprland session (HYPRLAND_INSTANCE_SIGNATURE unset)"
+  command -v hyprctl >/dev/null || die "hyprctl not found"
+}
+
+output_name() { printf '%s-%d' "$PREFIX" "$1"; }
+
+# Our outputs go to the right of every other monitor, so a machine that also
+# has a real screen keeps it where it is.
+x_origin() {
+  hyprctl monitors all -j 2>/dev/null | jq -r --arg p "$PREFIX-" '
+    [ .[] | select(.name | startswith($p) | not) | .x + .width ] | max // 0'
+}
+
+ensure_outputs() {
+  local x i name mode w
+  x=$(x_origin)
+  for i in "${!MONITORS[@]}"; do
+    name=$(output_name $((i + 1)))
+    mode=${MONITORS[$i]}
+    [[ $mode =~ ^([0-9]+)x([0-9]+)$ ]] || die "bad monitor size '$mode' in $CONF (want WxH)"
+    w=${BASH_REMATCH[1]}
+    if ! hyprctl monitors all -j | jq -e --arg n "$name" 'any(.[]; .name == $n)' >/dev/null; then
+      hyprctl output create headless "$name" >/dev/null || die "could not create output $name"
+      log "created $name"
+    fi
+    hyprctl eval "hl.monitor({ output = \"$name\", mode = \"${mode}@${REFRESH}\", position = \"${x}x0\", scale = $SCALE })" >/dev/null
+    # Scaled outputs are narrower in layout space.
+    x=$(( x + $(awk -v w="$w" -v s="$SCALE" 'BEGIN { printf "%d", w / s }') ))
+  done
+}
+
+remove_outputs() {
+  local name
+  for name in $(hyprctl monitors all -j 2>/dev/null | jq -r --arg p "$PREFIX-" '.[] | select(.name | startswith($p)) | .name'); do
+    hyprctl output remove "$name" >/dev/null && log "removed $name"
+  done
+}
+
+# serve <index> — one hypr-rdp for one output, restarted when it exits.
+serve() {
+  local i=$1 name port audio delay=2 started rc
+  name=$(output_name "$i")
+  port=$((PORT + i - 1))
+  # Audio goes through the first connection only: every instance would
+  # otherwise try to own the same redirect sink.
+  audio=off; (( i == 1 )) && audio=redirect
+  # Killing this loop must take its server down with it.
+  local child=
+  trap '[[ -n $child ]] && kill "$child" 2>/dev/null; exit 0' TERM INT
+  while :; do
+    started=$SECONDS
+    log "$name on $BIND:$port"
+    "$HYPR_RDP" --output "$name" --bind "$BIND:$port" --audio-mode "$audio" &
+    child=$!
+    wait "$child"; rc=$?
+    # A crash loop backs off; a server that ran a while restarts at once.
+    if (( SECONDS - started > 30 )); then delay=2; else delay=$(( delay < 30 ? delay * 2 : 30 )); fi
+    log "$name: hypr-rdp exited ($rc), restarting in ${delay}s"
+    sleep "$delay"
+  done
+}
+
+cmd_run() {
+  need_hyprland
+  command -v "$HYPR_RDP" >/dev/null || die "$HYPR_RDP not found — install it with: paru -S hypr-rdp"
+  [[ -f $PASSWORD_FILE ]] || die "no password set — run: anarchy-rdp password"
+  mkdir -p "$RUNTIME"
+
+  exec 9>"$RUNTIME/lock"
+  flock -n 9 || { log "already running"; exit 0; }
+  echo $$ >"$RUNTIME/pid"
+
+  local pids=()
+  cleanup() {
+    trap - EXIT INT TERM
+    ((${#pids[@]})) && kill "${pids[@]}" 2>/dev/null
+    wait 2>/dev/null
+    # hypr-rdp removes only outputs it created itself, and these are ours.
+    remove_outputs
+    rm -f "$RUNTIME/pid"
+  }
+  trap cleanup EXIT
+  trap 'exit 0' INT TERM
+
+  ensure_outputs
+  local i
+  for i in "${!MONITORS[@]}"; do
+    serve $((i + 1)) &
+    pids+=($!)
+    # The first server writes the self-signed certificate every instance
+    # shares; starting the rest at the same moment races on it.
+    if (( i == 0 )); then
+      for _ in {1..100}; do [[ -f $HYPR_RDP_DIR/key.pem ]] && break; sleep 0.1; done
+    fi
+  done
+  wait
+}
+
+cmd_start() {
+  need_hyprland
+  setsid -f "$0" run >>"$RUNTIME.log" 2>&1 </dev/null
+  sleep 1
+  cmd_status
+}
+
+cmd_stop() {
+  local pid
+  pid=$(cat "$RUNTIME/pid" 2>/dev/null) || { echo "not running"; return 0; }
+  kill "$pid" 2>/dev/null
+  for _ in {1..50}; do kill -0 "$pid" 2>/dev/null || break; sleep 0.1; done
+  echo "stopped"
+}
+
+cmd_status() {
+  local host i name port running=no
+  [[ -f $RUNTIME/pid ]] && kill -0 "$(cat "$RUNTIME/pid")" 2>/dev/null && running=yes
+  host=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for (i=1;i<NF;i++) if ($i=="src") print $(i+1)}')
+  host=${host:-$(hostname)}
+
+  printf 'running: %s    user: %s    config: %s\n\n' "$running" "$USER" "${CONF/#$HOME/\~}"
+  for i in "${!MONITORS[@]}"; do
+    name=$(output_name $((i + 1)))
+    port=$((PORT + i))
+    local live=" " listen=" "
+    [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] &&
+      hyprctl monitors all -j 2>/dev/null | jq -e --arg n "$name" 'any(.[]; .name == $n)' >/dev/null && live="✓"
+    ss -Hltn "sport = :$port" 2>/dev/null | grep -q . && listen="✓"
+    printf '  monitor %d  %-10s output %s %-15s  port %d %s\n' $((i + 1)) "${MONITORS[$i]}" "$live" "$name" "$port" "$listen"
+  done
+
+  cat <<EOF
+
+Connect one window per monitor, each full screen on its own display:
+EOF
+  for i in "${!MONITORS[@]}"; do
+    printf '  xfreerdp3 /v:%s:%d /u:%s /cert:tofu /f /monitors:%d /dynamic-resolution:off\n' "$host" $((PORT + i)) "$USER" "$i"
+  done
+  cat <<EOF
+  Windows: one mstsc per port ($host:$PORT, $host:$((PORT + 1)) …), "Full screen"
+  on the display it should cover. Move a connection window there first.
+EOF
+}
+
+cmd_password() {
+  local p1 p2
+  mkdir -p "$HYPR_RDP_DIR"
+  if [[ -t 0 ]]; then
+    read -rsp "New RDP password for $USER: " p1; echo
+    read -rsp "Again: " p2; echo
+    [[ $p1 == "$p2" ]] || die "passwords differ"
+    [[ -n $p1 ]] || die "empty password"
+  else
+    p1=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 20)
+    echo "generated RDP password: $p1"
+  fi
+  (umask 077; printf '%s\n' "$p1" >"$PASSWORD_FILE")
+  echo "saved to ${PASSWORD_FILE/#$HOME/\~} — takes effect on the next connection after: anarchy-rdp restart"
+}
+
+case ${1:-status} in
+  run)      cmd_run ;;
+  start)    cmd_start ;;
+  stop)     cmd_stop ;;
+  restart)  cmd_stop; cmd_start ;;
+  status)   cmd_status ;;
+  password) cmd_password ;;
+  -h|--help|help) sed -n '3,24p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) die "unknown command '$1' (try --help)" ;;
+esac

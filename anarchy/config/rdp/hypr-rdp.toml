@@ -1,0 +1,15 @@
+# hypr-rdp settings shared by every anarchy-rdp monitor. The per-monitor bits
+# (output, port, audio) come from anarchy-rdp on the command line.
+# Everything here: hypr-rdp --help (keys use _ where flags use -).
+
+username = "@USER@"
+password_file = "@HOME@/.config/hypr-rdp/password"
+
+fps = 60
+egfx_codec = "avc420"
+h264_backend = "auto"
+bitrate = 12000000
+
+# Use the layout the client types with; "compositor" keeps Hyprland's (ch).
+keyboard_layout_policy = "client"
+file_transfer_mode = "both"
