@@ -10,6 +10,11 @@ pac_install dms-shell-hyprland
 # Terminals: foot is the default; kitty stays for its graphics protocol.
 pac_install foot kitty
 
+# The font foot and kitty are configured for. Without it both silently fall
+# back to Noto Sans Mono, and the Nerd Font icons in fastfetch, the launcher
+# and the bar come from whatever fallback happens to have them.
+pac_install ttf-jetbrains-mono-nerd
+
 # Bar widgets and DMS optional deps: media keys, brightness, visualiser,
 # wallpaper theming, network and power-profile control, sound effects.
 pac_install playerctl brightnessctl cava matugen networkmanager \
