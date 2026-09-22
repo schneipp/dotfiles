@@ -1,6 +1,6 @@
 # dotfiles
 
-## anarchy — Hyprland desktop for Arch/CachyOS
+## anarchy — Hyprland desktop for Arch/CachyOS and Fedora
 
 A complete Hyprland setup: a Material 3 topbar, a menu-launcher that installs and
 uninstalls packages, vim-style window management, and screen capture with audio.
@@ -27,7 +27,7 @@ and serves it over RDP, with one virtual monitor per screen on the client.
 | `Print` | Select an area → clipboard |
 | `Super+Shift+R` | Record a region with audio |
 
-Requires Hyprland 0.56+ (Lua config format) and `pacman`.
+Requires Hyprland 0.56+ (Lua config format) and `pacman` or Fedora 43+ (`dnf`).
 **Full documentation and the complete keymap: [anarchy/README.md](anarchy/README.md)**
 
 ---

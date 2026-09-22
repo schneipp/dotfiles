@@ -7,14 +7,14 @@
 #  ██║  ██║██║ ╚████║██║  ██║██║  ██║╚██████╗██║  ██║   ██║
 #  ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝   ╚═╝
 #
-#  A Hyprland desktop on Arch/CachyOS: DankMaterialShell topbar, two launchers
-#  (rofi + a Quickshell one that installs and uninstalls packages), vim-style
-#  window management, and a consistently dark Qt/KDE theme.
+#  A Hyprland desktop on Arch/CachyOS or Fedora: DankMaterialShell topbar, a
+#  Quickshell menu-launcher that installs and uninstalls packages, vim-style
+#  window management, and themes that reach every app.
 #
 #  Usage:
 #    ./install.sh                 run every step
 #    ./install.sh --dry-run       print what would happen, change nothing
-#    ./install.sh hyprland rofi   run only the named steps
+#    ./install.sh hyprland theme  run only the named steps
 #    ./install.sh --list          show available steps
 #
 set -uo pipefail
@@ -68,7 +68,7 @@ done
 # ------------------------------------------------------------------- checks
 
 [[ $EUID -ne 0 ]] || die "Don't run this as root — it installs into \$HOME and calls sudo itself."
-require_arch
+require_supported
 
 if (( DRY_RUN )); then
   printf '%s*** DRY RUN — nothing will be changed ***%s\n' "$C_YELLOW$C_BOLD" "$C_RESET"

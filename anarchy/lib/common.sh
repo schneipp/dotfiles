@@ -34,9 +34,35 @@ run() {
 
 need_cmd() { command -v "$1" >/dev/null 2>&1; }
 
-require_arch() {
-  need_cmd pacman || die "This installer targets Arch/CachyOS (pacman not found)."
+# DISTRO: arch (pacman: Arch, CachyOS, EndeavourOS, …) or fedora (dnf).
+detect_distro() {
+  local id="" like=""
+  if [[ -r /etc/os-release ]]; then
+    id=$(. /etc/os-release; echo "${ID:-}")
+    like=$(. /etc/os-release; echo "${ID_LIKE:-}")
+  fi
+  if need_cmd pacman && [[ " $id $like " == *" arch "* || $id == arch ]]; then
+    echo arch
+  elif need_cmd dnf && [[ " $id $like " == *" fedora "* || $id == fedora ]]; then
+    echo fedora
+  elif need_cmd pacman; then
+    echo arch
+  elif need_cmd dnf; then
+    echo fedora
+  else
+    echo unknown
+  fi
 }
+DISTRO=${DISTRO:-$(detect_distro)}
+
+require_supported() {
+  case $DISTRO in
+    arch|fedora) ;;
+    *) die "This installer targets Arch/CachyOS (pacman) or Fedora (dnf); found neither." ;;
+  esac
+}
+# Older name, kept for steps written before Fedora support.
+require_arch() { require_supported; }
 
 # ------------------------------------------------------------------ files
 
@@ -101,28 +127,62 @@ ensure_line() {
 
 tilde() { printf '%s' "${1/#$HOME/\~}"; }
 
-# ------------------------------------------------------------------ pacman
+# ---------------------------------------------------------------- packages
 
-# pac_install <pkg...> — install only what's missing.
-pac_install() {
+# pkg_installed <pkg> — true when the package is installed.
+pkg_installed() {
+  case $DISTRO in
+    arch)   pacman -Qq "$1" &>/dev/null ;;
+    fedora) rpm -q --whatprovides "$1" &>/dev/null ;;
+  esac
+}
+
+# pkg_install <pkg...> — install only what's missing, with the native
+# package manager. Names are the distro's own; the steps pick per distro.
+# On Fedora a package no enabled repo has is reported and skipped rather than
+# failing the whole batch, since several extras live in optional COPRs.
+pkg_install() {
   local missing=()
   for p in "$@"; do
-    pacman -Qq "$p" &>/dev/null || missing+=("$p")
+    pkg_installed "$p" || missing+=("$p")
   done
   if ((${#missing[@]} == 0)); then
     skip "already installed: $*"
     return 0
   fi
   info "installing: ${missing[*]}"
-  run sudo pacman -S --needed --noconfirm "${missing[@]}"
+  case $DISTRO in
+    arch)   run sudo pacman -S --needed --noconfirm "${missing[@]}" ;;
+    fedora) run sudo dnf install -y --skip-unavailable "${missing[@]}"
+            (( DRY_RUN )) && return 0
+            local p left=()
+            for p in "${missing[@]}"; do pkg_installed "$p" || left+=("$p"); done
+            ((${#left[@]} == 0)) || warn "not available in the enabled repos: ${left[*]}" ;;
+  esac
+}
+# Older name, kept for steps written before Fedora support.
+pac_install() { pkg_install "$@"; }
+
+# copr_enable <owner/project> — Fedora only: add a COPR repository.
+copr_enable() {
+  [[ $DISTRO == fedora ]] || return 0
+  local repo=$1
+  if dnf copr list 2>/dev/null | grep -q "/$repo\b"; then
+    skip "COPR $repo already enabled"
+    return 0
+  fi
+  pkg_installed dnf5-plugins || pkg_installed dnf-plugins-core || \
+    run sudo dnf install -y dnf5-plugins
+  run sudo dnf copr enable -y "$repo" && ok "COPR $repo enabled"
 }
 
 # aur_install <pkg...> — install from the AUR with paru, showing the anarchy
 # trust report first so a low-vote package is a visible choice, not a surprise.
 aur_install() {
+  [[ $DISTRO == arch ]] || die "aur_install: the AUR is Arch-only"
   local missing=()
   for p in "$@"; do
-    pacman -Qq "$p" &>/dev/null || missing+=("$p")
+    pkg_installed "$p" || missing+=("$p")
   done
   if ((${#missing[@]} == 0)); then
     skip "already installed: $*"
@@ -147,3 +207,41 @@ confirm() {
   [[ $reply == [yY]* ]]
 }
 ASSUME_YES=${ASSUME_YES:-0}
+
+# pkg_install_any <pkg...> — the first of several alternatives, unless one is
+# already installed (ffmpeg vs ffmpeg-free).
+pkg_install_any() {
+  local p
+  for p in "$@"; do
+    pkg_installed "$p" && { skip "already installed: $p"; return 0; }
+  done
+  pkg_install "$1"
+}
+
+# install_nerd_font — JetBrainsMono Nerd Font from the upstream release, for
+# distros that don't package it. Pinned by version and checksum.
+NERD_FONT_URL=https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/JetBrainsMono.tar.xz
+NERD_FONT_SHA256=04d5e8f903693f9dd13e16f867e994834e681eb3c72c0d337a770dcda09010cf
+install_nerd_font() {
+  local dir=$HOME/.local/share/fonts/JetBrainsMonoNerd
+  if fc-list 2>/dev/null | grep -q "JetBrainsMono Nerd Font"; then
+    skip "JetBrainsMono Nerd Font already installed"
+    return 0
+  fi
+  if (( DRY_RUN )); then
+    info "would download JetBrainsMono Nerd Font into $(tilde "$dir")"
+    return 0
+  fi
+  local tmp
+  tmp=$(mktemp -d)
+  if curl -fsSL "$NERD_FONT_URL" -o "$tmp/font.tar.xz" &&
+     echo "$NERD_FONT_SHA256  $tmp/font.tar.xz" | sha256sum -c --quiet; then
+    mkdir -p "$dir"
+    tar --no-same-owner -xJf "$tmp/font.tar.xz" -C "$dir" --wildcards '*.ttf'
+    fc-cache -f "$dir" >/dev/null 2>&1
+    ok "JetBrainsMono Nerd Font -> $(tilde "$dir")"
+  else
+    warn "could not fetch JetBrainsMono Nerd Font (download or checksum failed)"
+  fi
+  rm -rf "$tmp"
+}

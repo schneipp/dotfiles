@@ -3,8 +3,9 @@
 #  anarchy, headless: the full desktop from install.sh, served over RDP.
 #
 #  Runs everything install.sh does, then:
-#    - hypr-rdp (AUR), with one virtual monitor per remote screen, each on its
-#      own port, laid out side by side so windows and focus hop between them
+#    - hypr-rdp (AUR on Arch, the pinned upstream release on Fedora), with
+#      one virtual monitor per remote screen, each on its own port, laid out
+#      side by side so windows and focus hop between them
 #    - greetd autologin into Hyprland at boot, so there is a desktop to serve
 #      with no keyboard or screen attached
 #    - suspend and hibernate masked, the firewall opened if one is running
@@ -54,7 +55,7 @@ done
 export DRY_RUN ASSUME_YES RDP_MONITORS NO_AUTOLOGIN
 
 [[ $EUID -ne 0 ]] || die "Don't run this as root — it installs into \$HOME and calls sudo itself."
-require_arch
+require_supported
 
 # ------------------------------------------------------------------ desktop
 
@@ -69,7 +70,7 @@ fi
 # ------------------------------------------------------------------ headless
 
 if (( ! DRY_RUN )) && ! sudo -n true 2>/dev/null; then
-  info "the headless steps need sudo (AUR install, greetd, sleep targets)"
+  info "the headless steps need sudo (hypr-rdp, greetd, sleep targets)"
   sudo -v || die "sudo is required"
 fi
 

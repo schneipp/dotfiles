@@ -68,13 +68,15 @@ Singleton {
           run: ["dms", "ipc", "call", "processlist", "toggle"] },
     ]
 
+    // qsl-pkg does the distro-specific part (pacman/paru on Arch, dnf/flatpak
+    // on Fedora) and waits for a key before the terminal closes.
     readonly property var update: [
-        { icon: "\uf187", label: "System packages", desc: "sudo pacman -Syu",
-          term: ["sh", "-c", "sudo pacman -Syu; printf '\\nPress any key…'; read -rsn1"] },
-        { icon: "\uf1b3", label: "AUR packages",    desc: "paru -Sua",
-          term: ["sh", "-c", "paru -Sua; printf '\\nPress any key…'; read -rsn1"] },
+        { icon: "\uf187", label: "System packages", desc: "Upgrade everything from the distro's repos",
+          term: ["qsl-pkg", "upgrade"] },
+        { icon: "\uf1b3", label: "AUR and Flatpak", desc: "What the system upgrade does not cover",
+          term: ["qsl-pkg", "upgrade-extra"] },
         { icon: "\uf014", label: "Remove orphans",  desc: "Drop unused dependencies",
-          term: ["sh", "-c", "o=$(pacman -Qtdq); if [ -n \"$o\" ]; then echo \"$o\" | sudo pacman -Rns -; else echo 'No orphans.'; fi; printf '\\nPress any key…'; read -rsn1"] },
+          term: ["qsl-pkg", "orphans"] },
     ]
 
     readonly property var system: [

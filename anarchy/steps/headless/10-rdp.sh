@@ -8,9 +8,36 @@
 # headless output per monitor and runs one server for each.
 
 step "RDP server (multi-monitor)"
-require_arch
+require_supported
 
-aur_install hypr-rdp
+HYPR_RDP_VERSION=0.1.6
+HYPR_RDP_SHA256=f6f52a4683c6a6aae7543a13dbe445e7494e4e77a0e2e794a644740827ed304a
+
+if [[ $DISTRO == arch ]]; then
+  aur_install hypr-rdp
+elif need_cmd hypr-rdp; then
+  skip "hypr-rdp already installed ($(hypr-rdp --version 2>/dev/null))"
+else
+  # Not packaged for Fedora: the upstream release binary, pinned by checksum,
+  # plus the libraries it links against and pactl for audio.
+  pkg_install libva pipewire-libs libxkbcommon mesa-libgbm fuse3 pulseaudio-utils
+  if (( DRY_RUN )); then
+    info "would install hypr-rdp $HYPR_RDP_VERSION to /usr/local/bin"
+  else
+    tmp=$(mktemp -d)
+    url=https://github.com/MuNeNICK/hypr-rdp/releases/download/v$HYPR_RDP_VERSION/hypr-rdp-v$HYPR_RDP_VERSION-x86_64-linux.tar.gz
+    if curl -fsSL "$url" -o "$tmp/hypr-rdp.tgz" &&
+       echo "$HYPR_RDP_SHA256  $tmp/hypr-rdp.tgz" | sha256sum -c --quiet; then
+      tar --no-same-owner -xzf "$tmp/hypr-rdp.tgz" -C "$tmp"
+      sudo install -Dm755 "$tmp/hypr-rdp" /usr/local/bin/hypr-rdp
+      ok "hypr-rdp $HYPR_RDP_VERSION -> /usr/local/bin"
+    else
+      rm -rf "$tmp"
+      die "could not fetch hypr-rdp $HYPR_RDP_VERSION (download or checksum failed)"
+    fi
+    rm -rf "$tmp"
+  fi
+fi
 
 link bin/anarchy-rdp "$HOME/.local/bin/anarchy-rdp"
 

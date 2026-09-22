@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <b>A Hyprland desktop for Arch and CachyOS that gets out of your way.</b><br>
+  <b>A Hyprland desktop for Arch, CachyOS and Fedora that gets out of your way.</b><br>
   Vim keys everywhere. A launcher that finds, installs, removes — and vets — your software.<br>
   Screenshots and screen recording with audio. One theme switch that reaches every app.
 </p>
@@ -155,16 +155,47 @@ anarchy-rdp password    # the RDP password (separate from your Linux one)
 
 Hyprland's portal has no RemoteDesktop interface, so the usual servers can't be
 used here: krdp and gnome-remote-desktop need that interface, and xrdp serves
-only X11. That leaves hypr-rdp. It is young and it comes from the AUR, and the
-installer shows you its trust report before building it.
+only X11. That leaves hypr-rdp, which is young. On Arch it comes from the AUR,
+and the installer shows its trust report before building it. On Fedora it is
+the upstream release binary, pinned by checksum.
 
 ### Requirements
 
-Arch or an Arch derivative (CachyOS is what this was built on) with `pacman`, and
-Hyprland **0.56 or newer** — the config uses the Lua format, not the old `.conf`
-one. Start Hyprland once before installing so it writes its default
-`~/.config/hypr/hyprland.lua`; the installer appends a single `require("custom")`
-line to it rather than replacing it.
+- **Arch or a derivative** (CachyOS is what this was built on), with `pacman`,
+  **or Fedora 43 or newer**, with dnf5.
+- Hyprland **0.56 or newer**. The config uses the Lua format, not the old
+  `.conf` one. Start Hyprland once before installing so it writes its default
+  `~/.config/hypr/hyprland.lua`. The installer then appends a single
+  `require("custom")` line to it rather than replacing it.
+
+### Fedora
+
+The same `./install.sh` works on Fedora. Two things differ from Arch.
+
+**Packages from COPR.** Fedora's own repos have no Hyprland and an older
+quickshell than DankMaterialShell needs, so the packages step enables four
+COPRs:
+
+| COPR | For |
+|---|---|
+| `sdegler/hyprland` | Hyprland 0.56+, hyprpicker, satty, the portal |
+| `avengemedia/dms` | DankMaterialShell |
+| `avengemedia/danklinux` | quickshell and matugen, at the versions DMS wants |
+| `brycensranch/gpu-screen-recorder-git` | screen recording |
+
+Things with no Fedora package come from upstream instead, pinned to a version
+and checksum: the JetBrainsMono Nerd Font goes to `~/.local/share/fonts`, and
+for the headless installer, the `hypr-rdp` release binary goes to
+`/usr/local/bin`. `starship` is skipped, and the shell falls back to a plain
+prompt without it. `ffmpeg-free` stands in for ffmpeg; RPM Fusion's full
+ffmpeg is used when it's installed.
+
+**The launcher installs from dnf and Flathub.** Install searches both at once:
+dnf covers the Fedora repos and every enabled COPR, and flatpak covers Flathub.
+The first run adds Flathub for your user. Results are labelled `fedora`, `COPR`
+or `flathub`. Delete on a Flatpak app uninstalls it with flatpak. The Update
+menu runs `dnf upgrade`, `flatpak update` and `dnf autoremove`. There is no
+AUR on Fedora, so the AUR trust check never comes up.
 
 ---
 
@@ -383,7 +414,7 @@ While a recording is running the capture menu shows a **● REC** badge and offe
 anarchy/
 ├── install.sh                  entry point
 ├── installer-headless-rdp.sh   install.sh + RDP, autologin, no sleep
-├── lib/common.sh               logging, backup, symlink and pacman helpers
+├── lib/common.sh               logging, backup, symlink and package helpers (pacman/dnf)
 ├── steps/                      one file per concern, run in filename order
 │   ├── 10-packages.sh
 │   ├── 20-hyprland.sh          keybindings, input, autostart, window rules
@@ -411,7 +442,7 @@ anarchy/
 │   ├── rdp/                    anarchy-rdp and hypr-rdp config templates
 │   └── bash/                   aliases, functions, shell setup
 └── bin/                        symlinked into ~/.local/bin
-    ├── qsl-pkg                 package queries, install and removal
+    ├── qsl-pkg                 package queries, install, removal, upgrades (pacman/AUR or dnf/Flatpak)
     ├── qsl-aur-audit           trust check for AUR packages
     ├── qsl-capture             screenshots and recording
     ├── qsl-wall                wallpaper discovery

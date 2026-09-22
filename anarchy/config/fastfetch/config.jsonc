@@ -137,7 +137,7 @@
       "type": "command",
       "key": " Update",
       "keyColor": "magenta",
-      "text": "awk '/starting full system upgrade/{d=$1} END{gsub(/[][]/,\"\",d); print (d?substr(d,1,16):\"never\")}' /var/log/pacman.log"
+      "text": "if [ -r /var/log/pacman.log ]; then awk '/starting full system upgrade/{d=$1} END{gsub(/[][]/,\"\",d); print (d?substr(d,1,16):\"never\")}' /var/log/pacman.log; else t=$(rpm -qa --qf '%{INSTALLTIME}\\n' 2>/dev/null | sort -n | tail -1); [ -n \"$t\" ] && date -d @$t +%Y-%m-%dT%H:%M || echo never; fi"
     },
     {
       "type": "custom",

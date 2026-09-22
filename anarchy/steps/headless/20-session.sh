@@ -22,7 +22,11 @@ LOGIN_SHELL=${LOGIN_SHELL:-/bin/bash}
 
 # ---------------------------------------------------------------- autologin
 
-pac_install greetd
+pkg_install greetd
+
+# The package's own greeter account: "greeter" on Arch, "greetd" on Fedora.
+GREETER=greeter
+getent passwd greeter >/dev/null || { getent passwd greetd >/dev/null && GREETER=greetd; }
 
 GREETD_CONF=/etc/greetd/config.toml
 greetd_conf=$(cat <<EOF
@@ -38,7 +42,7 @@ user = "$USER"
 # After a logout: a text login on tty1.
 [default_session]
 command = "agreety --cmd '$LOGIN_SHELL -lc $HYPR_CMD'"
-user = "greeter"
+user = "$GREETER"
 EOF
 )
 

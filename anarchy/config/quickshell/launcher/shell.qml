@@ -11,7 +11,7 @@
 //   Ctrl+J/K         move down/up, as do the arrows
 //
 // Anything needing sudo is handed to a floating terminal (class qsl-term) so
-// pacman can prompt for a password and show its own output.
+// the package manager can prompt for a password and show its own output.
 
 import Quickshell
 import Quickshell.Io
@@ -104,7 +104,8 @@ Scope {
     }
 
     // Install goes straight to searching with the first source qsl-pkg offers —
-    // paru when it is installed, which covers the repos and the AUR at once.
+    // paru when it is installed, which covers the repos and the AUR at once
+    // (on Fedora: dnf and Flathub together).
     // The picker is pushed onto the history first, so Esc still reveals it when
     // you want to narrow the source.
     function startInstall(): void {
@@ -153,7 +154,8 @@ Scope {
             const m = root.managers.find(x => x.id === mgr);
             // The source list loads asynchronously on open, so fall back to the
             // same names qsl-pkg uses when it has not arrived yet.
-            const names = { all: "Everything", pacman: "Official repos only", aur: "AUR only" };
+            const names = { all: "Everything", pacman: "Official repos only", aur: "AUR only",
+                            dnf: "Fedora repos", flatpak: "Flathub only" };
             root.managerLabel = m ? m.label : (names[mgr] ?? mgr);
             root.goTo("search");
             root.query = q;
@@ -292,7 +294,8 @@ Scope {
         }
     }
 
-    // `pacman -Si` prints "Key : Value" with indented continuation lines.
+    // `pacman -Si` prints "Key : Value" with indented continuation lines;
+    // qsl-pkg renames dnf and flatpak details to the same keys.
     function parseInfo(text: string): var {
         const out = {};
         let lastKey = null;
@@ -439,6 +442,7 @@ Scope {
     function sourceBadge(repo: string): string {
         if (!repo) return "";
         if (repo === "aur") return "AUR";
+        if (repo === "copr") return "COPR";
         return repo.replace(/-v[234]$/, "").replace(/^cachyos-/, "cachyos ");
     }
 
@@ -1359,7 +1363,7 @@ Scope {
                         color: Theme.fgDim
                         text: {
                             if (root.targetKind === "pkg")
-                                return "A terminal will open so pacman can confirm dependencies "
+                                return "A terminal will open so the package manager can confirm dependencies "
                                      + "and ask for your password.";
                             if (root.targetKind === "file")
                                 return "No package owns this entry — it's a standalone .desktop file.\n"
