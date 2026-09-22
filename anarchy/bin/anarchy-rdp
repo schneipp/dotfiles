@@ -104,7 +104,10 @@ remove_outputs() {
 
 # serve <index> — one hypr-rdp for one output, restarted when it exits.
 serve() {
-  local i=$1 name port audio delay=2 started rc
+  local i=$1 name port audio delay=2 started rc child= napper=
+  # The supervisor's lock must not be held by this subshell too, or a stray
+  # one keeps the next supervisor out.
+  exec 9>&-
   name=$(output_name "$i")
   port=$((PORT + i - 1))
   # Audio goes through the first connection only: every instance would
@@ -114,9 +117,10 @@ serve() {
   # and resizes it when the client window changes.
   local target=(--output "$name")
   [[ $MODE == dynamic ]] && { target=(); name="dynamic screen"; }
-  # Killing this loop must take its server down with it.
-  local child=
-  trap '[[ -n $child ]] && kill "$child" 2>/dev/null; exit 0' TERM INT
+  # Killing this loop must take its server down with it, at once: bash runs a
+  # trap only once the command in front of it returns, so the waits below are
+  # on background jobs rather than on the commands themselves.
+  trap 'kill "$child" "$napper" 2>/dev/null; exit 0' TERM INT
   while :; do
     started=$SECONDS
     log "$name on $BIND:$port"
@@ -126,7 +130,8 @@ serve() {
     # A crash loop backs off; a server that ran a while restarts at once.
     if (( SECONDS - started > 30 )); then delay=2; else delay=$(( delay < 30 ? delay * 2 : 30 )); fi
     log "$name: hypr-rdp exited ($rc), restarting in ${delay}s"
-    sleep "$delay"
+    sleep "$delay" & napper=$!
+    wait "$napper"
   done
 }
 
@@ -145,6 +150,8 @@ cmd_run() {
     trap - EXIT INT TERM
     ((${#pids[@]})) && kill "${pids[@]}" 2>/dev/null
     wait 2>/dev/null
+    # Anything that still has not gone (a server that ignores TERM).
+    pkill -P $$ 2>/dev/null
     # hypr-rdp removes only outputs it created itself, and these are ours.
     remove_outputs
     rm -f "$RUNTIME/pid"
