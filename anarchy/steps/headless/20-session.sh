@@ -1,79 +1,77 @@
 #!/usr/bin/env bash
-# Session: log straight into Hyprland at boot and never suspend.
+# Session: a Hyprland of your own at boot, with no seat, no login and no sleep.
 #
-# RDP serves a running Hyprland, and with no screen or keyboard attached
-# nobody is there to log in. greetd's initial_session starts Hyprland for the
-# user once per boot; after a logout it falls back to a text login on tty1.
+# A normal Hyprland takes the machine's one seat, and a second user's is paused
+# while the first is in front. Here Hyprland runs as a systemd user service
+# instead (anarchy-hyprland-headless): libseat's noop backend opens the GPU
+# directly, so every user who runs this installer gets their own desktop,
+# running side by side. Lingering starts it at boot without anyone logging in.
 # A sleeping machine drops every connection, so the sleep targets are masked.
 
 step "Headless session"
 
-if (( NO_AUTOLOGIN )); then
-  skip "autologin and sleep settings skipped (--no-autologin)"
+if (( NO_SESSION )); then
+  skip "session setup skipped (--no-session)"
   return 0
 fi
 
-HYPR_CMD=Hyprland
-need_cmd start-hyprland && HYPR_CMD=start-hyprland
-# Through the login shell, so the session gets the PATH and environment a
-# normal login would (~/.local/bin, where the anarchy scripts live).
-LOGIN_SHELL=$(getent passwd "$USER" | cut -d: -f7)
-LOGIN_SHELL=${LOGIN_SHELL:-/bin/bash}
+link bin/anarchy-hyprland-headless "$HOME/.local/bin/anarchy-hyprland-headless"
+link config/systemd/anarchy-hyprland.service "$HOME/.config/systemd/user/anarchy-hyprland.service"
 
-# ---------------------------------------------------------------- autologin
+# ---------------------------------------------------------------------- gpu
+#
+# The card node needs read/write. On a seat, logind grants that to whoever is
+# in front; without one it comes from the video group.
 
-pkg_install greetd
-
-# The package's own greeter account: "greeter" on Arch, "greetd" on Fedora.
-GREETER=greeter
-getent passwd greeter >/dev/null || { getent passwd greetd >/dev/null && GREETER=greetd; }
-
-GREETD_CONF=/etc/greetd/config.toml
-greetd_conf=$(cat <<EOF
-# Written by anarchy (installer-headless-rdp.sh).
-[terminal]
-vt = 1
-
-# Once per boot: straight into Hyprland, so RDP has a desktop to serve.
-[initial_session]
-command = "$LOGIN_SHELL -lc $HYPR_CMD"
-user = "$USER"
-
-# After a logout: a text login on tty1.
-[default_session]
-command = "agreety --cmd '$LOGIN_SHELL -lc $HYPR_CMD'"
-user = "$GREETER"
-EOF
-)
-
-if [[ -f $GREETD_CONF ]] && grep -q "^user = \"$USER\"" "$GREETD_CONF" 2>/dev/null; then
-  skip "greetd already logs $USER in"
-elif (( DRY_RUN )); then
-  info "would write $GREETD_CONF (autologin $USER -> $HYPR_CMD)"
-else
-  [[ -f $GREETD_CONF ]] && sudo cp "$GREETD_CONF" "$GREETD_CONF.pre-anarchy.$STAMP"
-  printf '%s\n' "$greetd_conf" | sudo tee "$GREETD_CONF" >/dev/null
-  ok "$GREETD_CONF: autologin $USER -> $HYPR_CMD"
+if ! ls /dev/dri/card[0-9]* >/dev/null 2>&1; then
+  # No GPU at all (a bare VM): vkms is a virtual one, and Mesa renders on the CPU.
+  warn "no GPU device found — loading vkms, a virtual one (rendering on the CPU)"
+  if (( ! DRY_RUN )); then
+    echo vkms | sudo tee /etc/modules-load.d/anarchy-vkms.conf >/dev/null
+    sudo modprobe vkms || warn "could not load vkms"
+  fi
 fi
 
-# Swap the display manager. Only the boot target changes: stopping the running
-# one now would end the session this installer may be running in.
-current_dm=$(basename "$(readlink -f /etc/systemd/system/display-manager.service 2>/dev/null)" 2>/dev/null)
-if [[ $current_dm == greetd.service ]]; then
-  skip "greetd is already the display manager"
-elif (( DRY_RUN )); then
-  info "would replace ${current_dm:-no display manager} with greetd"
-elif [[ -z $current_dm || $current_dm == . ]] ||
-     confirm "Replace ${current_dm%.service} with greetd autologin at boot?"; then
-  [[ -n $current_dm && $current_dm != . ]] && sudo systemctl disable "$current_dm" >/dev/null 2>&1
-  if sudo systemctl enable greetd.service >/dev/null 2>&1; then
-    ok "greetd enabled — autologin from the next boot"
-  else
-    warn "could not enable greetd.service"
-  fi
+if id -nG "$USER" | tr ' ' '\n' | grep -qx video; then
+  skip "$USER is in the video group"
+  gpu_ready=1
 else
-  warn "kept ${current_dm%.service}: RDP only works once someone logs into Hyprland on the machine"
-  [[ -t 0 ]] || warn "(no terminal to ask on — rerun with --yes to switch to greetd)"
+  run sudo usermod -aG video "$USER"
+  ok "$USER added to the video group"
+  gpu_ready=0
+fi
+
+# ---------------------------------------------------------------- lingering
+
+if [[ $(loginctl show-user "$USER" -p Linger --value 2>/dev/null) == yes ]]; then
+  skip "lingering already on for $USER"
+else
+  run sudo loginctl enable-linger "$USER"
+  ok "lingering on: $USER's services start at boot"
+fi
+
+if (( ! DRY_RUN )); then
+  systemctl --user daemon-reload
+  systemctl --user enable anarchy-hyprland.service >/dev/null 2>&1 &&
+    ok "anarchy-hyprland enabled"
+fi
+
+# --------------------------------------------------------------- autologin
+#
+# An earlier version of this installer logged one user into a seat Hyprland
+# with greetd. That instance would compete with the service for the RDP port,
+# so drop the autologin and leave greetd as a plain text login.
+
+GREETD_CONF=/etc/greetd/config.toml
+if [[ -f $GREETD_CONF ]] && grep -q 'Written by anarchy' "$GREETD_CONF" &&
+   grep -q '^\[initial_session\]' "$GREETD_CONF"; then
+  if (( DRY_RUN )); then
+    info "would remove the greetd autologin from $GREETD_CONF"
+  else
+    sudo cp "$GREETD_CONF" "$GREETD_CONF.pre-anarchy.$STAMP"
+    sudo sed -i '/^# Once per boot/,/^user = /d' "$GREETD_CONF"
+    ok "greetd autologin removed (the service starts Hyprland now)"
+  fi
 fi
 
 # -------------------------------------------------------------------- sleep
@@ -87,4 +85,20 @@ elif confirm "Never suspend or hibernate (recommended for a server)?"; then
   sudo systemctl mask "${sleep_targets[@]}" >/dev/null 2>&1 && ok "suspend and hibernate disabled"
 else
   warn "suspend left on: an idle timeout will cut RDP off"
+fi
+
+# -------------------------------------------------------------------- start
+#
+# A new group only reaches processes started after it, and the user manager
+# that runs the service predates it. Start now only when nothing is in the way.
+
+SESSION_STARTED=0
+if (( DRY_RUN )); then
+  :
+elif pgrep -u "$USER" -x Hyprland >/dev/null && ! systemctl --user -q is-active anarchy-hyprland; then
+  info "a Hyprland of yours is already running (a seat login): the service takes over at the next boot"
+elif (( gpu_ready )); then
+  systemctl --user restart anarchy-hyprland && SESSION_STARTED=1 && ok "headless Hyprland started"
+else
+  info "the video group applies from the next boot (or: sudo systemctl restart user@$(id -u))"
 fi

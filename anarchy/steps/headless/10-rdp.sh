@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# RDP server: hypr-rdp, one virtual monitor per remote screen.
+# RDP server: hypr-rdp, with a resizable screen or several fixed monitors.
 #
 # Hyprland's portal has no RemoteDesktop interface, so krdp and
 # gnome-remote-desktop can't drive it, and xrdp only serves X11. hypr-rdp talks
 # to Hyprland directly: wlr-screencopy for video, virtual pointer/keyboard for
-# input. It serves a single output per process, so anarchy-rdp creates one
-# headless output per monitor and runs one server for each.
+# input. anarchy-rdp runs it: one server for a screen that follows the client
+# window, or one per monitor for a fixed multi-monitor desk.
 
-step "RDP server (multi-monitor)"
+step "RDP server"
 require_supported
 
 HYPR_RDP_VERSION=0.1.6
@@ -58,6 +58,59 @@ if [[ -n ${RDP_MONITORS:-} ]]; then
   fi
 fi
 
+# set_conf <KEY> <value> — replace the line, or add it to a config written
+# before the key existed.
+set_conf() {
+  (( DRY_RUN )) && { info "would set $1=$2 in $(tilde "$RDP_CONF")"; return 0; }
+  if grep -q "^$1=" "$RDP_CONF"; then
+    sed -i "s|^$1=.*|$1=$2|" "$RDP_CONF"
+  else
+    printf '\n%s=%s\n' "$1" "$2" >>"$RDP_CONF"
+  fi
+}
+
+# Mode: --monitors means fixed; --dynamic, or a config from before modes
+# existed, means dynamic.
+if [[ -n ${RDP_MODE:-} ]]; then
+  set_conf MODE "$RDP_MODE"
+  ok "mode: $RDP_MODE"
+elif [[ -f $RDP_CONF ]] && ! grep -q '^MODE=' "$RDP_CONF"; then
+  set_conf MODE dynamic
+  ok "mode: dynamic"
+fi
+
+# ------------------------------------------------------------------- ports
+#
+# Every user on the machine runs their own servers, so each needs ports of
+# their own. /etc/anarchy/rdp-ports records who has which block of ten (a
+# fixed-mode desk uses one per monitor): "user port" per line.
+
+PORTS_DB=/etc/anarchy/rdp-ports
+my_port=$(awk -v u="$USER" '$1 == u { print $2 }' "$PORTS_DB" 2>/dev/null)
+if [[ -n $my_port ]]; then
+  skip "port $my_port is registered for $USER"
+else
+  taken=" $(awk '{ print $2 }' "$PORTS_DB" 2>/dev/null | tr '\n' ' ') "
+  # A user who set up RDP before the registry keeps the port they had,
+  # unless someone else has claimed it since.
+  had=$(sed -n 's/^PORT=\([0-9]*\).*/\1/p' "$RDP_CONF" 2>/dev/null)
+  if [[ -n $had && $taken != *" $had "* ]]; then
+    my_port=$had
+  else
+    my_port=3389
+    while [[ $taken == *" $my_port "* ]]; do my_port=$((my_port + 10)); done
+  fi
+  if (( DRY_RUN )); then
+    info "would register port $my_port for $USER in $PORTS_DB"
+  else
+    sudo install -d -m 755 "$(dirname "$PORTS_DB")"
+    printf '%s %s\n' "$USER" "$my_port" | sudo tee -a "$PORTS_DB" >/dev/null
+    sudo chmod 644 "$PORTS_DB"
+    ok "port $my_port registered for $USER"
+  fi
+fi
+[[ -f $RDP_CONF ]] && ! grep -q "^PORT=$my_port\$" "$RDP_CONF" && set_conf PORT "$my_port"
+
 HYPR_RDP_CONF=$HOME/.config/hypr-rdp/config.toml
 if [[ -e $HYPR_RDP_CONF ]]; then
   skip "$(tilde "$HYPR_RDP_CONF") exists, left alone"
@@ -88,17 +141,19 @@ link config/hypr/rdp.lua "$HOME/.config/hypr/rdp.lua"
 # shellcheck disable=SC1090
 if [[ -f $RDP_CONF ]]; then source "$RDP_CONF"; else source "$ANARCHY_DIR/config/rdp/rdp.conf"; fi
 first=${PORT:-3389}
-last=$(( first + ${#MONITORS[@]} - 1 ))
+last=$first
+[[ ${MODE:-dynamic} == fixed ]] && last=$(( first + ${#MONITORS[@]} - 1 ))
+ports=$first; (( last > first )) && ports=$first-$last
 
 if systemctl is-active -q ufw 2>/dev/null; then
-  run sudo ufw allow "$first:$last/tcp" comment anarchy-rdp
-  ok "ufw: opened $first-$last/tcp"
+  run sudo ufw allow "${ports/-/:}/tcp" comment anarchy-rdp
+  ok "ufw: opened $ports/tcp"
 elif systemctl is-active -q firewalld 2>/dev/null; then
-  run sudo firewall-cmd --permanent --add-port="$first-$last/tcp"
+  run sudo firewall-cmd --permanent --add-port="$ports/tcp"
   run sudo firewall-cmd --reload
-  ok "firewalld: opened $first-$last/tcp"
+  ok "firewalld: opened $ports/tcp"
 else
-  skip "no active firewall (ports $first-$last/tcp)"
+  skip "no active firewall (port $ports/tcp)"
 fi
 
 # ------------------------------------------------------------------- start
@@ -106,7 +161,7 @@ fi
 if (( DRY_RUN )); then
   :
 elif [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
-  "$HOME/.local/bin/anarchy-rdp" restart >/dev/null && ok "RDP running on ports $first-$last"
+  "$HOME/.local/bin/anarchy-rdp" restart >/dev/null && ok "RDP running on port $ports"
 else
   info "RDP starts with the next Hyprland session"
 fi

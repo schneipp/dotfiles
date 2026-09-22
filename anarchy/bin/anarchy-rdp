@@ -2,14 +2,20 @@
 #
 # anarchy-rdp — headless multi-monitor RDP for Hyprland.
 #
-# hypr-rdp serves exactly one output per process. For several monitors this
-# creates one headless Hyprland output per monitor, lays them out side by
-# side, and runs one hypr-rdp per output on consecutive ports. Hyprland sees
-# real monitors: every one gets its own workspaces and bar, and Super+Ctrl+h/l
-# and the window-move keys hop between them like on a desk.
+# Two modes (MODE in the config):
 #
-# On the client, open one connection per monitor and make each full screen on
-# its own display (see `anarchy-rdp status` for the exact commands).
+#   dynamic  one screen that takes the size of the client window and follows
+#            it when the window is resized. hypr-rdp creates and resizes the
+#            output itself.
+#   fixed    several monitors of fixed size. hypr-rdp serves one output per
+#            process, so this creates one headless Hyprland output per monitor,
+#            lays them out side by side, and runs one hypr-rdp per output on
+#            consecutive ports. Hyprland sees real monitors: each gets its own
+#            workspaces and bar, and Super+Ctrl+h/l hops between them. On the
+#            client, open one connection per monitor, each full screen on its
+#            own display.
+#
+# `anarchy-rdp status` prints the exact client commands.
 #
 #   anarchy-rdp run        supervise the outputs and servers (Hyprland autostart)
 #   anarchy-rdp start      same, detached
@@ -31,6 +37,7 @@ PREFIX=ANARCHY-RDP
 HYPR_RDP=${HYPR_RDP:-hypr-rdp}
 
 # Defaults, overridden by the config file.
+MODE=dynamic
 MONITORS=(1920x1080 1920x1080)
 PORT=3389
 BIND=0.0.0.0
@@ -48,6 +55,11 @@ need_hyprland() {
 }
 
 output_name() { printf '%s-%d' "$PREFIX" "$1"; }
+
+# 0-based indexes of the screens to serve: one in dynamic mode.
+screen_indexes() {
+  if [[ $MODE == dynamic ]]; then echo 0; else echo "${!MONITORS[@]}"; fi
+}
 
 # Our outputs go to the right of every other monitor, so a machine that also
 # has a real screen keeps it where it is.
@@ -89,13 +101,17 @@ serve() {
   # Audio goes through the first connection only: every instance would
   # otherwise try to own the same redirect sink.
   audio=off; (( i == 1 )) && audio=redirect
+  # dynamic: no --output, so hypr-rdp makes its own output at the client's size
+  # and resizes it when the client window changes.
+  local target=(--output "$name")
+  [[ $MODE == dynamic ]] && { target=(); name="dynamic screen"; }
   # Killing this loop must take its server down with it.
   local child=
   trap '[[ -n $child ]] && kill "$child" 2>/dev/null; exit 0' TERM INT
   while :; do
     started=$SECONDS
     log "$name on $BIND:$port"
-    "$HYPR_RDP" --output "$name" --bind "$BIND:$port" --audio-mode "$audio" &
+    "$HYPR_RDP" "${target[@]}" --bind "$BIND:$port" --audio-mode "$audio" &
     child=$!
     wait "$child"; rc=$?
     # A crash loop backs off; a server that ran a while restarts at once.
@@ -127,9 +143,10 @@ cmd_run() {
   trap cleanup EXIT
   trap 'exit 0' INT TERM
 
-  ensure_outputs
+  [[ $MODE == dynamic || $MODE == fixed ]] || die "MODE must be dynamic or fixed (in $CONF)"
+  [[ $MODE == fixed ]] && ensure_outputs
   local i
-  for i in "${!MONITORS[@]}"; do
+  for i in $(screen_indexes); do
     serve $((i + 1)) &
     pids+=($!)
     # The first server writes the self-signed certificate every instance
@@ -162,7 +179,21 @@ cmd_status() {
   host=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for (i=1;i<NF;i++) if ($i=="src") print $(i+1)}')
   host=${host:-$(hostname)}
 
-  printf 'running: %s    user: %s    config: %s\n\n' "$running" "$USER" "${CONF/#$HOME/\~}"
+  printf 'running: %s    mode: %s    user: %s    config: %s\n\n' "$running" "$MODE" "$USER" "${CONF/#$HOME/\~}"
+  if [[ $MODE == dynamic ]]; then
+    local listen=" "
+    ss -Hltn "sport = :$PORT" 2>/dev/null | grep -q . && listen="✓"
+    printf '  one screen, sized by the client          port %d %s\n' "$PORT" "$listen"
+    cat <<EOF
+
+Connect (resize the window and the desktop follows):
+  xfreerdp3 /v:$host:$PORT /u:$USER /cert:tofu /dynamic-resolution +clipboard
+  xfreerdp3 /v:$host:$PORT /u:$USER /cert:tofu /f          full screen
+  Windows: mstsc to $host:$PORT — it resizes with the window too.
+EOF
+    return 0
+  fi
+
   for i in "${!MONITORS[@]}"; do
     name=$(output_name $((i + 1)))
     port=$((PORT + i))
@@ -209,6 +240,6 @@ case ${1:-status} in
   restart)  cmd_stop; cmd_start ;;
   status)   cmd_status ;;
   password) cmd_password ;;
-  -h|--help|help) sed -n '3,24p' "$0" | sed 's/^# \{0,1\}//' ;;
+  -h|--help|help) sed -n '3,30p' "$0" | sed 's/^# \{0,1\}//' ;;
   *) die "unknown command '$1' (try --help)" ;;
 esac

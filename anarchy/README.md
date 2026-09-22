@@ -112,11 +112,12 @@ already pointing at this repo are left alone.
 
 ### Headless, over RDP
 
-For a machine with no screen: a server, a VM, the box under the desk.
+For a machine with no screen: a server, a VM, the box under the desk. Every
+user who runs it gets their own desktop, and they run side by side.
 
 ```bash
-./installer-headless-rdp.sh                                 # two 1920x1080 monitors
-./installer-headless-rdp.sh --monitors "2560x1440 1920x1080"
+./installer-headless-rdp.sh                                 # one resizable screen
+./installer-headless-rdp.sh --monitors "2560x1440 1920x1080"  # fixed monitors instead
 ./installer-headless-rdp.sh --rdp-only                      # desktop already installed
 ./installer-headless-rdp.sh --dry-run
 ```
@@ -126,32 +127,49 @@ It runs `install.sh`, then adds:
 - **[hypr-rdp](https://github.com/MuNeNICK/hypr-rdp)**: an RDP server that talks
   to Hyprland directly, with H.264 (VA-API when there is a GPU), audio,
   clipboard and file copy.
-- **One virtual monitor per remote screen**: `anarchy-rdp` creates a headless
-  Hyprland output for each entry in `~/.config/anarchy/rdp.conf`, lays them out
-  side by side, and serves each on its own port (3389, 3390, …).
-- **Autologin**: greetd starts Hyprland at boot, so there is a desktop to
-  connect to. The installer asks before it replaces your display manager.
-- **No sleep**: it asks before masking suspend and hibernate. It also opens
-  the ports in ufw or firewalld when one of them is running.
+- **A screen that follows your window.** By default hypr-rdp makes one virtual
+  screen at the size of the client window and resizes it as you resize the
+  window. With `--monitors`, you get fixed monitors instead: `anarchy-rdp`
+  creates a headless Hyprland output per entry in `~/.config/anarchy/rdp.conf`,
+  side by side, each served on its own port. Hyprland treats those as real
+  monitors, so each has its own workspaces and bar and `Super+Ctrl+h/l` hops
+  between them. Switch any time with `MODE=` in that file.
+- **Hyprland as a user service, with no seat.** `loginctl` normally hands the
+  GPU to whichever session is in front of the machine's single seat, which
+  would pause a second user's desktop. The service starts Hyprland through
+  `anarchy-hyprland-headless`, which uses libseat's `noop` backend to open the
+  GPU device directly, so every user's Hyprland renders at the same time. It
+  needs read/write on `/dev/dri/card*` — the installer adds you to the `video`
+  group — and no monitor, because every screen is virtual. A machine with no
+  GPU at all gets `vkms`, a virtual one that renders on the CPU.
+- **Started at boot, with nobody logged in**, by enabling lingering for your
+  user. No display manager and no autologin are involved.
+- **A port of your own.** The installer picks a free block of ten (3389, 3399,
+  …) and records it in `/etc/anarchy/rdp-ports`, so two users never collide.
+- **No sleep**: it asks before masking suspend and hibernate, and opens the
+  ports in ufw or firewalld when one is running.
 
-Hyprland sees the virtual monitors as real ones. Each gets its own workspaces
-and bar, and `Super+Ctrl+h/l` and the window-move keys work across them as on a
-desk. On the client, open one connection per monitor and make each full screen
-on its own display:
+Connect, resizing the window as you like:
 
 ```bash
-xfreerdp3 /v:host:3389 /u:$USER /cert:tofu /f /monitors:0 /dynamic-resolution:off
-xfreerdp3 /v:host:3390 /u:$USER /cert:tofu /f /monitors:1 /dynamic-resolution:off
+xfreerdp3 /v:host:3389 /u:you /cert:tofu /dynamic-resolution +clipboard
 ```
 
-On Windows, open one `mstsc` per port and put each one full screen on its own
-display. `anarchy-rdp status` prints these commands filled in for your machine.
+On Windows, mstsc to the same host and port. With fixed monitors, open one
+connection per port, each full screen on its own display. `anarchy-rdp status`
+prints the commands filled in for your machine.
 
 ```bash
-anarchy-rdp status      # outputs, ports, connect commands
-anarchy-rdp restart     # after editing rdp.conf
-anarchy-rdp password    # the RDP password (separate from your Linux one)
+anarchy-rdp status                           # mode, ports, connect commands
+anarchy-rdp restart                          # after editing rdp.conf
+anarchy-rdp password                         # the RDP password (not your Linux one)
+systemctl --user status anarchy-hyprland     # the desktop itself
 ```
+
+Each user is a separate desktop with its own password, and a port only ever
+shows the desktop of the user who runs it. The first setup takes effect at the
+next reboot, because the `video` group and lingering only apply to sessions
+started afterwards.
 
 Hyprland's portal has no RemoteDesktop interface, so the usual servers can't be
 used here: krdp and gnome-remote-desktop need that interface, and xrdp serves
@@ -427,8 +445,8 @@ anarchy/
 │   ├── 80-webapps.sh           standalone browser windows
 │   ├── 90-plugins.sh           DankMaterialShell plugins
 │   └── headless/               only run by installer-headless-rdp.sh
-│       ├── 10-rdp.sh           hypr-rdp, anarchy-rdp, password, firewall
-│       └── 20-session.sh       greetd autologin, sleep targets
+│       ├── 10-rdp.sh           hypr-rdp, anarchy-rdp, ports, password, firewall
+│       └── 20-session.sh       seatless Hyprland service, lingering, sleep
 ├── plugins/                    DankMaterialShell plugins (see their READMEs)
 │   └── spotmarchy/             Spotify + time-synced lyrics, ported from Omarchy
 ├── themes/                     colour schemes
@@ -446,7 +464,8 @@ anarchy/
     ├── qsl-aur-audit           trust check for AUR packages
     ├── qsl-capture             screenshots and recording
     ├── qsl-wall                wallpaper discovery
-    ├── anarchy-rdp             virtual monitors + one RDP server each
+    ├── anarchy-rdp             virtual screens + an RDP server for each
+    ├── anarchy-hyprland-headless  Hyprland with no seat, so every user can run one
     ├── anarchy-theme-apply     push a theme into apps DMS does not reach
     ├── anarchy-logo-braille    turn the artwork into braille text art for fastfetch
     ├── launch-webapp           standalone browser windows

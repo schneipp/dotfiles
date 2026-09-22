@@ -2,16 +2,18 @@
 #
 #  anarchy, headless: the full desktop from install.sh, served over RDP.
 #
-#  Runs everything install.sh does, then:
-#    - hypr-rdp (AUR on Arch, the pinned upstream release on Fedora), with
-#      one virtual monitor per remote screen, each on its own port, laid out
-#      side by side so windows and focus hop between them
-#    - greetd autologin into Hyprland at boot, so there is a desktop to serve
-#      with no keyboard or screen attached
+#  Runs everything install.sh does, then gives the user running it their own
+#  desktop over RDP. Run it once per user: each gets a separate Hyprland, side
+#  by side on the same machine, on ports of their own.
+#    - hypr-rdp (AUR on Arch, the pinned upstream release on Fedora)
+#    - one screen that follows the client window's size, or with --monitors,
+#      several fixed monitors laid out side by side
+#    - Hyprland as a systemd user service with no seat (libseat noop), started
+#      at boot by lingering; no monitor or login needed
 #    - suspend and hibernate masked, the firewall opened if one is running
 #
 #  Usage:
-#    ./installer-headless-rdp.sh                          everything, 2x 1920x1080
+#    ./installer-headless-rdp.sh                          one resizable screen
 #    ./installer-headless-rdp.sh --monitors "2560x1440 1920x1080"
 #    ./installer-headless-rdp.sh --rdp-only               skip the desktop part
 #    ./installer-headless-rdp.sh --dry-run                change nothing
@@ -29,22 +31,24 @@ usage() {
 Usage: ./installer-headless-rdp.sh [options]
 
 Options:
-  --monitors "WxH ..."  remote monitor sizes, left to right (default: 1920x1080 1920x1080)
+  --dynamic             one screen that follows the client window (the default)
+  --monitors "WxH ..."  fixed monitors instead, left to right, one port each
   --rdp-only            skip install.sh, set up only RDP and the headless session
-  --no-autologin        leave the display manager and sleep settings alone
-  -y, --yes             answer yes to the display-manager and sleep questions
+  --no-session          don't set up the headless Hyprland service
+  -y, --yes             answer yes to the sleep question
   --dry-run             show what would change without touching anything
   -h, --help            this message
 EOF
 }
 
-RDP_ONLY=0 NO_AUTOLOGIN=0 RDP_MONITORS=
+RDP_ONLY=0 NO_SESSION=0 RDP_MONITORS= RDP_MODE= SESSION_STARTED=0
 while (($#)); do
   case $1 in
-    --monitors)     [[ $# -ge 2 ]] || die "--monitors needs a value"; RDP_MONITORS=$2; shift ;;
-    --monitors=*)   RDP_MONITORS=${1#*=} ;;
+    --dynamic)      RDP_MODE=dynamic ;;
+    --monitors)     [[ $# -ge 2 ]] || die "--monitors needs a value"; RDP_MONITORS=$2; RDP_MODE=fixed; shift ;;
+    --monitors=*)   RDP_MONITORS=${1#*=}; RDP_MODE=fixed ;;
     --rdp-only)     RDP_ONLY=1 ;;
-    --no-autologin) NO_AUTOLOGIN=1 ;;
+    --no-session)   NO_SESSION=1 ;;
     -y|--yes)       ASSUME_YES=1 ;;
     --dry-run)      DRY_RUN=1 ;;
     -h|--help)      usage; exit 0 ;;
@@ -52,7 +56,7 @@ while (($#)); do
   esac
   shift
 done
-export DRY_RUN ASSUME_YES RDP_MONITORS NO_AUTOLOGIN
+export DRY_RUN ASSUME_YES RDP_MONITORS RDP_MODE NO_SESSION
 
 [[ $EUID -ne 0 ]] || die "Don't run this as root — it installs into \$HOME and calls sudo itself."
 require_supported
@@ -70,7 +74,7 @@ fi
 # ------------------------------------------------------------------ headless
 
 if (( ! DRY_RUN )) && ! sudo -n true 2>/dev/null; then
-  info "the headless steps need sudo (hypr-rdp, greetd, sleep targets)"
+  info "the headless steps need sudo (hypr-rdp, ports, video group, lingering)"
   sudo -v || die "sudo is required"
 fi
 
@@ -88,12 +92,11 @@ fi
 cat <<EOF
 
   anarchy-rdp status | restart | password     manage it
-  ~/.config/anarchy/rdp.conf                   monitor sizes and ports
+  ~/.config/anarchy/rdp.conf                   mode, monitor sizes, port
+  systemctl --user status anarchy-hyprland     the headless desktop itself
 
+  Other users on this machine: run this installer as them for a desktop each.
 EOF
-if [[ $(systemctl is-enabled greetd.service 2>/dev/null) == enabled ]]; then
-  echo "  Reboot to come up headless: greetd logs in and the servers start with Hyprland."
-else
-  printf '  %sgreetd is not enabled%s: nothing starts Hyprland at boot, so nothing listens\n' "$C_YELLOW" "$C_RESET"
-  echo "  on the RDP ports until someone logs into Hyprland. Rerun with --yes to switch."
+if (( ! DRY_RUN && ! NO_SESSION && ! SESSION_STARTED )); then
+  echo "  Reboot to start it (the video group and lingering apply from then)."
 fi
