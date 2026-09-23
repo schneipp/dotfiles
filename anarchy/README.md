@@ -172,6 +172,16 @@ anarchy-rdp password                         # the RDP password (not your Linux 
 systemctl --user status anarchy-hyprland     # the desktop itself
 ```
 
+**Keys, when the client is itself a Hyprland.** Both sessions want the same
+`Super` bindings and the local one wins, so the remote desktop never sees the
+key. On the client, `Super+Escape` hands every key to the focused window —
+the remote session then gets `Super`, `Super+Space` and the rest exactly as if
+you were sitting at it — and the same keys take them back. `hyprctl submap`
+says which mode you are in, and `hyprctl dispatch 'hl.dsp.submap("reset")'`
+always gets you out. If you would rather the remote session simply used a
+different modifier, uncomment `ANARCHY_MAINMOD=ALT` in
+`~/.config/anarchy/headless.env` and restart `anarchy-hyprland`.
+
 Each user is a separate desktop with its own password, and a port only ever
 shows the desktop of the user who runs it. The first setup takes effect at the
 next reboot, because the `video` group and lingering only apply to sessions
@@ -279,6 +289,7 @@ qs -c launcher ipc call launcher go wallpaper
 | Key | Action |
 |-----|--------|
 | `Super+Shift+M` | Quit Hyprland |
+| `Super+Escape` | Send every key to the focused window (a remote desktop); again to stop |
 
 `Super+M` is deliberately **unbound**. Stock Hyprland quits the session on a bare
 `Super+M`, which is far too easy to hit by accident.

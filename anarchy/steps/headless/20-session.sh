@@ -16,6 +16,8 @@ if (( NO_SESSION )); then
 fi
 
 link bin/anarchy-hyprland-headless "$HOME/.local/bin/anarchy-hyprland-headless"
+# Session settings you may want to change: the modifier, the GPU.
+copy config/rdp/headless.env "$HOME/.config/anarchy/headless.env"
 link config/systemd/anarchy-hyprland.service "$HOME/.config/systemd/user/anarchy-hyprland.service"
 
 # ---------------------------------------------------------------------- gpu
