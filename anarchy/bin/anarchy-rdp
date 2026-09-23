@@ -36,7 +36,10 @@ RUNTIME=${XDG_RUNTIME_DIR:-/tmp}/anarchy-rdp
 PREFIX=ANARCHY-RDP
 HYPR_RDP=${HYPR_RDP:-hypr-rdp}
 
-# Defaults, overridden by the config file.
+# Defaults, overridden by the config file. HIDE_PHYSICAL stays off here: the
+# headless installer turns it on in the config it writes, so running this on a
+# machine someone is sitting at can never blank its screens.
+HIDE_PHYSICAL=no
 MODE=dynamic
 MONITORS=(1920x1080 1920x1080)
 PORT=3389
@@ -102,6 +105,47 @@ remove_outputs() {
   done
 }
 
+# A screen plugged into the machine joins the session as a real output, takes
+# workspace 1 and the focus, and then windows open where no client can see
+# them; with every user on a seatless Hyprland of their own, there is also no
+# seat to decide who drives it. So disable whatever is not one of our screens.
+#
+# A monitor rule in the config would be simpler but strands us: `hyprctl
+# reload` re-applies the config and would disable the RDP output, which is
+# created at runtime and has no rule in the file.
+hide_physical() {
+  local name
+  for name in $(hyprctl monitors all -j 2>/dev/null |
+                jq -r --arg p "$PREFIX-" '.[] | select((.name | startswith($p)) or (.name | startswith("hypr-rdp")) | not) | .name'); do
+    hyprctl eval "hl.monitor({ output = \"$name\", disabled = true })" >/dev/null &&
+      log "disabled $name (a screen on the machine itself)"
+  done
+}
+
+# Hyprland re-enables those on a reload, and a screen can be plugged in at any
+# time, so follow its event socket. Without a tool to read a unix socket, poll.
+monitor_guard() {
+  exec 9>&-
+  trap 'exit 0' TERM INT
+  hide_physical
+  local sock=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock
+  local reader=()
+  if command -v socat >/dev/null; then reader=(socat -u "UNIX-CONNECT:$sock" -)
+  elif nc -h 2>&1 | grep -q -- '-U';  then reader=(nc -U "$sock")
+  fi
+  if ((${#reader[@]} == 0)); then
+    log "no socat or nc -U: checking for new screens every 5s instead"
+    while :; do sleep 5 & wait $!; hide_physical; done
+  fi
+  while :; do
+    "${reader[@]}" | while IFS= read -r line; do
+      case $line in monitoradded*|configreloaded*) hide_physical ;; esac
+    done
+    # The socket goes away with the session; if it returns, follow it again.
+    sleep 2 & wait $!
+  done
+}
+
 # serve <index> — one hypr-rdp for one output, restarted when it exits.
 serve() {
   local i=$1 name port audio delay=2 started rc child= napper=
@@ -161,6 +205,12 @@ cmd_run() {
 
   [[ $MODE == dynamic || $MODE == fixed ]] || die "MODE must be dynamic or fixed (in $CONF)"
   [[ $MODE == fixed ]] && ensure_outputs
+
+  if [[ ${HIDE_PHYSICAL:-no} == yes ]]; then
+    monitor_guard &
+    pids+=($!)
+  fi
+
   local i
   for i in $(screen_indexes); do
     serve $((i + 1)) &

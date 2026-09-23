@@ -79,6 +79,11 @@ elif [[ -f $RDP_CONF ]] && ! grep -q '^MODE=' "$RDP_CONF"; then
   ok "mode: dynamic"
 fi
 
+# Screens attached to the machine are not part of a headless session.
+if [[ -f $RDP_CONF ]] && ! grep -q '^HIDE_PHYSICAL=' "$RDP_CONF"; then
+  set_conf HIDE_PHYSICAL yes
+fi
+
 # ------------------------------------------------------------------- ports
 #
 # Every user on the machine runs their own servers, so each needs ports of

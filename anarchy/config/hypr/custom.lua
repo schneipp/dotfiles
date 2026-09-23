@@ -15,8 +15,7 @@ pcall(require, "dms.layout")
 -- lives in its own file and is optional.
 pcall(require, "monitors")
 
--- Headless RDP (installer-headless-rdp.sh links these; absent otherwise).
-pcall(require, "headless")
+-- Headless RDP (installer-headless-rdp.sh links rdp.lua; absent otherwise).
 pcall(require, "rdp")
 
 
