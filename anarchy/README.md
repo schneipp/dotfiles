@@ -142,6 +142,12 @@ It runs `install.sh`, then adds:
   needs read/write on `/dev/dri/card*` — the installer adds you to the `video`
   group — and no monitor, because every screen is virtual. A machine with no
   GPU at all gets `vkms`, a virtual one that renders on the CPU.
+- **The machine's own screens stay off.** A monitor plugged into a headless
+  box would join the session, take workspace 1 and the focus, and swallow
+  windows where no client can see them — and with no seat to arbitrate, two
+  users' sessions would fight over it. `config/hypr/headless.lua` disables
+  every output that isn't a named RDP screen; delete that link to use a local
+  screen after all.
 - **Started at boot, with nobody logged in**, by enabling lingering for your
   user. No display manager and no autologin are involved.
 - **A port of your own.** The installer picks a free block of ten (3389, 3399,
@@ -453,6 +459,7 @@ anarchy/
 ├── docs/                       the images in this README
 ├── config/                     symlinked into ~/.config
 │   ├── hypr/custom.lua         everything Hyprland
+│   ├── hypr/headless.lua       no physical screens (headless installer only)
 │   ├── quickshell/launcher/    the launcher itself (QML)
 │   ├── fastfetch/              system summary with the anarchy logo
 │   ├── foot/                   terminal config

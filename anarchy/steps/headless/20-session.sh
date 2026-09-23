@@ -16,6 +16,9 @@ if (( NO_SESSION )); then
 fi
 
 link bin/anarchy-hyprland-headless "$HOME/.local/bin/anarchy-hyprland-headless"
+# No physical screens in this session: they would take workspace 1 out of
+# sight of every client, and several seatless sessions would fight over one.
+link config/hypr/headless.lua "$HOME/.config/hypr/headless.lua"
 link config/systemd/anarchy-hyprland.service "$HOME/.config/systemd/user/anarchy-hyprland.service"
 
 # ---------------------------------------------------------------------- gpu
