@@ -2,34 +2,16 @@
 
 ## anarchy — Hyprland desktop for Arch/CachyOS and Fedora
 
-A complete Hyprland setup: a Material 3 topbar, a menu-launcher that installs and
-uninstalls packages, vim-style window management, and screen capture with audio.
+Moved to its own repository: **[github.com/schneipp/anarchy](https://github.com/schneipp/anarchy)**
 
-<p align="center"><img src="anarchy/docs/launcher.gif" width="640" alt="The anarchy launcher"></p>
+A Material 3 topbar, a menu-launcher that installs, removes and vets packages,
+vim-style window management, screen capture with audio, one theme switch that
+reaches every app, and a headless RDP mode that gives every user on a machine
+their own desktop.
 
 ```bash
-git clone https://github.com/schneipp/dotfiles ~/dotfiles
-cd ~/dotfiles/anarchy
-./install.sh
+git clone https://github.com/schneipp/anarchy ~/anarchy && ~/anarchy/install.sh
 ```
-
-Preview it first with `./install.sh --dry-run`, or run a single part with
-`./install.sh hyprland`. Every step is idempotent and backs up whatever it
-replaces.
-
-No screen attached? `./installer-headless-rdp.sh` installs the same desktop and
-serves it over RDP — a screen that follows your client window, or fixed
-monitors. Every user on the machine can run their own, side by side.
-
-| | |
-|---|---|
-| `Super+Space` | The anarchy menu — apps, capture, install, remove, style, setup, update, system |
-| `Super+h/j/k/l` | Focus windows (`+Shift` moves them, `+Ctrl` switches monitor) |
-| `Print` | Select an area → clipboard |
-| `Super+Shift+R` | Record a region with audio |
-
-Requires Hyprland 0.56+ (Lua config format) and `pacman` or Fedora 43+ (`dnf`).
-**Full documentation and the complete keymap: [anarchy/README.md](anarchy/README.md)**
 
 ---
 
